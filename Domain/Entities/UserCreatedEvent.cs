@@ -10,6 +10,7 @@ using static Domain.Constants.EmojiConstants;
 
 namespace Domain.Entities
 {
+	[Serializable]
 	public class UserCreatedEvent : IEntity
 	{
 		[Key]

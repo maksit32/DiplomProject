@@ -9,6 +9,7 @@ using static Domain.Constants.EmojiConstants;
 
 namespace Domain.Entities
 {
+	[Serializable]
 	public class ScienceEvent : IEntity
 	{
 		[Key]
@@ -20,9 +21,9 @@ namespace Domain.Entities
 		public string RequirementsEvent { get; set; }
 		public string InformationEvent { get; set; }
 		public DateTime DateEventCreated { get; set; }
-		public long AddByAdminChatId { get; set; }
+		public Guid AddByAdminChatId { get; set; }
 
-		public ScienceEvent(string nameEvent, DateTime dateEvent, string placeEvent, string requirementsEvent, string informationEvent, long chatId)
+		public ScienceEvent(string nameEvent, DateTime dateEvent, string placeEvent, string requirementsEvent, string informationEvent, Guid addByAdminChatId)
 		{
 			if (string.IsNullOrWhiteSpace(nameEvent))
 			{
@@ -50,7 +51,7 @@ namespace Domain.Entities
 			RequirementsEvent = requirementsEvent;
 			InformationEvent = informationEvent;
 			DateEventCreated = DateTime.Now;
-			AddByAdminChatId = chatId;
+			AddByAdminChatId = addByAdminChatId;
 		}
 		public override string ToString()
 		{

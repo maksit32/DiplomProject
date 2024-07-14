@@ -6,37 +6,30 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Services.Interfaces;
 
 
 namespace Domain.Entities
 {
+	[Serializable]
 	public class Password : IEntity
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public Guid Id { get; init; }
 		public string HashedPassword { get; set; }
-		public Guid UserChatId { get; init; }
+		//id телеграма
+		public long UserChatId { get; init; }
 
-		public Password(string password, Guid chatId)
+		public Password(string password, long userChatId, IPasswordHasherService passwordHasherService)
 		{
 			if (string.IsNullOrWhiteSpace(password))
 			{
 				throw new ArgumentException($"\"{nameof(password)}\" не может быть пустым или содержать только пробел.", nameof(password));
 			}
 
-			HashedPassword = HashPasword(password);
-			UserChatId = chatId;
-		}
-		public static string HashPasword(string password)
-		{
-			if (string.IsNullOrWhiteSpace(password))
-			{
-				throw new ArgumentException($"\"{nameof(password)}\" не может быть пустым или содержать только пробел.", nameof(password));
-			}
-
-			using SHA256 hash = SHA256.Create();
-			return Convert.ToHexString(hash.ComputeHash(Encoding.UTF8.GetBytes(password)));
+			HashedPassword = passwordHasherService.HashPassword(password);
+			UserChatId = userChatId;
 		}
 	}
 }

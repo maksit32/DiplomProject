@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
+	[Serializable]
 	public class TelegramUser : IEntity
 	{
 		[Key]
@@ -25,7 +26,7 @@ namespace Domain.Entities
 		public List<UserCreatedEvent> UserCreatedEvents { get; set; } = new();
 
 		//спец. добавление для клиентского приложения
-		public TelegramUser(Guid UserId, string name, string surname, string patronymic, string phoneNumber, long tgChatId, DateTime lastMessageTime, bool isSubscribed = false, bool isAdmin = false)
+		public TelegramUser(Guid id, string name, string surname, string patronymic, string phoneNumber, long tgChatId, DateTime lastMessageTime, bool isSubscribed = false, bool isAdmin = false)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 			{
@@ -49,7 +50,7 @@ namespace Domain.Entities
 
 			if (tgChatId <= 0) throw new ArgumentOutOfRangeException("Поле tgChatId не должно быть меньше 0!");
 
-			Id = UserId;
+			Id = id;
 			TgChatId = tgChatId;
 			IsSubscribed = isSubscribed;
 			IsAdmin = isAdmin;

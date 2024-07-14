@@ -4,7 +4,6 @@ using DiplomProject.Server.Services;
 using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Repositories.Interfaces;
-using Domain.Services.Implementations;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
@@ -43,7 +42,6 @@ namespace API
 				builder.Services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
 				builder.Services.AddScoped<IScienceEventRepository, ScienceEventRepository>();
 				builder.Services.AddScoped<IPasswordRepostitory, PasswordRepository>();
-				builder.Services.AddScoped<AccountService>();
 
 				builder.Services.AddSingleton<IPasswordHasher<TelegramUser>, PasswordHasher<TelegramUser>>();
 				builder.Services.AddSingleton<IPasswordHasherService, PasswordHasherService>();

@@ -10,5 +10,6 @@ namespace Domain.Repositories.Interfaces
 {
 	public interface ITelegramUserRepository : IRepository<TelegramUser>
 	{
+	
 	}
 }

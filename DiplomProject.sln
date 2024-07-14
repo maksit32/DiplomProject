@@ -3,13 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiplomProject.Server", "DiplomProject.Server\DiplomProject.Server.csproj", "{D767E6EB-B3CA-4506-B8C8-3D70807DE4C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiplomProject.Server", "DiplomProject.Server\DiplomProject.Server.csproj", "{D767E6EB-B3CA-4506-B8C8-3D70807DE4C3}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "diplomproject.client", "diplomproject.client\diplomproject.client.esproj", "{D5F64C4F-D540-4747-80A2-DFBF4FE52E45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{1AFEA283-FD9D-4742-BB07-CE95174AD240}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{1AFEA283-FD9D-4742-BB07-CE95174AD240}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpModels", "HttpModels\HttpModels.csproj", "{11205A2A-BCC2-4AA2-92ED-976C9424036A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpModels", "HttpModels\HttpModels.csproj", "{11205A2A-BCC2-4AA2-92ED-976C9424036A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramLibrary", "TelegramLibrary\TelegramLibrary.csproj", "{263B6BF6-3138-444D-9237-E57381D2EB53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSONLibrary", "JSONLibrary\JSONLibrary.csproj", "{1D1B9523-9BA8-41A3-B431-7355FC2B6108}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogLibrary", "LogLibrary\LogLibrary.csproj", "{27A655ED-55E1-49C7-B6D3-1468075323D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +41,18 @@ Global
 		{11205A2A-BCC2-4AA2-92ED-976C9424036A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11205A2A-BCC2-4AA2-92ED-976C9424036A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11205A2A-BCC2-4AA2-92ED-976C9424036A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{263B6BF6-3138-444D-9237-E57381D2EB53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{263B6BF6-3138-444D-9237-E57381D2EB53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{263B6BF6-3138-444D-9237-E57381D2EB53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{263B6BF6-3138-444D-9237-E57381D2EB53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D1B9523-9BA8-41A3-B431-7355FC2B6108}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D1B9523-9BA8-41A3-B431-7355FC2B6108}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D1B9523-9BA8-41A3-B431-7355FC2B6108}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D1B9523-9BA8-41A3-B431-7355FC2B6108}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27A655ED-55E1-49C7-B6D3-1468075323D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27A655ED-55E1-49C7-B6D3-1468075323D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27A655ED-55E1-49C7-B6D3-1468075323D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27A655ED-55E1-49C7-B6D3-1468075323D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
