@@ -1,5 +1,7 @@
-﻿using Domain.Entities;
+﻿using DiplomProject.Server.DbContexts;
+using Domain.Entities;
 using Domain.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using static Domain.Constants.EmojiConstants;
 
 
@@ -7,29 +9,13 @@ namespace DiplomProject.Server.Repositories
 {
 	public class TelegramUserRepository : ITelegramUserRepository
 	{
-		public Task Add(TelegramUser entity, CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
+		private readonly DiplomDbContext _dbContext;
+		private DbSet<TelegramUser> TelegramUsers => _dbContext.Set<TelegramUser>();
 
-		public Task Delete(TelegramUser entity, CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
 
-		public Task<IReadOnlyCollection<TelegramUser>> GetAll(CancellationToken ct)
+		public TelegramUserRepository(DiplomDbContext dbContext)
 		{
-			throw new NotImplementedException();
-		}
-
-		public Task<TelegramUser> GetById(Guid id, CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
-
-		public Task Update(TelegramUser entity, CancellationToken ct)
-		{
-			throw new NotImplementedException();
+			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 		}
 		public async Task<bool> AddTgUserAsync(TelegramUser user)
 		{
@@ -45,7 +31,7 @@ namespace DiplomProject.Server.Repositories
 
 			//добавление пользователя
 			await TelegramUsers.AddAsync(user);
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return true;
 		}
 		public async Task<IReadOnlyCollection<TelegramUser>> ReadAllTgUsersAsync()
@@ -62,7 +48,7 @@ namespace DiplomProject.Server.Repositories
 
 			_user.IsSubscribed = subStatus;
 
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return true;
 		}
 		public async Task<bool> UpdateSubStatusTgUserAsync(Guid Id, bool subStatus)
@@ -73,7 +59,7 @@ namespace DiplomProject.Server.Repositories
 
 			_user.IsSubscribed = subStatus;
 
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return true;
 		}
 		public async Task<bool> UpdateAdminStatusTgUserAsync(string lowerCaseMessage, long senderChatId)
@@ -98,7 +84,7 @@ namespace DiplomProject.Server.Repositories
 			{
 				_user.IsAdmin = !_user.IsAdmin;
 
-				await this.SaveChangesAsync();
+				await _dbContext.SaveChangesAsync();
 				return true;
 			}
 			return false;
@@ -117,7 +103,7 @@ namespace DiplomProject.Server.Repositories
 
 			newName = Char.ToUpper(newName[0]) + newName.Substring(1);
 			tgUser.Name = newName;
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return $"{GreenCircleEmj}Имя успешно изменено на: {newName}";
 		}
 		public async Task<string> UpdateSNameTgUserAsync(long chatId, string sName)
@@ -134,7 +120,7 @@ namespace DiplomProject.Server.Repositories
 
 			sName = Char.ToUpper(sName[0]) + sName.Substring(1);
 			tgUser.Surname = sName;
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return $"{GreenCircleEmj}Фамилия успешно изменена на: {sName}";
 		}
 		public async Task<string> UpdatePatrTgUserAsync(long chatId, string patronymic)
@@ -151,7 +137,7 @@ namespace DiplomProject.Server.Repositories
 
 			patronymic = Char.ToUpper(patronymic[0]) + patronymic.Substring(1);
 			tgUser.Patronymic = patronymic;
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return $"{GreenCircleEmj}Отчество успешно изменено на: {patronymic}";
 		}
 		public async Task<string> UpdatePhoneTgUserAsync(long chatId, string phoneNumb)
@@ -170,7 +156,7 @@ namespace DiplomProject.Server.Repositories
 			if (phoneNumb.Length != 12) return $"{AlertEmj}Неверный номер телефона. Пожалуйста, проверьте правильность ввода.";
 
 			tgUser.PhoneNumber = phoneNumb;
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return $"{GreenCircleEmj}Номер успешно изменен на: {phoneNumb}";
 		}
 		public async Task<bool> UpdateAdminStatusTgUserAsync(Guid Id, bool adminStatus)
@@ -181,7 +167,7 @@ namespace DiplomProject.Server.Repositories
 
 			_user.IsAdmin = adminStatus;
 
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return true;
 		}
 		public async Task UpdateLastTimeMessageTgUserAsync(long chatId)
@@ -194,7 +180,7 @@ namespace DiplomProject.Server.Repositories
 
 
 			_user.LastMessageTime = DateTime.UtcNow;
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 		}
 		public async Task<TelegramUser?> ReadTgUserByIdAsync(Guid Id)
 		{
@@ -214,7 +200,7 @@ namespace DiplomProject.Server.Repositories
 			if (_user is not null)
 			{
 				TelegramUsers.Remove(_user);
-				await this.SaveChangesAsync();
+				await _dbContext.SaveChangesAsync();
 				return true;
 			}
 			return false;
@@ -227,7 +213,7 @@ namespace DiplomProject.Server.Repositories
 			if (_user is not null)
 			{
 				TelegramUsers.Remove(_user);
-				await this.SaveChangesAsync();
+				await _dbContext.SaveChangesAsync();
 				return true;
 			}
 			return false;

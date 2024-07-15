@@ -42,9 +42,10 @@ namespace API
 				builder.Services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
 				builder.Services.AddScoped<IScienceEventRepository, ScienceEventRepository>();
 				builder.Services.AddScoped<IPasswordRepostitory, PasswordRepository>();
+				builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
+				builder.Services.AddScoped<IPasswordHasher<TelegramUser>, PasswordHasher<TelegramUser>>();
 
-				builder.Services.AddSingleton<IPasswordHasher<TelegramUser>, PasswordHasher<TelegramUser>>();
-				builder.Services.AddSingleton<IPasswordHasherService, PasswordHasherService>();
+
 
 				builder.Services.AddCors();
 				builder.Services.AddHttpLogging(options =>

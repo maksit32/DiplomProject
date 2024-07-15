@@ -1,5 +1,8 @@
-﻿using Domain.Entities;
+﻿using DiplomProject.Server.DbContexts;
+using Domain.Entities;
 using Domain.Repositories.Interfaces;
+using Domain.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using static Domain.Constants.EmojiConstants;
 
 
@@ -7,37 +10,18 @@ namespace DiplomProject.Server.Repositories
 {
 	public class PasswordRepository : IPasswordRepostitory
 	{
-		private readonly ITelegramUserRepository telegramUserRepo;
+		private readonly DiplomDbContext _dbContext;
+		private DbSet<Password> Passwords => _dbContext.Set<Password>();
+		private DbSet<TelegramUser> TelegramUsers => _dbContext.Set<TelegramUser>();
+		private DbSet<UserCreatedEvent> UserCreatedEvents => _dbContext.Set<UserCreatedEvent>();
+		private readonly IPasswordHasherService _passwordHasherService;
 
-		public PasswordRepository(ITelegramUserRepository telegramUserRepo)
+		public PasswordRepository(DiplomDbContext dbContext, IPasswordHasherService passwordHasherService)
 		{
-			this.telegramUserRepo = telegramUserRepo;
+			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+			_passwordHasherService = passwordHasherService ?? throw new ArgumentNullException(nameof(passwordHasherService));
 		}
 
-		public Task Add(Password entity, CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
-
-		public Task Delete(Password entity, CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
-
-		public Task<IReadOnlyCollection<Password>> GetAll(CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
-
-		public Task<Password> GetById(Guid id, CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
-
-		public Task Update(Password entity, CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
 		public async Task<bool> AddPasswordAsync(Password password, long chatId)
 		{
 			if (chatId < 0) throw new ArgumentOutOfRangeException(nameof(chatId));
@@ -57,7 +41,7 @@ namespace DiplomProject.Server.Repositories
 				}
 
 				await Passwords.AddAsync(password);
-				await this.SaveChangesAsync();
+				await _dbContext.SaveChangesAsync();
 				return true;
 			}
 			return false;
@@ -71,7 +55,7 @@ namespace DiplomProject.Server.Repositories
 
 			if (Passwords.ToList().Count > 0)
 			{
-				string hashedPassword = HashPasword(password);
+				string hashedPassword = _passwordHasherService.HashPassword(password);
 
 				if (Passwords.ToList().Exists(e => e.HashedPassword == hashedPassword))
 				{
@@ -93,7 +77,7 @@ namespace DiplomProject.Server.Repositories
 			lowerCaseMessage = lowerCaseMessage.Replace("/adminchpass ", "");
 			var dataArr = lowerCaseMessage.Split(" ");
 
-			long passwordId = long.Parse(dataArr[0]);
+			Guid passwordId = Guid.Parse(dataArr[0]);
 
 			string newPassword = dataArr[1];
 
@@ -102,7 +86,7 @@ namespace DiplomProject.Server.Repositories
 			//только админ
 			if (_user.IsAdmin)
 			{
-				string newHashedPassword = HashPasword(newPassword);
+				string newHashedPassword = _passwordHasherService.HashPassword(newPassword);
 				var passwordObj = await GetPasswordByIdAsync(passwordId);
 				if (passwordObj is not null && passwordObj.UserChatId == chatId)
 				{
@@ -113,7 +97,7 @@ namespace DiplomProject.Server.Repositories
 					}
 					passwordObj.HashedPassword = newHashedPassword;
 
-					await this.SaveChangesAsync();
+					await _dbContext.SaveChangesAsync();
 					return $"{CheckMarkInBlockEmj}Пароль с Id: " + passwordId + " успешно обновлен на: " + newPassword;
 				}
 				else
@@ -133,9 +117,8 @@ namespace DiplomProject.Server.Repositories
 			if (chatId < 0) throw new ArgumentOutOfRangeException(nameof(chatId));
 
 			string delId = lowerCaseMessage.Replace("/admindelpass", "");
-			delId.Replace(" ", "");
-			long passwordId = long.Parse(delId);
-
+			delId = delId.Replace(" ", "");
+			Guid passwordId = Guid.Parse(delId);
 
 			var _user = await GetTgUserByIdAsync(chatId);
 			if (_user == null) return false;
@@ -145,13 +128,13 @@ namespace DiplomProject.Server.Repositories
 				if (passwordObj is not null && passwordObj.UserChatId == chatId)
 				{
 					Passwords.Remove(passwordObj);
-					await this.SaveChangesAsync();
+					await _dbContext.SaveChangesAsync();
 					return true;
 				}
 			}
 			return false;
 		}
-		public async Task<string> GetPasswordsByChatIdAsync(long chatId)
+		public async Task<string> GetPasswordsByChatIdAsync(long chatId, CancellationToken ct)
 		{
 			if (chatId < 0) throw new ArgumentOutOfRangeException(nameof(chatId));
 
@@ -171,7 +154,7 @@ namespace DiplomProject.Server.Repositories
 			}
 			return passwords;
 		}
-		private async Task<Password?> GetPasswordByIdAsync(long Id)
+		private async Task<Password?> GetPasswordByIdAsync(Guid Id)
 		{
 			return await Passwords.FirstOrDefaultAsync(x => x.Id == Id);
 		}
@@ -192,6 +175,13 @@ namespace DiplomProject.Server.Repositories
 			}
 			return $"{GreenCircleEmj} Статус подписки:	{tgUser.IsSubscribed}\n{YellowCircleEmj} Фамилия: {tgUser.Surname}\n{BrownCircleEmj} Имя: {tgUser.Name}\n{YellowCircleEmj} Отчество: {tgUser.Patronymic}\n{BrownCircleEmj} Номер телефона: {tgUser.PhoneNumber}\n{RedCircleEmj} Статус админа:	{tgUser.IsAdmin}\n{BlueCircleEmj} Номер чата:	{tgUser.TgChatId}\nУчастие в мероприятиях:\n\n{evString}";
 		}
+		public async Task<IReadOnlyList<UserCreatedEvent>> ReadAllUserEventsAsync(TelegramUser tgUser)
+		{
+			var lst = from e in UserCreatedEvents
+					  where e.TgUser.Id == tgUser.Id
+					  select e;
+			return await lst.ToListAsync();
+		}
 		public async Task<bool> CheckLastTimeMessageAsync(long chatId)
 		{
 			var tgUser = await GetTgUserByIdAsync(chatId);
@@ -203,7 +193,7 @@ namespace DiplomProject.Server.Repositories
 
 		private async Task<TelegramUser?> GetTgUserByIdAsync(long chatId)
 		{
-			return await telegramUserRepo.FirstOrDefaultAsync(e => e.TgChatId == chatId);
+			return await TelegramUsers.FirstOrDefaultAsync(e => e.TgChatId == chatId);
 		}
 		private async Task<TelegramUser?> GetTgUserByIdAsync(Guid Id)
 		{

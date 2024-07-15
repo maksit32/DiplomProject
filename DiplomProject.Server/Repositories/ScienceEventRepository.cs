@@ -1,36 +1,24 @@
-﻿using Domain.Entities;
+﻿using DiplomProject.Server.DbContexts;
+using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using static Domain.Constants.EmojiConstants;
+
 
 namespace DiplomProject.Server.Repositories
 {
 	public class ScienceEventRepository : IScienceEventRepository
 	{
-		public Task Add(ScienceEvent entity, CancellationToken ct)
+		private readonly DiplomDbContext _dbContext;
+		private DbSet<ScienceEvent> ScienceEvents => _dbContext.Set<ScienceEvent>();
+
+		public ScienceEventRepository(DiplomDbContext dbContext)
 		{
-			throw new NotImplementedException();
+			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 		}
 
-		public Task Delete(ScienceEvent entity, CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
-
-		public Task<IReadOnlyCollection<ScienceEvent>> GetAll(CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
-
-		public Task<ScienceEvent> GetById(Guid id, CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
-
-		public Task Update(ScienceEvent entity, CancellationToken ct)
-		{
-			throw new NotImplementedException();
-		}
 		public async Task<bool> AddEventAsyncAsync(string lowerCaseMessage)
 		{
 			if (string.IsNullOrWhiteSpace(lowerCaseMessage))
@@ -55,7 +43,7 @@ namespace DiplomProject.Server.Repositories
 			//Information
 			string information = dataArray[4];
 			//ChatId
-			long chatId = long.Parse(dataArray[5]);
+			Guid chatId = Guid.Parse(dataArray[5]);
 			ScienceEvent sEvent = new ScienceEvent(nameEvent, dateEvent, placeEvent, requirement, information, chatId);
 
 
@@ -65,7 +53,7 @@ namespace DiplomProject.Server.Repositories
 			}
 
 			await ScienceEvents.AddAsync(sEvent);
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return true;
 		}
 		public async Task<IReadOnlyList<ScienceEvent>> ReadAllEventsAsync()
@@ -95,7 +83,7 @@ namespace DiplomProject.Server.Repositories
 			}
 			return messageToSend;
 		}
-		public async Task<ScienceEvent?> ReadScienceEventByIdAsync(long id)
+		public async Task<ScienceEvent?> ReadScienceEventByIdAsync(Guid id)
 		{
 			var sEvent = await GetScienceEventByIdAsync(id);
 			return sEvent;
@@ -114,7 +102,7 @@ namespace DiplomProject.Server.Repositories
 		{
 			return await ScienceEvents.FirstOrDefaultAsync(e => e.NameEvent == name);
 		}
-		private async Task<ScienceEvent?> GetScienceEventByIdAsync(long id)
+		private async Task<ScienceEvent?> GetScienceEventByIdAsync(Guid id)
 		{
 			return await ScienceEvents.FirstOrDefaultAsync(e => e.Id == id);
 		}
@@ -141,7 +129,7 @@ namespace DiplomProject.Server.Repositories
 
 			sEvent.NameEvent = newName;
 
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return true;
 		}
 		public async Task<bool> UpdateEventDateAsync(string name, DateTime newDate)
@@ -156,7 +144,7 @@ namespace DiplomProject.Server.Repositories
 
 			sEvent.DateEvent = newDate;
 
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return true;
 		}
 		public async Task<bool> UpdateEventPlaceAsync(string name, string place)
@@ -177,7 +165,7 @@ namespace DiplomProject.Server.Repositories
 
 			sEvent.PlaceEvent = place;
 
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return true;
 		}
 		public async Task<bool> UpdateEventRequirementsAsync(string name, string require)
@@ -198,7 +186,7 @@ namespace DiplomProject.Server.Repositories
 
 			sEvent.RequirementsEvent = require;
 
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return true;
 		}
 		public async Task<bool> UpdateEventInformationAsync(string name, string information)
@@ -219,7 +207,7 @@ namespace DiplomProject.Server.Repositories
 
 			sEvent.InformationEvent = information;
 
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return true;
 		}
 		public async Task<ScienceEvent?> UpdateFullEventAsync(string lowerCaseMessage)
@@ -233,7 +221,7 @@ namespace DiplomProject.Server.Repositories
 			var dataArray = lowerCaseMessage.Split("/");
 
 			//IdEvent
-			long idEvent = long.Parse(dataArray[0]);
+			Guid idEvent = Guid.Parse(dataArray[0]);
 			//NameEvent
 			string nameEvent = char.ToUpper(dataArray[1][0]) + dataArray[1].Substring(1);
 			//проверка на повтор названия
@@ -252,7 +240,7 @@ namespace DiplomProject.Server.Repositories
 			//Information
 			string information = dataArray[5];
 			//ChatId
-			long chatId = long.Parse(dataArray[6]);
+			Guid chatId = Guid.Parse(dataArray[6]);
 
 
 			//получаем старое мероприятие и меняем его значения
@@ -266,10 +254,10 @@ namespace DiplomProject.Server.Repositories
 			sEvent.RequirementsEvent = requirement;
 			sEvent.InformationEvent = information;
 			sEvent.DateEventCreated = DateTime.UtcNow;
-			sEvent.addByAdminChatId = chatId;
+			sEvent.AddByAdminChatId = chatId;
 
 
-			await this.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync();
 			return sEvent;
 		}
 		public async Task<ScienceEvent?> DeleteEventByIdAsync(string lowerCaseMessage)
@@ -281,7 +269,7 @@ namespace DiplomProject.Server.Repositories
 
 			lowerCaseMessage = lowerCaseMessage.Replace("/deleteevent", "");
 			lowerCaseMessage.Replace(" ", "");
-			long id = long.Parse(lowerCaseMessage);
+			Guid id = Guid.Parse(lowerCaseMessage);
 
 
 			var sEvent = await GetScienceEventByIdAsync(id);
@@ -289,7 +277,7 @@ namespace DiplomProject.Server.Repositories
 			if (sEvent is not null)
 			{
 				ScienceEvents.Remove(sEvent);
-				await this.SaveChangesAsync();
+				await _dbContext.SaveChangesAsync();
 				return noticeObject;
 			}
 			return null;
@@ -305,7 +293,7 @@ namespace DiplomProject.Server.Repositories
 			if (sEvent is not null)
 			{
 				ScienceEvents.Remove(sEvent);
-				await this.SaveChangesAsync();
+				await _dbContext.SaveChangesAsync();
 				return true;
 			}
 			return false;
