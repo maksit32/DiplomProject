@@ -41,7 +41,6 @@ namespace API
 				builder.Services.AddScoped<IUserCreatedEventRepository, UserCreatedEventRepository>();
 				builder.Services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
 				builder.Services.AddScoped<IScienceEventRepository, ScienceEventRepository>();
-				builder.Services.AddScoped<IPasswordRepostitory, PasswordRepository>();
 				builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
 				builder.Services.AddScoped<IPasswordHasher<TelegramUser>, PasswordHasher<TelegramUser>>();
 
@@ -70,7 +69,6 @@ namespace API
 				app.UseSwaggerUI(options =>
 				{
 					options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-					options.RoutePrefix = string.Empty;
 				});
 				app.MapControllers();
 				await app.RunAsync();

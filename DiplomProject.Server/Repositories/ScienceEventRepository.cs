@@ -19,7 +19,7 @@ namespace DiplomProject.Server.Repositories
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 		}
 
-		public async Task<bool> AddEventAsyncAsync(string lowerCaseMessage)
+		public async Task<bool> AddEventAsync(string lowerCaseMessage)
 		{
 			if (string.IsNullOrWhiteSpace(lowerCaseMessage))
 			{

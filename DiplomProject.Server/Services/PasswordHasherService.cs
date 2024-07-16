@@ -20,6 +20,7 @@ namespace DiplomProject.Server.Services
 			return _passwordHasher.HashPassword(null!, password);
 		}
 
+		//hashedPassword из бд
 		public bool VerifyPassword(string hashedPassword, string providedPassword)
 		{
 			var result = _passwordHasher.VerifyHashedPassword(null!, hashedPassword, providedPassword);

@@ -26,6 +26,7 @@ namespace Domain.Repositories.Interfaces
 		Task<bool> DeleteTgUserByIdAsync(long chatId);
 		Task<List<TelegramUser>> GetSubUsersListAsync();
 		Task<List<TelegramUser>> GetAdminUsersListAsync();
+		Task<List<TelegramUser>> GetUsersListAsync(CancellationToken ct);
 
 	}
 }

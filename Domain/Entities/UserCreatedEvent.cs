@@ -23,6 +23,7 @@ namespace Domain.Entities
 		//призер
 		public bool IsWinner { get; set; }
 
+		protected UserCreatedEvent() { }
 		public UserCreatedEvent(string nameEvent, string placeEvent, DateTime dateEvent, bool isWinner, TelegramUser tgUser)
 		{
 			if (string.IsNullOrWhiteSpace(nameEvent))

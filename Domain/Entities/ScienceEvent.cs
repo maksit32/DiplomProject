@@ -23,6 +23,7 @@ namespace Domain.Entities
 		public DateTime DateEventCreated { get; set; }
 		public Guid AddByAdminChatId { get; set; }
 
+		protected ScienceEvent() { }
 		public ScienceEvent(string nameEvent, DateTime dateEvent, string placeEvent, string requirementsEvent, string informationEvent, Guid addByAdminChatId)
 		{
 			if (string.IsNullOrWhiteSpace(nameEvent))

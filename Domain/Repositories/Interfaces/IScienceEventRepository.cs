@@ -10,7 +10,7 @@ namespace Domain.Repositories.Interfaces
 {
 	public interface IScienceEventRepository : IRepository<ScienceEvent>
 	{
-		Task<bool> AddEventAsyncAsync(string lowerCaseMessage);
+		Task<bool> AddEventAsync(string lowerCaseMessage);
 		Task<IReadOnlyList<ScienceEvent>> ReadAllEventsAsync();
 		Task<string> ReadAllEventsToStringAsync();
 		Task<string> ReadAllActualEventsToStringAsync();

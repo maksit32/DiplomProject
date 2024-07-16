@@ -15,7 +15,7 @@ namespace DiplomProject.Server.Repositories
 		private DbSet<TelegramUser> TelegramUsers => _dbContext.Set<TelegramUser>();
 
 
-		public UserCreatedEventRepository(DiplomDbContext dbContext, IPasswordHasherService passwordHasherService)
+		public UserCreatedEventRepository(DiplomDbContext dbContext)
 		{
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 		}
@@ -56,7 +56,6 @@ namespace DiplomProject.Server.Repositories
 			{
 				return false;
 			}
-
 
 			await UserCreatedEvents.AddAsync(uEvent);
 			await _dbContext.SaveChangesAsync();

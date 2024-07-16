@@ -21,12 +21,14 @@ namespace Domain.Entities
 		public long TgChatId { get; set; }
 		public bool IsSubscribed { get; set; } = false;
 		public bool IsAdmin { get; set; } = false;
-		public DateTime LastMessageTime { get; set; }
+		public string? HashedPassword { get; set; } = null;
+        public DateTime LastMessageTime { get; set; }
 		//много эвентов (Fluent API)
 		public List<UserCreatedEvent> UserCreatedEvents { get; set; } = new();
 
+		protected TelegramUser() { }
 		//спец. добавление для клиентского приложения
-		public TelegramUser(Guid id, string name, string surname, string patronymic, string phoneNumber, long tgChatId, DateTime lastMessageTime, bool isSubscribed = false, bool isAdmin = false)
+		public TelegramUser(Guid id, string name, string surname, string patronymic, string phoneNumber, long tgChatId, bool isSubscribed = false, bool isAdmin = false, string? hashedPassword = null)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 			{
@@ -54,14 +56,15 @@ namespace Domain.Entities
 			TgChatId = tgChatId;
 			IsSubscribed = isSubscribed;
 			IsAdmin = isAdmin;
-			LastMessageTime = lastMessageTime;
+			LastMessageTime = DateTime.Now;
 			Name = name;
 			Surname = surname;
 			Patronymic = patronymic;
 			PhoneNumber = phoneNumber;
+			HashedPassword = hashedPassword;
 		}
 		//основное добавление
-		public TelegramUser(long tgChatId, string name, string surname, string patronymic, string phoneNumber, DateTime lastMessageTime, bool isSubscribed = false, bool isAdmin = false)
+		public TelegramUser(long tgChatId, string name, string surname, string patronymic, string phoneNumber, DateTime lastMessageTime, bool isSubscribed = false, bool isAdmin = false, string? hashedPassword = null)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 			{
@@ -91,6 +94,7 @@ namespace Domain.Entities
 			Surname = surname;
 			Patronymic = patronymic;
 			PhoneNumber = phoneNumber;
+			HashedPassword = hashedPassword;
 		}
 		public override string ToString()
 		{

@@ -242,5 +242,10 @@ namespace DiplomProject.Server.Repositories
 		{
 			return await TelegramUsers.FirstOrDefaultAsync(e => e.Id == Id);
 		}
+
+		public async Task<List<TelegramUser>> GetUsersListAsync(CancellationToken ct)
+		{
+			return await TelegramUsers.ToListAsync();
+		}
 	}
 }
