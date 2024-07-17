@@ -3,12 +3,17 @@ using DiplomProject.Server.Repositories;
 using DiplomProject.Server.Services;
 using Domain.Entities;
 using Domain.Exceptions;
+using Domain.Models;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Serilog.Core;
+using Telegram.Bot;
+
 
 
 
@@ -31,7 +36,16 @@ namespace API
 						.WriteTo.Console()
 						.MinimumLevel.Information();
 				});
-				builder.Services.AddControllers();
+
+				var botConfigSection = builder.Configuration.GetSection("BotConfiguration");
+				builder.Services.Configure<BotConfiguration>(botConfigSection);
+				builder.Services.AddHttpClient("tgwebhook").RemoveAllLoggers().AddTypedClient<ITelegramBotClient>(
+					httpClient => new TelegramBotClient(botConfigSection.Get<BotConfiguration>()!.BotToken, httpClient));
+				builder.Services.AddSingleton<UpdateHandler>();
+				builder.Services.AddControllers().AddNewtonsoftJson();
+				//builder.Services.ConfigureTelegramBotMvc();
+
+
 				builder.Services.AddEndpointsApiExplorer();
 				builder.Services.AddSwaggerGen();
 
