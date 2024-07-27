@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DiplomProject.Server.Migrations
 {
     [DbContext(typeof(DiplomDbContext))]
-    [Migration("20240716170920_InitialCreate")]
+    [Migration("20240727072310_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -31,8 +31,8 @@ namespace DiplomProject.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AddByAdminChatId")
-                        .HasColumnType("uuid");
+                    b.Property<long>("AddByAdminChatId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("DateEvent")
                         .HasColumnType("timestamp with time zone");

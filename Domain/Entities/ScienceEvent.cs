@@ -21,10 +21,10 @@ namespace Domain.Entities
 		public string RequirementsEvent { get; set; }
 		public string InformationEvent { get; set; }
 		public DateTime DateEventCreated { get; set; }
-		public Guid AddByAdminChatId { get; set; }
+		public long AddByAdminChatId { get; set; }
 
 		protected ScienceEvent() { }
-		public ScienceEvent(string nameEvent, DateTime dateEvent, string placeEvent, string requirementsEvent, string informationEvent, Guid addByAdminChatId)
+		public ScienceEvent(string nameEvent, DateTime dateEvent, string placeEvent, string requirementsEvent, string informationEvent, long addByAdminChatId)
 		{
 			if (string.IsNullOrWhiteSpace(nameEvent))
 			{

@@ -10,20 +10,25 @@ namespace Domain.Repositories.Interfaces
 {
 	public interface IScienceEventRepository : IRepository<ScienceEvent>
 	{
-		Task<bool> AddEventAsync(string lowerCaseMessage);
-		Task<IReadOnlyList<ScienceEvent>> ReadAllEventsAsync();
-		Task<string> ReadAllEventsToStringAsync();
-		Task<string> ReadAllActualEventsToStringAsync();
-		Task<ScienceEvent?> ReadScienceEventByIdAsync(Guid id);
-		Task<ScienceEvent?> ReadScienceEventByNameAsync(string name);
-		Task<bool> UpdateEventNameAsync(string oldName, string newName);
-		Task<bool> UpdateEventDateAsync(string name, DateTime newDate);
-		Task<bool> UpdateEventPlaceAsync(string name, string place);
-		Task<bool> UpdateEventRequirementsAsync(string name, string require);
-		Task<bool> UpdateEventInformationAsync(string name, string information);
-		Task<ScienceEvent?> UpdateFullEventAsync(string lowerCaseMessage);
-		Task<ScienceEvent?> DeleteEventByIdAsync(string lowerCaseMessage);
-		Task<bool> DeleteEventByNameAsync(string name);
-		Task<ScienceEvent?> GetLastCreatedEventAsync();
+		Task<bool> AddEventAsync(string lowerCaseMessage, CancellationToken token);
+		Task AddEventAsync(ScienceEvent newEvent, CancellationToken token);
+		Task<List<ScienceEvent>> ReadAllEventsAsync(CancellationToken token);
+		Task<List<ScienceEvent>> ReadAllActualEventsAsync(CancellationToken token);
+		Task<ScienceEvent?> GetScienceEventById(Guid Id, CancellationToken token);
+		Task<string> ReadAllEventsToStringAsync(CancellationToken token);
+		Task<string> ReadAllActualEventsToStringAsync(CancellationToken token);
+		Task<ScienceEvent?> ReadScienceEventByIdAsync(Guid id, CancellationToken token);
+		Task<ScienceEvent?> ReadScienceEventByNameAsync(string name, CancellationToken token);
+		Task<bool> UpdateEventNameAsync(string oldName, string newName, CancellationToken token);
+		Task<bool> UpdateEventDateAsync(string name, DateTime newDate, CancellationToken token);
+		Task<bool> UpdateEventPlaceAsync(string name, string place, CancellationToken token);
+		Task<bool> UpdateEventRequirementsAsync(string name, string require, CancellationToken token);
+		Task<bool> UpdateEventInformationAsync(string name, string information, CancellationToken token);
+		Task<ScienceEvent?> UpdateFullEventAsync(string lowerCaseMessage, CancellationToken token);
+		Task UpdateFullEventAsync(ScienceEvent sEvent, CancellationToken token);
+		Task<ScienceEvent?> DeleteEventByIdAsync(string lowerCaseMessage, CancellationToken token);
+		Task DeleteEventByIdAsync(Guid Id, CancellationToken token);
+		Task<bool> DeleteEventByNameAsync(string name, CancellationToken token);
+		Task<ScienceEvent?> GetLastCreatedEventAsync(CancellationToken token);
 	}
 }

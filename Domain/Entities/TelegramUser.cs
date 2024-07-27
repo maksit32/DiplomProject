@@ -63,8 +63,8 @@ namespace Domain.Entities
 			PhoneNumber = phoneNumber;
 			HashedPassword = hashedPassword;
 		}
-		//основное добавление
-		public TelegramUser(long tgChatId, string name, string surname, string patronymic, string phoneNumber, DateTime lastMessageTime, bool isSubscribed = false, bool isAdmin = false, string? hashedPassword = null)
+		//добавление из телеграм бота
+		public TelegramUser(long tgChatId, string name, string surname, string patronymic, string phoneNumber, bool isSubscribed = false, bool isAdmin = false, string? hashedPassword = null)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 			{
@@ -94,6 +94,7 @@ namespace Domain.Entities
 			Surname = surname;
 			Patronymic = patronymic;
 			PhoneNumber = phoneNumber;
+			LastMessageTime = DateTime.Now;
 			HashedPassword = hashedPassword;
 		}
 		public override string ToString()

@@ -22,7 +22,7 @@ namespace DiplomProject.Server.Migrations
                     RequirementsEvent = table.Column<string>(type: "text", nullable: false),
                     InformationEvent = table.Column<string>(type: "text", nullable: false),
                     DateEventCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    AddByAdminChatId = table.Column<Guid>(type: "uuid", nullable: false)
+                    AddByAdminChatId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {

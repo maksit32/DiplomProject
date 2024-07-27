@@ -44,7 +44,6 @@
 
   <ItemGroup>
     <Folder Include="Documents\SMUApplications\" />
-    <Folder Include="Migrations\" />
     <Folder Include="Logs\" />
   </ItemGroup>
 

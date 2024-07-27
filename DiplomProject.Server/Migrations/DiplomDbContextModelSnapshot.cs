@@ -28,8 +28,8 @@ namespace DiplomProject.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AddByAdminChatId")
-                        .HasColumnType("uuid");
+                    b.Property<long>("AddByAdminChatId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("DateEvent")
                         .HasColumnType("timestamp with time zone");

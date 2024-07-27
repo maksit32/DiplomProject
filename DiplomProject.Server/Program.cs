@@ -69,6 +69,7 @@ namespace API
 											| HttpLoggingFields.ResponseBody;
 				});
 				var app = builder.Build();
+				app.UseHttpsRedirection();
 				app.UseHttpLogging();
 				app.UseCors(policy =>
 				{

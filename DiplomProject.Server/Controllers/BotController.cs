@@ -39,6 +39,11 @@ namespace DiplomProject.Server.Controllers
 			}
 			return Ok();
 		}
+		[HttpGet]
+		public string Get()
+		{
+			return "Telegram bot was started";
+		}
 	}
 
 }

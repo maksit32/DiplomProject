@@ -13,9 +13,6 @@ using Word = Microsoft.Office.Interop.Word;
 
 
 
-
-
-
 namespace MSTUCABOT.ConsoleServer.Services.Classes
 {
 	//only .docx type
@@ -51,7 +48,7 @@ namespace MSTUCABOT.ConsoleServer.Services.Classes
 		}
 
 		//format:  "<zone>", "data"
-		public async Task<string> FillSNODataAsync(string lowerCaseMessage, long chatId)
+		public async Task<string> FillSNODataAsync(string lowerCaseMessage, long chatId, CancellationToken token)
 		{
 			if (string.IsNullOrWhiteSpace(lowerCaseMessage))
 			{
@@ -106,7 +103,7 @@ namespace MSTUCABOT.ConsoleServer.Services.Classes
 
 				if (DirectorySize(new DirectoryInfo(fileInfo.DirectoryName + "\\SNOApplications"), maxSize) > maxSize)
 				{
-					notifyService.NotifyAdminsAsync($"{AlertEmj}Внимание, обработайте заявления на вступление в СНО!\nПрием заявлений временно остановлен. Требуется освободить память.");
+					notifyService.NotifyAdminsAsync($"{AlertEmj}Внимание, обработайте заявления на вступление в СНО!\nПрием заявлений временно остановлен. Требуется освободить память.", token);
 					semaphoreSlim.Release();
 					return $"{BlueCircleEmj} Сервер занят обработкой предыдущих заявлений.\nПожалуйста, повторите попытку позднее.";
 				}
@@ -165,7 +162,7 @@ namespace MSTUCABOT.ConsoleServer.Services.Classes
 			return $"{AlertEmj}Создать файл не удалось!";
 		}
 
-		public async Task<string> FillSMUDataAsync(string lowerCaseMessage, long chatId)
+		public async Task<string> FillSMUDataAsync(string lowerCaseMessage, long chatId, CancellationToken token)
 		{
 			if (string.IsNullOrWhiteSpace(lowerCaseMessage))
 			{
@@ -228,7 +225,7 @@ namespace MSTUCABOT.ConsoleServer.Services.Classes
 
 				if (DirectorySize(new DirectoryInfo(fileInfo.DirectoryName + "\\SMUApplications"), maxSize) > maxSize)
 				{
-					notifyService.NotifyAdminsAsync($"{AlertEmj}Внимание, обработайте заявления на вступление в СМУ!\nПрием заявлений временно остановлен. Требуется освободить память.");
+					notifyService.NotifyAdminsAsync($"{AlertEmj}Внимание, обработайте заявления на вступление в СМУ!\nПрием заявлений временно остановлен. Требуется освободить память.", token);
 					semaphoreSlim.Release();
 					return $"{BlueCircleEmj} Сервер занят обработкой предыдущих заявлений.\nПожалуйста, повторите попытку позднее.";
 				}

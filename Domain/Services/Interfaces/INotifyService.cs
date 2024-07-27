@@ -12,10 +12,10 @@ namespace Domain.Services.Interfaces
 {
     public interface INotifyService
     {
-        Task NotifyLastAddEventUsersAsync(string notifyMessage);
-        Task NotifyEventChangingUsersAsync(ScienceEvent sEvent, string notifyMessage);
-        Task NotifySubUsersAsync(string notifyMessage);
-        Task NotifyAllUsersAsync(string notifyMessage);
-        Task NotifyAdminsAsync(string notifyMessage);
+        Task NotifyLastAddEventUsersAsync(string notifyMessage, CancellationToken token);
+        Task NotifyEventChangingUsersAsync(ScienceEvent sEvent, string notifyMessage, CancellationToken token);
+        Task NotifySubUsersAsync(string notifyMessage, CancellationToken token);
+        Task NotifyAllUsersAsync(string notifyMessage, CancellationToken token);
+        Task NotifyAdminsAsync(string notifyMessage, CancellationToken token);
     }
 }

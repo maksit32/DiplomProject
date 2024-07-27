@@ -20,14 +20,14 @@ namespace DiplomProject.Server.Repositories
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 		}
 
-		public async Task<IReadOnlyList<UserCreatedEvent>> ReadAllUserEventsAsync(TelegramUser tgUser)
+		public async Task<List<UserCreatedEvent>> ReadAllUserEventsAsync(TelegramUser tgUser, CancellationToken token)
 		{
 			var lst = from e in UserCreatedEvents
 					  where e.TgUser.Id == tgUser.Id
 					  select e;
 			return await lst.ToListAsync();
 		}
-		public async Task<bool> AddUserCreatedEventAsync(string message, long chatId)
+		public async Task<bool> AddUserCreatedEventAsync(string message, long chatId, CancellationToken token)
 		{
 			if (string.IsNullOrWhiteSpace(message))
 			{
@@ -61,11 +61,11 @@ namespace DiplomProject.Server.Repositories
 			await _dbContext.SaveChangesAsync();
 			return true;
 		}
-		public async Task<UserCreatedEvent?> GetUserCreatedEventByIdAsync(Guid uEventId)
+		public async Task<UserCreatedEvent?> GetUserCreatedEventByIdAsync(Guid uEventId, CancellationToken token)
 		{
 			return await UserCreatedEvents.FirstOrDefaultAsync(e => e.Id == uEventId);
 		}
-		public async Task<bool> UpdateUserCreatedEventAsync(string message, long chatId)
+		public async Task<bool> UpdateUserCreatedEventAsync(string message, long chatId, CancellationToken token)
 		{
 			if (string.IsNullOrWhiteSpace(message))
 			{
@@ -87,7 +87,7 @@ namespace DiplomProject.Server.Repositories
 			Guid eventId = Guid.Parse(dataArr[4]);
 
 			//проверка, что событие именно этого пользователя
-			var evToChange = await GetUserCreatedEventByIdAsync(eventId);
+			var evToChange = await GetUserCreatedEventByIdAsync(eventId, token);
 			if (evToChange is null) return false;
 			var tgUser = await GetTgUserByIdAsync(chatId);
 			if (tgUser is null) return false;
@@ -110,7 +110,7 @@ namespace DiplomProject.Server.Repositories
 			}
 			return false;
 		}
-		public async Task<UserCreatedEvent?> DeleteUserCreatedEventByIdAsync(string message, long chatId)
+		public async Task<UserCreatedEvent?> DeleteUserCreatedEventByIdAsync(string message, long chatId, CancellationToken token)
 		{
 			if (string.IsNullOrWhiteSpace(message))
 			{
@@ -123,7 +123,7 @@ namespace DiplomProject.Server.Repositories
 			//проверка, что событие именно этого пользователя
 			var user = await GetTgUserByIdAsync(chatId);
 			if (user is null) return null;
-			var evToChange = await GetUserCreatedEventByIdAsync(eventToDeleteId);
+			var evToChange = await GetUserCreatedEventByIdAsync(eventToDeleteId, token);
 			if (evToChange is null) return null;
 			//принадлежит пользователю
 			if (evToChange.TgUser.Id == user.Id)
@@ -133,6 +133,34 @@ namespace DiplomProject.Server.Repositories
 				return evToChange; //удаленное событие
 			}
 			return null;
+		}
+		public async Task<List<UserCreatedEvent>> ReadAllEventsAsync(CancellationToken token)
+		{
+			return await UserCreatedEvents.ToListAsync(token);
+		}
+		public async Task<List<UserCreatedEvent>> ReadAllUserEventsAsync(Guid Id, CancellationToken token)
+		{
+			return await UserCreatedEvents.Where(e => e.TgUser.Id == Id).ToListAsync(token);
+		}
+		public async Task DeleteUserCreatedEventByIdAsync(Guid Id, CancellationToken token)
+		{
+			var createdEvent = await GetUserCreatedEventByIdAsync(Id, token);
+			if (createdEvent is null) return;
+
+			UserCreatedEvents.Remove(createdEvent);
+			await _dbContext.SaveChangesAsync();
+		}
+		public async Task UpdateUserCreatedEventAsync(UserCreatedEvent newEvent, CancellationToken token)
+		{
+			var oldEvent = await GetUserCreatedEventByIdAsync(newEvent.Id, token);
+			if (oldEvent is null) return;
+			
+			oldEvent.NameEvent = newEvent.NameEvent;
+			oldEvent.PlaceEvent = newEvent.PlaceEvent;
+			oldEvent.DateEvent = newEvent.DateEvent;
+			oldEvent.IsWinner = newEvent.IsWinner;
+
+			await _dbContext.SaveChangesAsync();
 		}
 		private async Task<TelegramUser?> GetTgUserByIdAsync(long chatId)
 		{
