@@ -19,11 +19,13 @@ namespace DiplomProject.Server.Controllers
 	{
 		private readonly IOptions<BotConfiguration> _config;
 		private readonly IPasswordHasherService _passwordHasherService;
+		private readonly INotifyService _notificationService;
 
-		public BotController(IOptions<BotConfiguration> config, IPasswordHasherService passwordHasherService)
+		public BotController(IOptions<BotConfiguration> config, IPasswordHasherService passwordHasherService, INotifyService notifyService)
 		{
 			_config = config;
 			_passwordHasherService = passwordHasherService;
+			_notificationService = notifyService;
 		}
 
 
@@ -56,5 +58,4 @@ namespace DiplomProject.Server.Controllers
 			return "Telegram bot was started";
 		}
 	}
-
 }

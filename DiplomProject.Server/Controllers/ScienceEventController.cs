@@ -1,6 +1,8 @@
 ﻿using Domain.Entities;
 using Domain.Repositories.Interfaces;
+using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace DiplomProject.Server.Controllers
 {
@@ -10,11 +12,13 @@ namespace DiplomProject.Server.Controllers
 	{
 		private readonly IScienceEventRepository _scEventsRepo;
 		private readonly ILogger<ScienceEventController> _logger;
+		private readonly INotifyService _notificationService;
 
-		public ScienceEventController(IScienceEventRepository repo, ILogger<ScienceEventController> logger)
+		public ScienceEventController(IScienceEventRepository repo, ILogger<ScienceEventController> logger, INotifyService notifyService)
 		{
 			_scEventsRepo = repo;
 			_logger = logger;
+			_notificationService = notifyService;
 		}
 
 		[HttpGet("get")]

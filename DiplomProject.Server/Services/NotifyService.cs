@@ -15,9 +15,9 @@ namespace DiplomProject.Server.Services
 {
 	public class NotifyService : INotifyService
 	{
-		private ITelegramBotClient _botClient;
 		private readonly ITelegramUserRepository tgUserRepo;
 		private readonly IScienceEventRepository scienceEventRepo;
+		private ITelegramBotClient _botClient;
 
 
 		public NotifyService(ITelegramBotClient botClient, ITelegramUserRepository repo1, IScienceEventRepository repo2)

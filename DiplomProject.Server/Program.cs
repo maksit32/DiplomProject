@@ -41,7 +41,7 @@ namespace API
 				builder.Services.Configure<BotConfiguration>(botConfigSection);
 				builder.Services.AddHttpClient("tgwebhook").RemoveAllLoggers().AddTypedClient<ITelegramBotClient>(
 					httpClient => new TelegramBotClient(botConfigSection.Get<BotConfiguration>()!.BotToken, httpClient));
-				builder.Services.AddSingleton<UpdateHandler>();
+				builder.Services.AddScoped<UpdateHandler>();
 				builder.Services.AddControllers().AddNewtonsoftJson();
 				//builder.Services.ConfigureTelegramBotMvc();
 
@@ -57,6 +57,7 @@ namespace API
 				builder.Services.AddScoped<IScienceEventRepository, ScienceEventRepository>();
 				builder.Services.AddScoped<IPasswordHasher<TelegramUser>, PasswordHasher<TelegramUser>>();
 				builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
+				builder.Services.AddScoped<INotifyService, NotifyService>();
 
 
 

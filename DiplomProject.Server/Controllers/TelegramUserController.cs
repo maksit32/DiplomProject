@@ -110,7 +110,9 @@ namespace DiplomProject.Server.Controllers
 		{
 			try
 			{
-				//пароль НЕ ХЕШИРОВАН!
+				var hashedPass = _passwordHasherService.HashPassword(user.HashedPassword);
+				user.HashedPassword = hashedPass;
+
 				await _tgusersRepo.AddTgUserAsync(user, token);
 				return Created();
 			}
