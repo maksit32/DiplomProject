@@ -8,26 +8,37 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types.ReplyMarkups;
+using Domain.Services.Interfaces;
 
 
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
 	[Route("/")]
-	public class BotController(IOptions<BotConfiguration> Config) : ControllerBase
+	public class BotController : ControllerBase
 	{
+		private readonly IOptions<BotConfiguration> _config;
+		private readonly IPasswordHasherService _passwordHasherService;
+
+		public BotController(IOptions<BotConfiguration> config, IPasswordHasherService passwordHasherService)
+		{
+			_config = config;
+			_passwordHasherService = passwordHasherService;
+		}
+
+
 		[HttpGet("setWebhook")]
 		public async Task<string> SetWebHook([FromServices] ITelegramBotClient bot, CancellationToken ct)
 		{
-			var webhookUrl = Config.Value.BotWebhookUrl.AbsoluteUri;
-			await bot.SetWebhookAsync(webhookUrl, allowedUpdates: [], secretToken: Config.Value.SecretToken, cancellationToken: ct);
+			var webhookUrl = _config.Value.BotWebhookUrl.AbsoluteUri;
+			await bot.SetWebhookAsync(webhookUrl, allowedUpdates: [], secretToken: _config.Value.SecretToken, cancellationToken: ct);
 			return $"Webhook set to {webhookUrl}";
 		}
 
 		[HttpPost]
 		public async Task<IActionResult> Post([FromBody] Update update, [FromServices] ITelegramBotClient bot, [FromServices] UpdateHandler handleUpdateService, CancellationToken ct)
 		{
-			if (Request.Headers["X-Telegram-Bot-Api-Secret-Token"] != Config.Value.SecretToken)
+			if (Request.Headers["X-Telegram-Bot-Api-Secret-Token"] != _config.Value.SecretToken)
 				return Forbid();
 			try
 			{

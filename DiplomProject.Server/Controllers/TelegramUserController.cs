@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Repositories.Interfaces;
+using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.InteropServices;
 
@@ -11,11 +12,13 @@ namespace DiplomProject.Server.Controllers
 	{
 		private readonly ITelegramUserRepository _tgusersRepo;
 		private readonly ILogger<TelegramUserController> _logger;
+		private readonly IPasswordHasherService _passwordHasherService;
 
-		public TelegramUserController(ITelegramUserRepository repo, ILogger<TelegramUserController> logger)
+		public TelegramUserController(ITelegramUserRepository repo, IPasswordHasherService passwordHasherService, ILogger<TelegramUserController> logger)
 		{
 			_tgusersRepo = repo;
 			_logger = logger;
+			_passwordHasherService = passwordHasherService;
 		}
 
 		[HttpGet("get")]

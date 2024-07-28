@@ -55,8 +55,8 @@ namespace API
 				builder.Services.AddScoped<IUserCreatedEventRepository, UserCreatedEventRepository>();
 				builder.Services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
 				builder.Services.AddScoped<IScienceEventRepository, ScienceEventRepository>();
-				builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
 				builder.Services.AddScoped<IPasswordHasher<TelegramUser>, PasswordHasher<TelegramUser>>();
+				builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
 
 
 
