@@ -43,7 +43,6 @@ namespace API
 					httpClient => new TelegramBotClient(botConfigSection.Get<BotConfiguration>()!.BotToken, httpClient));
 				builder.Services.AddScoped<UpdateHandler>();
 				builder.Services.AddControllers().AddNewtonsoftJson();
-				//builder.Services.ConfigureTelegramBotMvc();
 
 
 				builder.Services.AddEndpointsApiExplorer();
@@ -72,6 +71,7 @@ namespace API
 				var app = builder.Build();
 				app.UseHttpsRedirection();
 				app.UseHttpLogging();
+				app.UseRouting();
 				app.UseCors(policy =>
 				{
 					policy

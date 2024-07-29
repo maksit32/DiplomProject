@@ -16,9 +16,9 @@ namespace DiplomProject.Server.Controllers
 
 		public TelegramUserController(ITelegramUserRepository repo, IPasswordHasherService passwordHasherService, ILogger<TelegramUserController> logger)
 		{
-			_tgusersRepo = repo;
-			_logger = logger;
-			_passwordHasherService = passwordHasherService;
+			_tgusersRepo = repo ?? throw new ArgumentNullException(nameof(repo));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_passwordHasherService = passwordHasherService ?? throw new ArgumentNullException(nameof(passwordHasherService)); 
 		}
 
 		[HttpGet("get")]

@@ -23,7 +23,8 @@ namespace DiplomProject.Server.Services
 		public NotifyService(ITelegramBotClient botClient, ITelegramUserRepository repo1, IScienceEventRepository repo2)
 		{
 			if (botClient == null) throw new ArgumentNullException("ITelegramBotClient is null");
-			if (repo1 == null) throw new ArgumentNullException("TelegramUsersDb is null");
+			if (repo1 == null) throw new ArgumentNullException("TelegramUserDb is null");
+			if (repo2 == null) throw new ArgumentNullException("ScienceEventDb is null");
 
 
 			_botClient = botClient;

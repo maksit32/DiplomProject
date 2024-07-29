@@ -9,12 +9,13 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types.ReplyMarkups;
 using Domain.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
-	[Route("/")]
+	[Route("api/[controller]")]
 	public class BotController : ControllerBase
 	{
 		private readonly IOptions<BotConfiguration> _config;
@@ -23,25 +24,14 @@ namespace DiplomProject.Server.Controllers
 
 		public BotController(IOptions<BotConfiguration> config, IPasswordHasherService passwordHasherService, INotifyService notifyService)
 		{
-			_config = config;
-			_passwordHasherService = passwordHasherService;
-			_notificationService = notifyService;
-		}
-
-
-		[HttpGet("setWebhook")]
-		public async Task<string> SetWebHook([FromServices] ITelegramBotClient bot, CancellationToken ct)
-		{
-			var webhookUrl = _config.Value.BotWebhookUrl.AbsoluteUri;
-			await bot.SetWebhookAsync(webhookUrl, allowedUpdates: [], secretToken: _config.Value.SecretToken, cancellationToken: ct);
-			return $"Webhook set to {webhookUrl}";
+			_config = config ?? throw new ArgumentNullException(nameof(config));
+			_passwordHasherService = passwordHasherService ?? throw new ArgumentNullException(nameof(passwordHasherService));
+			_notificationService = notifyService ?? throw new ArgumentNullException(nameof(notifyService));
 		}
 
 		[HttpPost]
 		public async Task<IActionResult> Post([FromBody] Update update, [FromServices] ITelegramBotClient bot, [FromServices] UpdateHandler handleUpdateService, CancellationToken ct)
 		{
-			if (Request.Headers["X-Telegram-Bot-Api-Secret-Token"] != _config.Value.SecretToken)
-				return Forbid();
 			try
 			{
 				await handleUpdateService.HandleUpdateAsync(bot, update, ct);
@@ -51,11 +41,6 @@ namespace DiplomProject.Server.Controllers
 				await handleUpdateService.HandlePollingErrorAsync(bot, exception, ct);
 			}
 			return Ok();
-		}
-		[HttpGet]
-		public string Get()
-		{
-			return "Telegram bot was started";
 		}
 	}
 }

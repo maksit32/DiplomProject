@@ -16,9 +16,9 @@ namespace DiplomProject.Server.Controllers
 
 		public ScienceEventController(IScienceEventRepository repo, ILogger<ScienceEventController> logger, INotifyService notifyService)
 		{
-			_scEventsRepo = repo;
-			_logger = logger;
-			_notificationService = notifyService;
+			_scEventsRepo = repo ?? throw new ArgumentNullException(nameof(repo));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_notificationService = notifyService ?? throw new ArgumentNullException(nameof(notifyService));
 		}
 
 		[HttpGet("get")]

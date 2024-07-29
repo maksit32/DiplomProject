@@ -14,8 +14,8 @@ namespace DiplomProject.Server.Controllers
 
 		public UserCreatedEventController(IUserCreatedEventRepository repo, ILogger<UserCreatedEventController> logger)
 		{
-			_userCreatedEventsRepo = repo;
-			_logger = logger;
+			_userCreatedEventsRepo = repo ?? throw new ArgumentNullException(nameof(repo)); ;
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
 		[HttpGet("get")]
