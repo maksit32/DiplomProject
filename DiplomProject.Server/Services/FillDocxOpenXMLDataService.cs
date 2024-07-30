@@ -52,9 +52,9 @@ namespace DiplomProject.Server.Services
 			new KeyValuePair<string, string>("<GROUP>", dataArr[2].ToUpper()),
 			new KeyValuePair<string, string>("<NUMB>", dataArr[3]),
 			new KeyValuePair<string, string>("<MAIL>", dataArr[4]),
-			new KeyValuePair<string, string>("<DAY>", dataArr[5]),
-			new KeyValuePair<string, string>("<MONTH>", dataArr[6]),
-			new KeyValuePair<string, string>("<YEAR>", dataArr[7])
+			new KeyValuePair<string, string>("<DAY>", DateTime.Now.Day.ToString()),
+			new KeyValuePair<string, string>("<MONTH>", DateTime.Now.Month.ToString()),
+			new KeyValuePair<string, string>("<YEAR>", DateTime.Now.Year.ToString())
 		};
 
 			if (!ValidateData(replaceList)) return $"{AlertEmj} Неверно указаны данные.";
@@ -102,21 +102,21 @@ namespace DiplomProject.Server.Services
 			var dataArr = lowerCaseMessage.Split('/');
 
 			// Получение ФИО с большой буквы (родительный падеж)
-			var fioRArr = dataArr[0].Split(" ");
+			var fioRArr = dataArr[1].Split(" ");
 			string fioRStr = string.Join(" ", fioRArr.Select(str => char.ToUpper(str[0]) + str.Substring(1)));
 
 			var replaceList = new List<KeyValuePair<string, string>>
 		{
-			new KeyValuePair<string, string>("<FROM>", fioRStr),
-			new KeyValuePair<string, string>("<STRUCT>", dataArr[1].ToUpper()),
+			new KeyValuePair<string, string>("<FROM>", dataArr[0]),
 			new KeyValuePair<string, string>("<FIORP>", fioRStr),
-			new KeyValuePair<string, string>("<ISACADEMIC>", dataArr[2]),
-			new KeyValuePair<string, string>("<BIRTHDATE>", dataArr[3]),
-			new KeyValuePair<string, string>("<NUMB>", dataArr[4]),
-			new KeyValuePair<string, string>("<MAIL>", dataArr[5]),
-			new KeyValuePair<string, string>("<DAY>", dataArr[6]),
-			new KeyValuePair<string, string>("<MONTH>", dataArr[7]),
-			new KeyValuePair<string, string>("<YEAR>", dataArr[8])
+			new KeyValuePair<string, string>("<STRUCT>", dataArr[2].ToUpper()),
+			new KeyValuePair<string, string>("<ISACADEMIC>", dataArr[3]),
+			new KeyValuePair<string, string>("<BIRTHDATE>", dataArr[4]),
+			new KeyValuePair<string, string>("<NUMB>", dataArr[5]),
+			new KeyValuePair<string, string>("<MAIL>", dataArr[6]),
+			new KeyValuePair<string, string>("<DAY>", DateTime.Now.Day.ToString()),
+			new KeyValuePair<string, string>("<MONTH>", DateTime.Now.Month.ToString()),
+			new KeyValuePair<string, string>("<YEAR>", DateTime.Now.Year.ToString())
 		};
 
 			if (!ValidateData(replaceList)) return $"{AlertEmj} Неверно указаны данные.";
@@ -154,15 +154,6 @@ namespace DiplomProject.Server.Services
 
 			var email = replaceList.FirstOrDefault(kv => kv.Key == "<MAIL>").Value;
 			if (!Regex.IsMatch(email, @"^[\w-.]+@([\w-]+.)+[\w-]{2,4}$")) return false;
-
-			var day = replaceList.FirstOrDefault(kv => kv.Key == "<DAY>").Value;
-			if (long.Parse(day) != DateTime.Now.Day) return false;
-
-			var month = replaceList.FirstOrDefault(kv => kv.Key == "<MONTH>").Value;
-			if (long.Parse(month) != DateTime.Now.Month) return false;
-
-			var year = replaceList.FirstOrDefault(kv => kv.Key == "<YEAR>").Value;
-			if (long.Parse(year) != DateTime.Now.Year) return false;
 
 			return true;
 		}

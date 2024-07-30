@@ -313,14 +313,14 @@ namespace DiplomProject.Server.Services
 				await botClient.SendTextMessageAsync(message.Chat.Id,
 					$"{PlaneEmj} Для подачи заявления на вступление в СНО или СМУ воспользуйтесь следующими командами\n\n" +
 					$"{GreenCircleEmj} Вступление в СНО:\n" +
-					$"Формат вступления: /snoapp/Фамилия Имя Отчество(в родительном падеже)/Факультет/Группа/Номер телефона/Почта/День/Месяц/Год\n{RedCircleEmj} Пример:");
+					$"Формат вступления: /snoapp/Фамилия Имя Отчество(в родительном падеже)/Факультет/Группа/Номер телефона/Почта\n{RedCircleEmj} Пример:");
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"/snoapp/Иванова Ивана Ивановича/ФАСК/РС-5/+79999999999/Mail/12/02/2024");
+				await botClient.SendTextMessageAsync(message.Chat.Id, $"/snoapp/Иванова Ивана Ивановича/ФАСК/РС-5/+79999999999/example@example.ru");
 
 				await botClient.SendTextMessageAsync(message.Chat.Id, $"{BrownCircleEmj} Вступление в СМУ:\n" +
-					$"Формат вступления: /smuapp/Фамилия Имя Отчество(в родительном падеже)/Структурное подразделение(наименование кафедры или иного подразделения)/Наличие ученой степени/Дата рождения/Номер телефона/Почта/День/Месяц/Год\n{YellowCircleEmj} Пример:");
+					$"Формат вступления: /smuapp/Должность(в родительном падеже)/Фамилия Имя Отчество(в родительном падеже)/Структурное подразделение(наименование кафедры или иного подразделения)/Наличие ученой степени/Дата рождения/Номер телефона/Почта\n{YellowCircleEmj} Пример:");
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"/smuapp/Иванова Ивана Ивановича/ТЭРЭО ВТ/Ваша научная степень/20.01.1994/+79999999999/Mail/12/02/2024");
+				await botClient.SendTextMessageAsync(message.Chat.Id, $"/smuapp/аспиранта/Иванова Ивана Ивановича/ТЭРЭО ВТ/Ваша научная степень/20.01.1994/+79999999999/example@example.ru");
 			}
 			else if (lowerCaseMessage.Contains("наше местоположение"))
 			{
