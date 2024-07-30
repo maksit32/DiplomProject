@@ -17,5 +17,6 @@ namespace Domain.Services.Interfaces
         Task NotifySubUsersAsync(string notifyMessage, CancellationToken token);
         Task NotifyAllUsersAsync(string notifyMessage, CancellationToken token);
         Task NotifyAdminsAsync(string notifyMessage, CancellationToken token);
-    }
+        Task<string> GetInfoAboutTgUserAsync(long chatId, CancellationToken token);
+	}
 }

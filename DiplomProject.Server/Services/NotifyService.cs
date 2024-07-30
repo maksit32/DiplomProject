@@ -8,7 +8,7 @@ using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Telegram.Bot;
 using static TelegramLibrary.TelegramLibrary;
-
+using static Domain.Constants.EmojiConstants;
 
 
 namespace DiplomProject.Server.Services
@@ -17,10 +17,11 @@ namespace DiplomProject.Server.Services
 	{
 		private readonly ITelegramUserRepository tgUserRepo;
 		private readonly IScienceEventRepository scienceEventRepo;
+		private readonly IUserCreatedEventRepository userCreatedEvRepo;
 		private ITelegramBotClient _botClient;
 
 
-		public NotifyService(ITelegramBotClient botClient, ITelegramUserRepository repo1, IScienceEventRepository repo2)
+		public NotifyService(ITelegramBotClient botClient, ITelegramUserRepository repo1, IScienceEventRepository repo2, IUserCreatedEventRepository userCreatedEvRepo)
 		{
 			if (botClient == null) throw new ArgumentNullException("ITelegramBotClient is null");
 			if (repo1 == null) throw new ArgumentNullException("TelegramUserDb is null");
@@ -30,6 +31,7 @@ namespace DiplomProject.Server.Services
 			_botClient = botClient;
 			tgUserRepo = repo1;
 			scienceEventRepo = repo2;
+			this.userCreatedEvRepo = userCreatedEvRepo;
 		}
 
 		//специльно для экстренного оповещения ВСЕХ пользователей (собрания, перезагрузка бота итд)
@@ -107,6 +109,23 @@ namespace DiplomProject.Server.Services
 			{
 				await WriteToTgUserAsync(_botClient, adminTgUser.TgChatId, notifyMessage);
 			}
+		}
+		public async Task<string> GetInfoAboutTgUserAsync(long chatId, CancellationToken token)
+		{
+			var tgUser = await tgUserRepo.GetTgUserByIdAsync(chatId, token);
+			if (tgUser is null) return "Возникла ошибка! Обратитесь к создателю бота.";
+
+			//получаем все мероприятия, добавленные пользователем
+			string evString = "";
+			var userEvents = await userCreatedEvRepo.ReadAllUserEventsAsync(tgUser, token);
+			if (userEvents is not null)
+			{
+				foreach (var ev in userEvents)
+				{
+					evString += ev.ToString();
+				}
+			}
+			return $"{GreenCircleEmj} Статус подписки:	{tgUser.IsSubscribed}\n{YellowCircleEmj} Фамилия: {tgUser.Surname}\n{BrownCircleEmj} Имя: {tgUser.Name}\n{YellowCircleEmj} Отчество: {tgUser.Patronymic}\n{BrownCircleEmj} Номер телефона: {tgUser.PhoneNumber}\n{RedCircleEmj} Статус админа:	{tgUser.IsAdmin}\n{BlueCircleEmj} Номер чата:	{tgUser.TgChatId}\nУчастие в мероприятиях:\n\n{evString}";
 		}
 	}
 }

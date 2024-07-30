@@ -179,18 +179,6 @@ namespace DiplomProject.Server.Repositories
 			_user.LastMessageTime = DateTime.UtcNow;
 			await _dbContext.SaveChangesAsync(token);
 		}
-		public async Task<TelegramUser?> ReadTgUserByIdAsync(Guid Id, CancellationToken token)
-		{
-			var _user = await GetTgUserByIdAsync(Id, token);
-			return _user;
-		}
-		public async Task<TelegramUser?> ReadTgUserByIdAsync(long chatId, CancellationToken token)
-		{
-			if (chatId < 0) throw new ArgumentOutOfRangeException(nameof(chatId));
-
-			var _user = await GetTgUserByIdAsync(chatId, token);
-			return _user;
-		}
 		public async Task<bool> DeleteTgUserByIdAsync(Guid Id, CancellationToken token)
 		{
 			var _user = await GetTgUserByIdAsync(Id, token);
@@ -257,6 +245,14 @@ namespace DiplomProject.Server.Repositories
 			_user.IsAdmin = newUser.IsAdmin;
 
 			await _dbContext.SaveChangesAsync(token);
+		}
+		public async Task<bool> CheckLastTimeMessageAsync(long chatId, CancellationToken token)
+		{
+			var tgUser = await GetTgUserByIdAsync(chatId, token);
+			//если пользователя вообще нет в БД
+			if (tgUser is null) return true;
+
+			return DateTime.UtcNow - tgUser.LastMessageTime > TimeSpan.FromSeconds(3);
 		}
 	}
 }

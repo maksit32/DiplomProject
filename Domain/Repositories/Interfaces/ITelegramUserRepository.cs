@@ -20,7 +20,6 @@ namespace Domain.Repositories.Interfaces
 		Task<string> UpdatePhoneTgUserAsync(long chatId, string phoneNumb, CancellationToken token);
 		Task<bool> UpdateAdminStatusTgUserAsync(Guid Id, bool adminStatus, CancellationToken token);
 		Task UpdateLastTimeMessageTgUserAsync(long chatId, CancellationToken token);
-		Task<TelegramUser?> ReadTgUserByIdAsync(Guid Id, CancellationToken token);
 		Task<bool> DeleteTgUserByIdAsync(Guid Id, CancellationToken token);
 		Task<bool> DeleteTgUserByIdAsync(long chatId, CancellationToken token);
 		Task<TelegramUser?> GetTgUserByIdAsync(long chatId, CancellationToken token);
@@ -29,6 +28,6 @@ namespace Domain.Repositories.Interfaces
 		Task<List<TelegramUser>> GetAdminUsersListAsync(CancellationToken token);
 		Task<List<TelegramUser>> GetUsersListAsync(CancellationToken token);
 		Task UpdateTgUserAsync(TelegramUser newUser, CancellationToken token);
-
+		Task<bool> CheckLastTimeMessageAsync(long chatId, CancellationToken token);
 	}
 }
