@@ -11,7 +11,7 @@ namespace Domain.Services.Interfaces
 {
 	public interface IFillDataService
 	{
-		Task<string> FillSNODataAsync(string lowerCaseMessage, long chatId, CancellationToken token);
-		Task<string> FillSMUDataAsync(string lowerCaseMessage, long chatId, CancellationToken token);
+		Task<string> FillSNODataAsync(string lowerCaseMessage, long chatId, string fileFullPath, CancellationToken token);
+		Task<string> FillSMUDataAsync(string lowerCaseMessage, long chatId, string fileFullPath, CancellationToken token);
 	}
 }

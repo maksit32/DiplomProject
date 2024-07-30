@@ -10,20 +10,20 @@ using Npgsql.Replication.PgOutput.Messages;
 using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Services.Interfaces;
-using MSTUCABOT.ConsoleServer.Services.Classes;
 using System.Threading;
 using static Domain.Constants.EmojiConstants;
+
 
 
 namespace DiplomProject.Server.Services
 {
 	public class UpdateHandler(ITelegramBotClient botClient, ILogger<UpdateHandler> logger, ITelegramUserRepository telegramUserRepo, 
-		IScienceEventRepository scienceEventRepo, INotifyService notifyService, IUserCreatedEventRepository userCreatedEventRepo) : IUpdateHandler
+		IScienceEventRepository scienceEventRepo, INotifyService notifyService, IUserCreatedEventRepository userCreatedEventRepo, IFillDataService fillDataService) : IUpdateHandler
 	{
 		//private static SemaphoreSlim semaphore = new SemaphoreSlim(1); //для изменения документов
 		#region [Paths]
-		private static readonly string fileSNOFullPath = Environment.CurrentDirectory + "\\..\\..\\..\\Documents\\SNO.docx";
-		private static readonly string fileSMUFullPath = Environment.CurrentDirectory + "\\..\\..\\..\\Documents\\SMU.docx";
+		private static readonly string fileSNOFullPath = Environment.CurrentDirectory + "\\Documents\\SNO.docx";
+		private static readonly string fileSMUFullPath = Environment.CurrentDirectory + "\\Documents\\SMU.docx";
 		#endregion
 		#region [TgButtons]
 		//buttons
@@ -534,34 +534,32 @@ namespace DiplomProject.Server.Services
 						$"Пожалуйста, проверьте отправленные вами данные.");
 				}
 			}
-			//else if (lowerCaseMessage.Contains("/snoapp"))
-			//{
-			//	try
-			//	{
-			//		IFillDataService fillDataService = new FillDocxDataService(fileSNOFullPath, notifyService, semaphore);
-			//		var messageToSend = await fillDataService.FillSNODataAsync(lowerCaseMessage, message.Chat.Id);
-			//		await botClient.SendTextMessageAsync(message.Chat.Id, messageToSend);
-			//	}
-			//	catch (Exception)
-			//	{
-			//		await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при создании документа!\n" +
-			//			$"Пожалуйста, проверьте отправленные вами данные.");
-			//	}
-			//}
-			//else if (lowerCaseMessage.Contains("/smuapp"))
-			//{
-			//	try
-			//	{
-			//		IFillDataService fillDataService = new FillDocxDataService(fileSMUFullPath, notifyService, semaphore);
-			//		var messageToSend = await fillDataService.FillSMUDataAsync(lowerCaseMessage, message.Chat.Id);
-			//		await botClient.SendTextMessageAsync(message.Chat.Id, messageToSend);
-			//	}
-			//	catch (Exception)
-			//	{
-			//		await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при создании документа!\n" +
-			//			$"Пожалуйста, проверьте отправленные вами данные.");
-			//	}
-			//}
+			else if (lowerCaseMessage.Contains("/snoapp"))
+			{
+				try
+				{
+					var messageToSend = await fillDataService.FillSNODataAsync(lowerCaseMessage, message.Chat.Id, fileSNOFullPath, token);
+					await botClient.SendTextMessageAsync(message.Chat.Id, messageToSend);
+				}
+				catch (Exception)
+				{
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при создании документа!\n" +
+						$"Пожалуйста, проверьте отправленные вами данные.");
+				}
+			}
+			else if (lowerCaseMessage.Contains("/smuapp"))
+			{
+				try
+				{
+					var messageToSend = await fillDataService.FillSMUDataAsync(lowerCaseMessage, message.Chat.Id, fileSMUFullPath, token);
+					await botClient.SendTextMessageAsync(message.Chat.Id, messageToSend);
+				}
+				catch (Exception)
+				{
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при создании документа!\n" +
+						$"Пожалуйста, проверьте отправленные вами данные.");
+				}
+			}
 			#endregion
 
 			//реакции на сообщения администратора

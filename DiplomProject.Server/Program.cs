@@ -57,6 +57,7 @@ namespace API
 				builder.Services.AddScoped<IPasswordHasher<TelegramUser>, PasswordHasher<TelegramUser>>();
 				builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
 				builder.Services.AddScoped<INotifyService, NotifyService>();
+				builder.Services.AddSingleton<IFillDataService, FillDocxOpenXMLDataService>();
 
 
 
