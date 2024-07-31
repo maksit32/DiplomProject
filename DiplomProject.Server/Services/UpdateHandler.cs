@@ -11,23 +11,28 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Services.Interfaces;
 using System.Threading;
+using API;
+using Microsoft.Extensions.Configuration;
+
+
 using static Domain.Constants.EmojiConstants;
+using System.Text.RegularExpressions;
 
 
 
 namespace DiplomProject.Server.Services
 {
-	public class UpdateHandler(ITelegramBotClient botClient, ILogger<UpdateHandler> logger, ITelegramUserRepository telegramUserRepo, 
-		IScienceEventRepository scienceEventRepo, INotifyService notifyService, IUserCreatedEventRepository userCreatedEventRepo, IFillDataService fillDataService) : IUpdateHandler
+	public class UpdateHandler(ITelegramBotClient botClient, ILogger<UpdateHandler> logger, ITelegramUserRepository telegramUserRepo,
+		IScienceEventRepository scienceEventRepo, INotifyService notifyService, IUserCreatedEventRepository userCreatedEventRepo,
+		IFillDataService fillDataService, IConfiguration _configuration) : IUpdateHandler
 	{
-		//private static SemaphoreSlim semaphore = new SemaphoreSlim(1); //для изменения документов
 		#region [Paths]
-		private static readonly string fileSNOFullPath = Environment.CurrentDirectory + "\\Documents\\SNO.docx";
-		private static readonly string fileSMUFullPath = Environment.CurrentDirectory + "\\Documents\\SMU.docx";
+		private readonly string fileSNOFullPath = _configuration["fileSNOFullPath"] ?? throw new ArgumentNullException("FileSNOFullPath is null!");
+		private readonly string fileSMUFullPath = _configuration["fileSMUFullPath"] ?? throw new ArgumentNullException("FileSMUFullPath is null!");
 		#endregion
 		#region [TgButtons]
 		//buttons
-		private static ReplyKeyboardMarkup replyKeyboardUserSub = new ReplyKeyboardMarkup(new List<KeyboardButton[]>(){
+		private readonly ReplyKeyboardMarkup replyKeyboardUserSub = new ReplyKeyboardMarkup(new List<KeyboardButton[]>(){
 											new KeyboardButton[]
 											{
 												new KeyboardButton($"{CalendarEmj} Календарь мероприятий"),
@@ -68,7 +73,7 @@ namespace DiplomProject.Server.Services
 
 
 
-		private static ReplyKeyboardMarkup replyKeyboardUserNoSub = new ReplyKeyboardMarkup(new List<KeyboardButton[]>(){
+		private readonly ReplyKeyboardMarkup replyKeyboardUserNoSub = new ReplyKeyboardMarkup(new List<KeyboardButton[]>(){
 											new KeyboardButton[]
 											{
 												new KeyboardButton($"{CalendarEmj} Календарь мероприятий"),
@@ -108,7 +113,7 @@ namespace DiplomProject.Server.Services
 		{ ResizeKeyboard = true };
 
 
-		private static ReplyKeyboardMarkup replyKeyboardAdmin = new ReplyKeyboardMarkup(new List<KeyboardButton[]>(){
+		private readonly ReplyKeyboardMarkup replyKeyboardAdmin = new ReplyKeyboardMarkup(new List<KeyboardButton[]>(){
 											new KeyboardButton[]
 											{
 												new KeyboardButton($"{GreenCircleEmj} Просмотреть номера ваших паролей"),
@@ -145,7 +150,7 @@ namespace DiplomProject.Server.Services
 
 
 
-		private static InlineKeyboardMarkup inlineAuthorKeyboard = new InlineKeyboardMarkup(new List<InlineKeyboardButton[]>(){
+		private readonly InlineKeyboardMarkup inlineAuthorKeyboard = new InlineKeyboardMarkup(new List<InlineKeyboardButton[]>(){
 								new InlineKeyboardButton[]
 								{
 									InlineKeyboardButton.WithUrl($"{GreenCircleEmj} Вконтакте", "https://vk.com/id538682062"),
@@ -185,6 +190,9 @@ namespace DiplomProject.Server.Services
 
 			var lowerCaseMessage = message.Text.ToLower();
 
+			//получаем данные о пользователе
+			var user = await telegramUserRepo.GetTgUserByIdAsync(message.Chat.Id, token);
+
 			//старт и приветствие
 			#region [DefaultReactions]
 			if (lowerCaseMessage == "/start")
@@ -193,22 +201,26 @@ namespace DiplomProject.Server.Services
 					$"Добро пожаловать в бот науки МГТУ ГА! {PlaneEmj}\n" +
 					"Пожалуйста, выберите предложенные действия:\n\n" +
 					$"Внимание{AlertEmj} В боте установлена защита от спама.\n" +
-					$"Время задержки между сообщениями 3 секунды.", replyMarkup: replyKeyboardUserNoSub);
+					$"Время задержки между сообщениями 3 секунды.");
 				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} В соответствии с требованиями статьи 9 Федерального закона от 27.07.2006 № 152-ФЗ «О персональных данных»," +
-					" используя телеграм бот вы даете согласие членам Совета СНО МГТУ ГА на автоматизированную, " +
+					" используя телеграм бот вы даете согласие членам Совета СНО и СМУ МГТУ ГА на автоматизированную, " +
 					"а также без использования средств автоматизации, обработку моих персональных данных, " +
 					"включающих фамилию, имя, отчество, дату рождения, должность, сведения о месте работы, месте учебы, " +
 					"адрес электронной почты, номер контактного телефона.\r\n" +
-					"Так же вы предоставляете свое согласие членам Совета СНО МГТУ ГА на совершение действий (операций) с вашими персональными данными, " +
+					"Так же вы предоставляете свое согласие членам Совета СНО и СМУ МГТУ ГА на совершение действий (операций) с вашими персональными данными, " +
 					"включая сбор, систематизацию, накопление, хранение, обновление, изменение, " +
 					"использование, обезличивание, блокирование, уничтожение.\r\n");
 
-				var tgUser = await telegramUserRepo.GetTgUserByIdAsync(message.Chat.Id, token);
-				if (tgUser is null)
+				if (user is null)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id, $"{GreenCircleEmj}Для продолжения использования телеграмм бота, заполните ваши данные в следующем формате:\n" +
-					$"/addinfo/Ваше имя/Ваша фамилия/Ваше отчество/номер телефона (формат +7)\nПример:");
-					await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Яшин/Иванович/+79999999999");
+					$"/addinfo/Ваше имя/Ваша фамилия/Ваше отчество/номер телефона (формат +7)\nПример:", replyMarkup: replyKeyboardUserSub);
+					await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				}
+				else
+				{
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"Телеграм бот уже активен! {GreenCircleEmj}", replyMarkup: replyKeyboardUserNoSub);
+					await telegramUserRepo.UpdateSubStatusTgUserAsync(message.Chat.Id, true, token);
 				}
 			}
 			else if (lowerCaseMessage.Contains("/addinfo/"))
@@ -223,19 +235,14 @@ namespace DiplomProject.Server.Services
 					string patronymic = Char.ToUpper(lst[2][0]) + lst[2].Substring(1);
 					string phone = lst[3];
 
-					//Валидация
-					if (!phone.Contains("+7"))
+					// Валидация
+					if (!Regex.IsMatch(phone, @"^\+7\d{10}$"))
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Неверно указанный номер!\nНомер должен начинаться с +7");
-						return;
-					}
-					if (phone.Length != 12)
-					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Неверно указан номер!\nНомер должен состоять из 11 цифр");
+						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Неверно указанный номер!\nНомер должен начинаться с +7 и содержать 11 цифр.");
 						return;
 					}
 
-					var res = await telegramUserRepo.AddTgUserAsync(new TelegramUser(message.Chat.Id, name, surname, patronymic, phone, false, false), token);
+					var res = await telegramUserRepo.AddTgUserAsync(new TelegramUser(message.Chat.Id, name, surname, patronymic, phone, true, false), token);
 					if (!res)
 					{
 						await botClient.SendTextMessageAsync(message.Chat.Id,
@@ -245,13 +252,20 @@ namespace DiplomProject.Server.Services
 					else
 					{
 						await botClient.SendTextMessageAsync(message.Chat.Id,
-							$"{GreenCircleEmj} Данные успешно добавлены.", replyMarkup: replyKeyboardUserSub);
+							$"{GreenCircleEmj} Данные успешно добавлены.", replyMarkup: replyKeyboardUserNoSub);
 					}
 				}
 				catch (Exception)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Ошибка. Проверьте правильность ввода.");
 				}
+			}
+			//проверка на логин
+			else if (user is null)
+			{
+				await botClient.SendTextMessageAsync(message.Chat.Id, $"{GreenCircleEmj}Для продолжения использования телеграмм бота, заполните ваши данные в следующем формате:\n" +
+					$"/addinfo/Ваше имя/Ваша фамилия/Ваше отчество/номер телефона (формат +7)\nПример:");
+				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
 			}
 			else if (lowerCaseMessage == "привет")
 			{
@@ -335,7 +349,6 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage == "!user")
 			{
-				var user = await telegramUserRepo.GetTgUserByIdAsync(message.Chat.Id, token);
 				if (user == null)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id,
@@ -360,7 +373,7 @@ namespace DiplomProject.Server.Services
 
 				await botClient.SendTextMessageAsync(message.Chat.Id, $"{YellowCircleEmj}Для изменения фамилии введите команду:\n" +
 					$"/chsname/Ваша фамилия\nПример:");
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/chsname/Яшин");
+				await botClient.SendTextMessageAsync(message.Chat.Id, "/chsname/Иванов");
 
 				await botClient.SendTextMessageAsync(message.Chat.Id, $"{GreenCircleEmj}Для изменения отчества введите команду:\n" +
 					$"/chpatr/Ваше отчество\nПример:");
@@ -566,7 +579,6 @@ namespace DiplomProject.Server.Services
 			#region [ReactionsOnAdmin]
 			else if (lowerCaseMessage == "!admin")
 			{
-				var user = await telegramUserRepo.GetTgUserByIdAsync(message.Chat.Id, token);
 				if (user == null)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id,
@@ -591,7 +603,6 @@ namespace DiplomProject.Server.Services
 			//}
 			else if (lowerCaseMessage.Contains("список действий с мероприятиями"))
 			{
-				var user = await telegramUserRepo.GetTgUserByIdAsync(message.Chat.Id, token);
 				if (user == null)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id,
@@ -655,7 +666,6 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage.Contains("полный список команд"))
 			{
-				var user = await telegramUserRepo.GetTgUserByIdAsync(message.Chat.Id, token);
 				if (user == null)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id,
@@ -745,7 +755,6 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage == "/adminhelp")
 			{
-				var user = await telegramUserRepo.GetTgUserByIdAsync(message.Chat.Id, token);
 				if (user == null)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id,
@@ -776,7 +785,6 @@ namespace DiplomProject.Server.Services
 			{
 				try
 				{
-					var user = await telegramUserRepo.GetTgUserByIdAsync(message.Chat.Id, token);
 					if (user == null)
 					{
 						await botClient.SendTextMessageAsync(message.Chat.Id,
@@ -814,7 +822,6 @@ namespace DiplomProject.Server.Services
 			{
 				try
 				{
-					var user = await telegramUserRepo.GetTgUserByIdAsync(message.Chat.Id, token);
 					if (user.IsAdmin)
 					{
 						string messageToSend = lowerCaseMessage + "/" + message.Chat.Id;
@@ -845,7 +852,6 @@ namespace DiplomProject.Server.Services
 			{
 				try
 				{
-					var user = await telegramUserRepo.GetTgUserByIdAsync(message.Chat.Id, token);
 					if (user.IsAdmin)
 					{
 						var res = await scienceEventRepo.DeleteEventByIdAsync(lowerCaseMessage, token);

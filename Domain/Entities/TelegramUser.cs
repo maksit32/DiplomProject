@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace Domain.Entities
 {
@@ -49,14 +50,15 @@ namespace Domain.Entities
 			{
 				throw new ArgumentException($"\"{nameof(phoneNumber)}\" не может быть пустым или содержать только пробел.", nameof(phoneNumber));
 			}
-
+			string pattern = @"^\+7\d{10}$";
+			if (!Regex.IsMatch(phoneNumber, pattern)) throw new InvalidDataException("Invalid phone number!");
 			if (tgChatId <= 0) throw new ArgumentOutOfRangeException("Поле tgChatId не должно быть меньше 0!");
 
 			Id = id;
 			TgChatId = tgChatId;
 			IsSubscribed = isSubscribed;
 			IsAdmin = isAdmin;
-			LastMessageTime = DateTime.Now;
+			LastMessageTime = DateTime.UtcNow;
 			Name = name;
 			Surname = surname;
 			Patronymic = patronymic;
@@ -94,7 +96,7 @@ namespace Domain.Entities
 			Surname = surname;
 			Patronymic = patronymic;
 			PhoneNumber = phoneNumber;
-			LastMessageTime = DateTime.Now;
+			LastMessageTime = DateTime.UtcNow;
 			HashedPassword = hashedPassword;
 		}
 		public override string ToString()

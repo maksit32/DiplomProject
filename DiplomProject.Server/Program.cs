@@ -48,6 +48,8 @@ namespace API
 				builder.Services.AddEndpointsApiExplorer();
 				builder.Services.AddSwaggerGen();
 
+				//из secrets.json автоматом
+				builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 				builder.Services.AddDbContext<DiplomDbContext>(options =>
 					options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreeSqlConnectionString") ?? throw new EmptyValueConnectionStringException("Connection string not found!")));
 				builder.Services.AddScoped(typeof(IRepository<>), typeof(EFCoreRepository<>));
