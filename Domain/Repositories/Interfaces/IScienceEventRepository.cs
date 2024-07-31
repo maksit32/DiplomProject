@@ -30,5 +30,6 @@ namespace Domain.Repositories.Interfaces
 		Task DeleteEventByIdAsync(Guid Id, CancellationToken token);
 		Task<bool> DeleteEventByNameAsync(string name, CancellationToken token);
 		Task<ScienceEvent?> GetLastCreatedEventAsync(CancellationToken token);
+		Task<string> ReadAllActualEvAdminToStringAsync(CancellationToken token);
 	}
 }

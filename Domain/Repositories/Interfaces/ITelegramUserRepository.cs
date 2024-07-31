@@ -29,5 +29,6 @@ namespace Domain.Repositories.Interfaces
 		Task<List<TelegramUser>> GetUsersListAsync(CancellationToken token);
 		Task UpdateTgUserAsync(TelegramUser newUser, CancellationToken token);
 		Task<bool> CheckLastTimeMessageAsync(long chatId, CancellationToken token);
+		Task<bool> UpdatePasswordTgUserAsync(string password, long chatId, CancellationToken token);
 	}
 }

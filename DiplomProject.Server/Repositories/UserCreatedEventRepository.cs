@@ -42,14 +42,16 @@ namespace DiplomProject.Server.Repositories
 			string placeEvent = char.ToUpper(dataArr[1][0]) + dataArr[1].Substring(1);
 			//DateEvent
 			var cultureInfo = new CultureInfo("ru-RU");
-			DateTime dateEvent = DateTime.Parse(dataArr[2], cultureInfo);
+			DateTime dateEventLocal = DateTime.Parse(dataArr[2], cultureInfo);
+			// Преобразование в UTC
+			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
 			//IsWinner
 			bool isWinner = bool.Parse(dataArr[3]);
 			//TgUser
 			TelegramUser? tgUser = await GetTgUserByIdAsync(chatId);
 			if (tgUser is null) return false;
 
-			UserCreatedEvent uEvent = new UserCreatedEvent(nameEvent, placeEvent, dateEvent, isWinner, tgUser);
+			UserCreatedEvent uEvent = new UserCreatedEvent(nameEvent, placeEvent, dateEventUtc, isWinner, tgUser);
 
 			//проверка на уже добавленное ранее событие этим пользователем
 			if (UserCreatedEvents.ToList().Exists(e => e.NameEvent.ToLower() == uEvent.NameEvent.ToLower() && e.TgUser.Id == tgUser.Id))
@@ -80,7 +82,9 @@ namespace DiplomProject.Server.Repositories
 			string placeEvent = char.ToUpper(dataArr[1][0]) + dataArr[1].Substring(1);
 			//DateEvent
 			var cultureInfo = new CultureInfo("ru-RU");
-			DateTime dateEvent = DateTime.Parse(dataArr[2], cultureInfo);
+			DateTime dateEventLocal = DateTime.Parse(dataArr[2], cultureInfo);
+			// Преобразование в UTC
+			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
 			//IsWinner
 			bool isWinner = bool.Parse(dataArr[3]);
 			//EventId
@@ -102,7 +106,7 @@ namespace DiplomProject.Server.Repositories
 
 				evToChange.NameEvent = nameEvent;
 				evToChange.PlaceEvent = placeEvent;
-				evToChange.DateEvent = dateEvent;
+				evToChange.DateEvent = dateEventUtc;
 				evToChange.IsWinner = isWinner;
 
 				await _dbContext.SaveChangesAsync();

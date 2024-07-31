@@ -24,7 +24,7 @@ namespace DiplomProject.Server.Services
 {
 	public class UpdateHandler(ITelegramBotClient botClient, ILogger<UpdateHandler> logger, ITelegramUserRepository telegramUserRepo,
 		IScienceEventRepository scienceEventRepo, INotifyService notifyService, IUserCreatedEventRepository userCreatedEventRepo,
-		IFillDataService fillDataService, IConfiguration _configuration) : IUpdateHandler
+		IFillDataService fillDataService, IPasswordHasherService passwordHasherService, IConfiguration _configuration) : IUpdateHandler
 	{
 		#region [Paths]
 		private readonly string fileSNOFullPath = _configuration["fileSNOFullPath"] ?? throw new ArgumentNullException("FileSNOFullPath is null!");
@@ -116,7 +116,7 @@ namespace DiplomProject.Server.Services
 		private readonly ReplyKeyboardMarkup replyKeyboardAdmin = new ReplyKeyboardMarkup(new List<KeyboardButton[]>(){
 											new KeyboardButton[]
 											{
-												new KeyboardButton($"{GreenCircleEmj} Просмотреть номера ваших паролей"),
+												new KeyboardButton($"{CalendarEmj} Календарь добавленных мероприятий"),
 											},
 											new KeyboardButton[]
 											{
@@ -128,15 +128,7 @@ namespace DiplomProject.Server.Services
 											},
 											new KeyboardButton[]
 											{
-												new KeyboardButton($"{QuestionEmj} Как добавить пароль"),
-											},
-											new KeyboardButton[]
-											{
 												new KeyboardButton($"{QuestionEmj} Как изменить пароль")
-											},
-											new KeyboardButton[]
-											{
-												new KeyboardButton($"{QuestionEmj} Как удалить пароль"),
 											},
 											new KeyboardButton[]
 											{
@@ -219,7 +211,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"Телеграм бот уже активен! {GreenCircleEmj}", replyMarkup: replyKeyboardUserNoSub);
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{GreenCircleEmj} Телеграм бот уже активен.", replyMarkup: replyKeyboardUserNoSub);
 					await telegramUserRepo.UpdateSubStatusTgUserAsync(message.Chat.Id, true, token);
 				}
 			}
@@ -294,19 +286,19 @@ namespace DiplomProject.Server.Services
 					"/adduserevent/Название мероприятия/Место проведения/Дата проведения/Статус призера (указываете true или false)\n" +
 					$"{RedCircleEmj}Пример:");
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/adduserevent/Название 1/Москва/01.01.2024 12:12:12/True");
+				await botClient.SendTextMessageAsync(message.Chat.Id, "/adduserevent/Название 1/Москва/01.01.2024/True");
 
 				await botClient.SendTextMessageAsync(message.Chat.Id, "Для изменения участия в мероприятии придерживайтесь следующей конструкции:\n" +
 					"/updateuserevent/Название мероприятия/Место проведения/Дата проведения/Статус призера (указываете true или false)/Номер мероприятия\n" +
 					$"{YellowCircleEmj}Пример:");
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/updateuserevent/Название 1/Москва/01.01.2024 12:12:12/True/1");
+				await botClient.SendTextMessageAsync(message.Chat.Id, "/updateuserevent/Название 1/Москва/01.01.2024/True/11ce84c9-08ba-487d-89ac-97cd166111fc");
 
 				await botClient.SendTextMessageAsync(message.Chat.Id, "Для удаления участия в мероприятии придерживайтесь следующей конструкции:\n" +
 					"/deleteuserevent/Номер мероприятия\n" +
 					$"{GreenCircleEmj}Пример:");
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/deleteuserevent/1");
+				await botClient.SendTextMessageAsync(message.Chat.Id, "/deleteuserevent/11ce84c9-08ba-487d-89ac-97cd166111fc");
 			}
 			else if (lowerCaseMessage.Contains("подписаться на рассылку"))
 			{
@@ -595,93 +587,96 @@ namespace DiplomProject.Server.Services
 					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора.");
 				}
 			}
-			//else if (lowerCaseMessage.Contains("просмотреть номера ваших паролей"))
-			//{
-			//	string passwords = await telegramUserRepo.GetPasswordsByChatIdAsync(message.Chat.Id);
-			//	if (string.IsNullOrWhiteSpace(passwords)) passwords = "Список паролей пуст.";
-			//	await botClient.SendTextMessageAsync(message.Chat.Id, passwords);
-			//}
-			else if (lowerCaseMessage.Contains("список действий с мероприятиями"))
+			else if (lowerCaseMessage.Contains("календарь добавленных мероприятий"))
 			{
-				if (user == null)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{AlertEmj}Возникла ошибка.\n" +
-						"Пожалуйста, введите команду: /start");
-					return;
-				}
 				if (user.IsAdmin)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{TabletEmj}Форматы действий с мероприятиями:\n\n\n" +
-						$"	1) Формат добавления мероприятия:\n/addevent/Название события/Дата события/Место проведения/Требования к участнику/Дополнительная информация\n{YellowCircleEmj}Пример:\n");
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"/addevent/Событие 1/01.01.2024 12:12:12/Москва/нет/Хорошее мероприятие");
-
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"	2) Формат изменения мероприятия:\n/chevent/Номер мероприятия/Название события/Дата события/Место проведения/Требования к участнику/Дополнительная информация\n{GreenCircleEmj}Пример:");
-
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"/chevent/1/Событие 1/01.01.2024 12:12:12/Москва/нет/Хорошее мероприятие");
-
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"	3) Формат удаления мероприятия:\n/deleteevent/номер события\n{RedCircleEmj}Пример:");
-
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"/deleteevent 1");
+					string sendMessage = await scienceEventRepo.ReadAllActualEvAdminToStringAsync(token);
+					if (string.IsNullOrWhiteSpace(sendMessage)) sendMessage = $"{ButtonEmj}  На ближайшее время мероприятий не запланировано.";
+					await botClient.SendTextMessageAsync(message.Chat.Id, sendMessage);
 				}
 				else
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора.");
 				}
 			}
-			else if (lowerCaseMessage.Contains("как изменить права администратора"))
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id,
-					"Для изменения прав администратора нужно:\n\n" +
-					$"{RedCircleEmj} Иметь права администратора\n" +
-					$"{GreenCircleEmj} Получить у пользователя номер чата (вызвать команду просмотра статусов !user)\n" +
-					$"{BlueCircleEmj} Вызвать команду /adminchadm далее ввести номер чата\n{BrownCircleEmj}Пример:");
-
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/adminchadm 1");
-			}
-			else if (lowerCaseMessage.Contains("как добавить пароль"))
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"{RedCircleEmj} Для добавления нового пароля проверьте, имеете ли вы права администратора.\n" +
-					$"{GreenCircleEmj} Для ввода нового пароля воспользуйтесь командой /adminaddpass и далее сам пароль.\n{BlueCircleEmj}Пример:");
-
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/adminaddpass mypassword123");
-			}
-			else if (lowerCaseMessage.Contains("как изменить пароль"))
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"{RedCircleEmj} Для изменения старого пароля проверьте, имеете ли вы права администратора.\n" +
-					$"{GreenCircleEmj} Далее воспользуйтесь командой /adminchpass далее номер пароля, который нужно изменить и сам пароль.\n{BrownCircleEmj}Пример:");
-
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/adminchpass 1 newpassword");
-			}
-			else if (lowerCaseMessage.Contains("как удалить пароль"))
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"{RedCircleEmj} Для удаления пароля проверьте, имеете ли вы права администратора.\n" +
-					$"{GreenCircleEmj} Далее воспользуйтесь командой /admindelpass далее номер пароля.\n{BrownCircleEmj}Пример:");
-
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/admindelpass 1");
-			}
-			else if (lowerCaseMessage.Contains("полный список команд"))
+			else if (lowerCaseMessage.Contains("список действий с мероприятиями"))
 			{
 				if (user == null)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{AlertEmj}Возникла ошибка.\n" +
+						$"{AlertEmj} Возникла ошибка.\n" +
 						"Пожалуйста, введите команду: /start");
 					return;
 				}
 				if (user.IsAdmin)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"{TabletEmj}Список команд администратора:\n\n" +
+						$"{TabletEmj} Форматы действий с мероприятиями:\n\n\n" +
+						$"{GreenCircleEmj} Формат добавления мероприятия:\n/addevent/Название события/Дата события/Место проведения/Требования к участнику/Дополнительная информация\nПример:\n");
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"/addevent/Событие 1/01.01.2024/Москва/нет/Хорошее мероприятие");
+
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{YellowCircleEmj} Формат изменения мероприятия:\n/chevent/Номер мероприятия/Название события/Дата события/Место проведения/Требования к участнику/Дополнительная информация\nПример:");
+
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"/chevent/1e3eca14-90b2-459c-8471-58c9c9cc4462/Событие 1/01.01.2024/Москва/нет/Хорошее мероприятие");
+
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj} Формат удаления мероприятия:\n/deleteevent/номер события\nПример:");
+
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"/deleteevent/1e3eca14-90b2-459c-8471-58c9c9cc4462");
+				}
+				else
+				{
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} У вас нет прав администратора.");
+				}
+			}
+			else if (lowerCaseMessage.Contains("как изменить права администратора"))
+			{
+				if (user.IsAdmin)
+				{
+					await botClient.SendTextMessageAsync(message.Chat.Id,
+						"Для изменения прав администратора нужно:\n\n" +
+						$"{RedCircleEmj} Иметь права администратора\n" +
+						$"{GreenCircleEmj} Получить у пользователя номер чата (вызвать команду просмотра статусов !user)\n" +
+						$"{BlueCircleEmj} Вызвать команду /adminchadm/номер чата\nПример:");
+
+					await botClient.SendTextMessageAsync(message.Chat.Id, "/adminchadm/1");
+				}
+				else
+				{
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора!");
+				}
+			}
+			else if (lowerCaseMessage.Contains("как изменить пароль"))
+			{
+				if (user.IsAdmin)
+				{
+					await botClient.SendTextMessageAsync(message.Chat.Id,
+					$"{RedCircleEmj} Для изменения старого пароля проверьте, имеете ли вы права администратора.\n" +
+					$"{GreenCircleEmj} Далее воспользуйтесь командой /adminchpass/ваш пароль.\nПример:");
+
+					await botClient.SendTextMessageAsync(message.Chat.Id, "/adminchpass/newpassword");
+				}
+				else
+				{
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} У вас нет прав администратора!");
+				}
+			}
+			else if (lowerCaseMessage.Contains("полный список команд"))
+			{
+				if (user == null)
+				{
+					await botClient.SendTextMessageAsync(message.Chat.Id,
+						$"{AlertEmj} Возникла ошибка.\n" +
+						"Пожалуйста, введите команду: /start");
+					return;
+				}
+				if (user.IsAdmin)
+				{
+					await botClient.SendTextMessageAsync(message.Chat.Id,
+					$"{TabletEmj} Список команд администратора:\n\n" +
 					"!admin - перейти в панель администратора\n" +
 					"!user - перейти в панель пользователя\n" +
-					"/adminaddpass - добавление пароля\n" +
 					"/adminchpass - изменение пароля\n" +
-					"/admindelpass - удаление пароля\n" +
 					"/adminchadm - изменение прав пользователя.\n" +
 					"/addevent - добавление нового мероприятия\n" +
 					"/chevent - изменение ранее созданного мероприятия\n" +
@@ -692,65 +687,50 @@ namespace DiplomProject.Server.Services
 					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора!");
 				}
 			}
-			//else if (lowerCaseMessage.Contains("/adminaddpass"))
-			//{
-			//	string password = lowerCaseMessage.Replace("/adminaddpass", "");
-			//	password.Replace(" ", "");
-			//	if (await telegramUserRepo.AddPasswordAsync(new Password(password, message.Chat.Id), message.Chat.Id))
-			//	{
-			//		await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkInBlockEmj}Пароль {password} успешно добавлен.");
-			//	}
-			//	else
-			//	{
-			//		await botClient.SendTextMessageAsync(message.Chat.Id, $"{NegativeRedEmj}Пароль не добавлен. Возможно у вас нет прав на добавление пароля, либо такой пароль уже существует.");
-			//	}
-			//}
-			//else if (lowerCaseMessage.Contains("/adminchpass"))
-			//{
-			//	try
-			//	{
-			//		string messageToSend = await telegramUserRepo.UpdatePasswordByIdAsync(lowerCaseMessage, message.Chat.Id);
-			//		await botClient.SendTextMessageAsync(message.Chat.Id, messageToSend);
-			//	}
-			//	catch (Exception)
-			//	{
-			//		await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при изменении пароля. Проверьте правильность ввода.");
-			//	}
-			//}
-			//else if (lowerCaseMessage.Contains("/admindelpass"))
-			//{
-			//	try
-			//	{
-			//		if (await telegramUserRepo.DeletePasswordByIdAsync(lowerCaseMessage, message.Chat.Id))
-			//		{
-			//			await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkInBlockEmj}Пароль успешно удален.");
-			//		}
-			//		else
-			//		{
-			//			await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Пароль не удален. Проверьте правильность введного номера пароля.");
-			//		}
-			//	}
-			//	catch (Exception)
-			//	{
-			//		await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при удалении пароля. Возможно некорректный номер пароля. Помните, что удалять можно только свой пароль.");
-			//	}
-			//}
-			else if (lowerCaseMessage.Contains("/adminchadm"))
+			else if (lowerCaseMessage.Contains("/adminchpass"))
 			{
-				try
+				if (user.IsAdmin)
 				{
-					if (await telegramUserRepo.UpdateAdminStatusTgUserAsync(lowerCaseMessage, message.Chat.Id, token))
+					try
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkInBlockEmj}Права администратора успешно изменены!");
+						string hashedPassword = passwordHasherService.HashPassword(lowerCaseMessage.Replace("/adminchpass/", ""));
+						bool res = await telegramUserRepo.UpdatePasswordTgUserAsync(hashedPassword, message.Chat.Id, token);
+						if (res) await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Пароль успешно изменен!");
+						else await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj} Ошибка при изменении пароля!");
 					}
-					else
+					catch (Exception)
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Права администратора изменить не удалось.\nВозможно у вас отсутствуют права администратора, либо отсутсвует такой идентификатор, либо вы пытаетесь изменить свои права.");
+						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при изменении пароля. Проверьте правильность ввода.");
 					}
 				}
-				catch (Exception)
+				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при изменении прав. Проверьте правильность ввода.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора!");
+				}
+			}
+			else if (lowerCaseMessage.Contains("/adminchadm"))
+			{
+				if (user.IsAdmin)
+				{
+					try
+					{
+						if (await telegramUserRepo.UpdateAdminStatusTgUserAsync(lowerCaseMessage, message.Chat.Id, token))
+						{
+							await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkInBlockEmj} Права администратора успешно изменены!");
+						}
+						else
+						{
+							await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Права администратора изменить не удалось.\nВозможно у вас отсутствуют права администратора, либо отсутсвует такой идентификатор чата, либо вы пытаетесь изменить свои права.");
+						}
+					}
+					catch (Exception)
+					{
+						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Возникла ошибка при изменении прав. Проверьте правильность ввода.");
+					}
+				}
+				else
+				{
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора!");
 				}
 			}
 			else if (lowerCaseMessage == "/adminhelp")
@@ -758,19 +738,17 @@ namespace DiplomProject.Server.Services
 				if (user == null)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{AlertEmj}Возникла ошибка.\n" +
+						$"{AlertEmj} Возникла ошибка.\n" +
 						"Пожалуйста, введите команду: /start");
 					return;
 				}
 				if (user.IsAdmin)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"{TabletEmj}Список команд администратора:\n\n" +
+					$"{TabletEmj} Список команд администратора:\n\n" +
 					"!admin - перейти в панель администратора\n" +
 					"!user - перейти в панель пользователя\n" +
-					"/adminaddpass - добавление пароля\n" +
 					"/adminchpass - изменение пароля\n" +
-					"/admindelpass - удаление пароля\n" +
 					"/adminchadm - изменение прав пользователя.\n" +
 					"/addevent - добавление нового мероприятия\n" +
 					"/chevent - изменение ранее созданного мероприятия\n" +
@@ -783,129 +761,99 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage.Contains("/addevent"))
 			{
-				try
+				if (user == null)
 				{
-					if (user == null)
-					{
-						await botClient.SendTextMessageAsync(message.Chat.Id,
-							$"{AlertEmj}Возникла ошибка.\n" +
-							"Пожалуйста, введите команду: /start");
-						return;
-					}
-					if (user.IsAdmin)
+					await botClient.SendTextMessageAsync(message.Chat.Id,
+						$"{AlertEmj} Возникла ошибка.\n" +
+						"Пожалуйста, введите команду: /start");
+					return;
+				}
+				if (user.IsAdmin)
+				{
+					try
 					{
 						string messageToSend = lowerCaseMessage + "/" + message.Chat.Id;
 						var result = await scienceEventRepo.AddEventAsync(messageToSend, token);
 						if (!result)
 						{
-							await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Мероприятие с таким названием уже существует!");
+							await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Мероприятие с таким названием уже существует!");
 							return;
 						}
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj}Мероприятие успешно добавлено!");
-						await notifyService.NotifyLastAddEventUsersAsync($"{GreenCircleEmj}Новое мероприятие!", token);
+						await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Мероприятие успешно добавлено!");
+						await notifyService.NotifyLastAddEventUsersAsync($"{GreenCircleEmj} Новое мероприятие!", token);
 					}
-					else
+					catch (IrrelevatDateTimeException ex)
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора.");
+						await botClient.SendTextMessageAsync(message.Chat.Id, $"{ex.Message}");
+					}
+					catch (Exception)
+					{
+						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Возникла ошибка при добавлении мероприятия. Пожалуйста, проверьте правильность ввода мероприятия.");
 					}
 				}
-				catch (IrrelevatDateTimeException ex)
+				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{ex.Message}");
-				}
-				catch (Exception)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при добавлении мероприятия. Пожалуйста, проверьте правильность ввода мероприятия.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} У вас нет прав администратора.");
 				}
 			}
 			else if (lowerCaseMessage.Contains("/chevent"))
 			{
-				try
+				if (user.IsAdmin)
 				{
-					if (user.IsAdmin)
+					try
 					{
 						string messageToSend = lowerCaseMessage + "/" + message.Chat.Id;
 						var updEvent = await scienceEventRepo.UpdateFullEventAsync(messageToSend, token);
 						if (updEvent == null)
 						{
-							await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Номера такого мероприятия не существует, либо название мероприятия повторяется, либо неверно указана дата мероприятия.");
+							await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Номера такого мероприятия не существует, либо название мероприятия повторяется, либо неверно указана дата мероприятия.");
 							return;
 						}
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj}Мероприятие успешно изменено!");
-						await notifyService.NotifyEventChangingUsersAsync(updEvent, $"{RedCircleEmj}Внимание! Изменения!", token);
+						await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Мероприятие успешно изменено!");
+						await notifyService.NotifyEventChangingUsersAsync(updEvent, $"{RedCircleEmj} Внимание! Изменения!", token);
 					}
-					else
+					catch (IrrelevatDateTimeException ex)
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора.");
+						await botClient.SendTextMessageAsync(message.Chat.Id, $"{ex.Message}");
+					}
+					catch (Exception)
+					{
+						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Возникла ошибка при изменении мероприятия. Пожалуйста, проверьте правильность ввода мероприятия.");
 					}
 				}
-				catch (IrrelevatDateTimeException ex)
+				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{ex.Message}");
-				}
-				catch (Exception)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при изменении мероприятия. Пожалуйста, проверьте правильность ввода мероприятия.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} У вас нет прав администратора.");
 				}
 			}
 			else if (lowerCaseMessage.Contains("/deleteevent"))
 			{
-				try
+				if (user.IsAdmin)
 				{
-					if (user.IsAdmin)
+					try
 					{
 						var res = await scienceEventRepo.DeleteEventByIdAsync(lowerCaseMessage, token);
 						if (res == null)
 						{
-							await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Такого мероприятия не существует!");
+							await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Такого мероприятия не существует!");
 						}
 						else
 						{
-							await notifyService.NotifyEventChangingUsersAsync(res, $"{NegativeRedEmj}Мероприятие отменено!", token);
+							await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Мероприятие успешно отменено!");
+							await notifyService.NotifyEventChangingUsersAsync(res, $"{NegativeRedEmj} Мероприятие отменено!", token);
 						}
 					}
-					else
+					catch (Exception)
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора.");
+						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Возникла ошибка при удалении мероприятия. Пожалуйста, проверьте правильность введенного id.");
 					}
 				}
-				catch (Exception)
+				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при удалении мероприятия. Пожалуйста, проверьте правильность введенного id.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} У вас нет прав администратора.");
 				}
 			}
 			#endregion
-
-
-			//обработка любых сообщений
-			//Message sentMessage = await (messageText.Split(' ')[0].ToLower() switch
-			//{
-			//	"/start" => HelloWorld(msg),
-			//	_ => Usage(msg)
-			//});
-			//logger.LogInformation("The message was sent with id: {SentMessageId}", sentMessage.MessageId);
-		}
-
-		#region [Methods]
-		async Task<Message> HelloWorld(Message msg)
-		{
-			return await botClient.SendTextMessageAsync(msg.Chat, "Hey, buddy!");
-		}
-		async Task<Message> Usage(Message msg)
-		{
-			const string usage = """
-                <b><u>Bot menu</u></b>:
-                /photo          - send a photo
-                /inline_buttons - send inline buttons
-                /keyboard       - send keyboard buttons
-                /remove         - remove keyboard buttons
-                /request        - request location or contact
-                /inline_mode    - send inline-mode results list
-                /poll           - send a poll
-                /poll_anonymous - send an anonymous poll
-                /throw          - what happens if handler fails
-            """;
-			return await botClient.SendTextMessageAsync(msg.Chat, usage, parseMode: ParseMode.Html, replyMarkup: new ReplyKeyboardRemove());
 		}
 
 		private Task UnknownUpdateHandlerAsync(Update update)
@@ -913,6 +861,5 @@ namespace DiplomProject.Server.Services
 			logger.LogInformation("Unknown update type: {UpdateType}", update.Type);
 			return Task.CompletedTask;
 		}
-		#endregion
 	}
 }

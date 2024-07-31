@@ -3,6 +3,8 @@ using Domain.Entities;
 using Domain.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
+using Telegram.Bot.Types;
 using static Domain.Constants.EmojiConstants;
 
 
@@ -68,7 +70,7 @@ namespace DiplomProject.Server.Repositories
 
 			if (senderChatId < 0) throw new ArgumentOutOfRangeException(nameof(senderChatId));
 
-			lowerCaseMessage = lowerCaseMessage.Replace("/adminchadm", "");
+			lowerCaseMessage = lowerCaseMessage.Replace("/adminchadm/", "");
 			lowerCaseMessage.Replace(" ", "");
 
 			long chatId = long.Parse(lowerCaseMessage);
@@ -101,7 +103,7 @@ namespace DiplomProject.Server.Repositories
 			newName = Char.ToUpper(newName[0]) + newName.Substring(1);
 			tgUser.Name = newName;
 			await _dbContext.SaveChangesAsync(token);
-			return $"{GreenCircleEmj}Имя успешно изменено на: {newName}";
+			return $"{GreenCircleEmj} Имя успешно изменено на: {newName}";
 		}
 		public async Task<string> UpdateSNameTgUserAsync(long chatId, string sName, CancellationToken token)
 		{
@@ -118,7 +120,7 @@ namespace DiplomProject.Server.Repositories
 			sName = Char.ToUpper(sName[0]) + sName.Substring(1);
 			tgUser.Surname = sName;
 			await _dbContext.SaveChangesAsync(token);
-			return $"{GreenCircleEmj}Фамилия успешно изменена на: {sName}";
+			return $"{GreenCircleEmj} Фамилия успешно изменена на: {sName}";
 		}
 		public async Task<string> UpdatePatrTgUserAsync(long chatId, string patronymic, CancellationToken token)
 		{
@@ -135,7 +137,7 @@ namespace DiplomProject.Server.Repositories
 			patronymic = Char.ToUpper(patronymic[0]) + patronymic.Substring(1);
 			tgUser.Patronymic = patronymic;
 			await _dbContext.SaveChangesAsync(token);
-			return $"{GreenCircleEmj}Отчество успешно изменено на: {patronymic}";
+			return $"{GreenCircleEmj} Отчество успешно изменено на: {patronymic}";
 		}
 		public async Task<string> UpdatePhoneTgUserAsync(long chatId, string phoneNumb, CancellationToken token)
 		{
@@ -149,12 +151,14 @@ namespace DiplomProject.Server.Repositories
 			var tgUser = await GetTgUserByIdAsync(chatId, token);
 			if (tgUser == null) return "Ошибка. Пользователь не найден";
 
-			if (!phoneNumb.Contains("+7")) return $"{AlertEmj}Номер должен начинаться с +7!";
-			if (phoneNumb.Length != 12) return $"{AlertEmj}Неверный номер телефона. Пожалуйста, проверьте правильность ввода.";
+			if (!Regex.IsMatch(phoneNumb, @"^\+7\d{10}$"))
+			{
+				return $"{AlertEmj}Неверно указанный номер!\nНомер должен начинаться с +7 и содержать 11 цифр.";
+			}
 
 			tgUser.PhoneNumber = phoneNumb;
 			await _dbContext.SaveChangesAsync(token);
-			return $"{GreenCircleEmj}Номер успешно изменен на: {phoneNumb}";
+			return $"{GreenCircleEmj} Номер успешно изменен на: {phoneNumb}";
 		}
 		public async Task<bool> UpdateAdminStatusTgUserAsync(Guid Id, bool adminStatus, CancellationToken token)
 		{
@@ -253,6 +257,16 @@ namespace DiplomProject.Server.Repositories
 			if (tgUser is null) return true;
 
 			return DateTime.UtcNow - tgUser.LastMessageTime > TimeSpan.FromSeconds(3);
+		}
+		public async Task<bool> UpdatePasswordTgUserAsync(string hashedPassword, long chatId, CancellationToken token)
+		{
+			var tgUser = await GetTgUserByIdAsync(chatId, token);
+			if (tgUser is null) return false;
+
+			tgUser.HashedPassword = hashedPassword;
+
+			await _dbContext.SaveChangesAsync(token);
+			return true;
 		}
 	}
 }

@@ -34,8 +34,10 @@ namespace DiplomProject.Server.Repositories
 			string nameEvent = char.ToUpper(dataArray[0][0]) + dataArray[0].Substring(1);
 			//DateEvent
 			var cultureInfo = new CultureInfo("ru-RU");
-			DateTime dateEvent = DateTime.Parse(dataArray[1], cultureInfo);
-			if (dateEvent < DateTime.UtcNow) { throw new IrrelevatDateTimeException($"{AlertEmj}Неверно указана дата события!"); }
+			DateTime dateEventLocal = DateTime.Parse(dataArray[1], cultureInfo);
+			// Преобразование в UTC
+			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
+			if (dateEventUtc < DateTime.UtcNow) { throw new IrrelevatDateTimeException($"{AlertEmj}Неверно указана дата события!"); }
 			//PlaceEvent
 			string placeEvent = char.ToUpper(dataArray[2][0]) + dataArray[2].Substring(1);
 			//Requirement
@@ -44,7 +46,7 @@ namespace DiplomProject.Server.Repositories
 			string information = dataArray[4];
 			//ChatId
 			long chatId = long.Parse(dataArray[5]);
-			ScienceEvent sEvent = new ScienceEvent(nameEvent, dateEvent, placeEvent, requirement, information, chatId);
+			ScienceEvent sEvent = new ScienceEvent(nameEvent, dateEventUtc, placeEvent, requirement, information, chatId);
 
 
 			if (ScienceEvents.ToList().Exists(e => e.NameEvent.ToLower() == sEvent.NameEvent.ToLower()))
@@ -83,6 +85,19 @@ namespace DiplomProject.Server.Repositories
 				if (e.DateEvent > DateTime.UtcNow)
 				{
 					messageToSend += e.ToString();
+				}
+			}
+			return messageToSend;
+		}
+		public async Task<string> ReadAllActualEvAdminToStringAsync(CancellationToken token)
+		{
+			var events = await ScienceEvents.ToListAsync();
+			string messageToSend = "";
+			foreach (var e in events)
+			{
+				if (e.DateEvent > DateTime.UtcNow)
+				{
+					messageToSend += e.ToStringAdmin();
 				}
 			}
 			return messageToSend;
@@ -235,8 +250,10 @@ namespace DiplomProject.Server.Repositories
 			}
 			//DateEvent
 			var cultureInfo = new CultureInfo("ru-RU");
-			DateTime dateEvent = DateTime.Parse(dataArray[2], cultureInfo);
-			if (dateEvent < DateTime.UtcNow) { throw new IrrelevatDateTimeException($"{AlertEmj}Неверно указана дата события!"); }
+			DateTime dateEventLocal = DateTime.Parse(dataArray[2], cultureInfo);
+			// Преобразование в UTC
+			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
+			if (dateEventUtc < DateTime.UtcNow) { throw new IrrelevatDateTimeException($"{AlertEmj} Неверно указана дата события!"); }
 			//PlaceEvent
 			string placeEvent = char.ToUpper(dataArray[3][0]) + dataArray[3].Substring(1);
 			//Requirement
@@ -253,7 +270,7 @@ namespace DiplomProject.Server.Repositories
 
 
 			sEvent.NameEvent = nameEvent;
-			sEvent.DateEvent = dateEvent;
+			sEvent.DateEvent = dateEventUtc;
 			sEvent.PlaceEvent = placeEvent;
 			sEvent.RequirementsEvent = requirement;
 			sEvent.InformationEvent = information;
@@ -271,7 +288,7 @@ namespace DiplomProject.Server.Repositories
 				throw new ArgumentException($"\"{nameof(lowerCaseMessage)}\" не может быть пустым или содержать только пробел.", nameof(lowerCaseMessage));
 			}
 
-			lowerCaseMessage = lowerCaseMessage.Replace("/deleteevent", "");
+			lowerCaseMessage = lowerCaseMessage.Replace("/deleteevent/", "");
 			lowerCaseMessage.Replace(" ", "");
 			Guid id = Guid.Parse(lowerCaseMessage);
 
@@ -306,7 +323,7 @@ namespace DiplomProject.Server.Repositories
 		{
 			if (ScienceEvents.Count() > 0)
 			{
-				return await ScienceEvents.OrderBy(e => e.Id).LastAsync();
+				return await ScienceEvents.OrderBy(e => e.DateEventCreated).LastAsync();
 			}
 			return null;
 		}

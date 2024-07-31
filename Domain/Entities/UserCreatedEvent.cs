@@ -50,7 +50,7 @@ namespace Domain.Entities
 		}
 		public override string ToString()
 		{
-			return $"{ButtonEmj}Название:   {NameEvent}\nНомер мероприятия:   {Id}\nДата:   {DateEvent}\nМесто проведения:   {PlaceEvent}\nПризер:   {IsWinner}\n\n";
+			return $"{ButtonEmj} Название:   {NameEvent}\nНомер мероприятия:   {Id}\nДата:   {DateEvent.ToLocalTime().ToShortDateString()}\nМесто проведения:   {PlaceEvent}\nПризер:   {IsWinner}\n\n";
 
 		}
 	}

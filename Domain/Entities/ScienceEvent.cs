@@ -51,12 +51,16 @@ namespace Domain.Entities
 			PlaceEvent = placeEvent;
 			RequirementsEvent = requirementsEvent;
 			InformationEvent = informationEvent;
-			DateEventCreated = DateTime.Now;
+			DateEventCreated = DateTime.UtcNow;
 			AddByAdminChatId = addByAdminChatId;
 		}
 		public override string ToString()
 		{
-			return $"{ButtonEmj}Мероприятие:   {NameEvent}\nНомер мероприятия:   {Id}\nДата:   {DateEvent}\nМесто проведения:\n{PlaceEvent}\nТребования:   {RequirementsEvent}\nДополнительная информация:\n{InformationEvent}\n\n";
+			return $"{ButtonEmj} Мероприятие:   {NameEvent}\nДата:   {DateEvent.ToLocalTime().ToShortDateString()}\nМесто проведения:\n{PlaceEvent}\nТребования:   {RequirementsEvent}\nДополнительная информация:\n{InformationEvent}\n\n";
+		}
+		public string ToStringAdmin()
+		{
+			return $"{ButtonEmj} Мероприятие:   {NameEvent}\nНомер мероприятия:   {Id}\nДата:   {DateEvent.ToLocalTime().ToShortDateString()}\nМесто проведения:\n{PlaceEvent}\nТребования:   {RequirementsEvent}\nДополнительная информация:\n{InformationEvent}\n\n";
 		}
 	}
 }
