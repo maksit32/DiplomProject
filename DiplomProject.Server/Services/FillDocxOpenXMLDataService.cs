@@ -13,7 +13,6 @@ namespace DiplomProject.Server.Services
 	public class FillDocxOpenXMLDataService : IFillDataService
 	{
 		private readonly IServiceProvider serviceProvider;
-		private FileInfo fileInfo;
 		private readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1);
 		private readonly long maxSize = 150000000; // Примерно 50 заявлений
 
@@ -28,57 +27,54 @@ namespace DiplomProject.Server.Services
 			{
 				throw new ArgumentException($"\"{nameof(lowerCaseMessage)}\" не может быть пустым или содержать только пробел.", nameof(lowerCaseMessage));
 			}
+			if (chatId <= 0) throw new ArgumentOutOfRangeException("chatId out of range");
+			if (token.IsCancellationRequested) token.ThrowIfCancellationRequested();
 
 			if (File.Exists(fileFullPath))
 			{
-				fileInfo = new FileInfo(fileFullPath);
-			}
+				FileInfo fileInfo = new FileInfo(fileFullPath);
+				lowerCaseMessage = lowerCaseMessage.Replace("/snoapp/", "");
+				var dataArr = lowerCaseMessage.Split('/');
 
-			if (chatId <= 0) throw new ArgumentOutOfRangeException("chatId out of range");
+				// Получение ФИО с большой буквы
+				var fioArr = dataArr[0].Split(" ");
+				string fioStr = string.Join(" ", fioArr.Select(str => char.ToUpper(str[0]) + str.Substring(1)));
 
-			if (token.IsCancellationRequested) token.ThrowIfCancellationRequested();
+				var replaceList = new List<KeyValuePair<string, string>>
+												{
+													new KeyValuePair<string, string>("<FROM>", fioStr),
+													new KeyValuePair<string, string>("<FAT>", dataArr[1].ToUpper()),
+													new KeyValuePair<string, string>("<GROUP>", dataArr[2].ToUpper()),
+													new KeyValuePair<string, string>("<NUMB>", dataArr[3]),
+													new KeyValuePair<string, string>("<MAIL>", dataArr[4]),
+													new KeyValuePair<string, string>("<DAY>", DateTime.Now.Day.ToString()),
+													new KeyValuePair<string, string>("<MONTH>", DateTime.Now.Month.ToString()),
+													new KeyValuePair<string, string>("<YEAR>", DateTime.Now.Year.ToString())
+												};
 
-			lowerCaseMessage = lowerCaseMessage.Replace("/snoapp/", "");
-			var dataArr = lowerCaseMessage.Split('/');
+				if (!ValidateData(replaceList)) return $"{AlertEmj} Неверно указаны данные.";
 
-			// Получение ФИО с большой буквы
-			var fioArr = dataArr[0].Split(" ");
-			string fioStr = string.Join(" ", fioArr.Select(str => char.ToUpper(str[0]) + str.Substring(1)));
-
-			var replaceList = new List<KeyValuePair<string, string>>
-		{
-			new KeyValuePair<string, string>("<FROM>", fioStr),
-			new KeyValuePair<string, string>("<FAT>", dataArr[1].ToUpper()),
-			new KeyValuePair<string, string>("<GROUP>", dataArr[2].ToUpper()),
-			new KeyValuePair<string, string>("<NUMB>", dataArr[3]),
-			new KeyValuePair<string, string>("<MAIL>", dataArr[4]),
-			new KeyValuePair<string, string>("<DAY>", DateTime.Now.Day.ToString()),
-			new KeyValuePair<string, string>("<MONTH>", DateTime.Now.Month.ToString()),
-			new KeyValuePair<string, string>("<YEAR>", DateTime.Now.Year.ToString())
-		};
-
-			if (!ValidateData(replaceList)) return $"{AlertEmj} Неверно указаны данные.";
-
-			if (fileInfo != null && !string.IsNullOrWhiteSpace(fileInfo.DirectoryName))
-			{
-				await semaphoreSlim.WaitAsync();
-				try
+				if (fileInfo != null && !string.IsNullOrWhiteSpace(fileInfo.DirectoryName))
 				{
-					if (DirectorySize(new DirectoryInfo(Path.Combine(fileInfo.DirectoryName, "SNOApplications")), maxSize) > maxSize)
+					await semaphoreSlim.WaitAsync();
+					try
 					{
-						using var scope = serviceProvider.CreateScope();
+						if (DirectorySize(new DirectoryInfo(Path.Combine(fileInfo.DirectoryName, "SNOApplications")), maxSize) > maxSize)
+						{
+							using var scope = serviceProvider.CreateScope();
 
-						var notifyService = scope.ServiceProvider.GetRequiredService<INotifyService>();
-						await notifyService.NotifyAdminsAsync($"{AlertEmj} Внимание, обработайте заявления на вступление в СНО!\nПрием заявлений временно остановлен. Требуется освободить память.", token);
-						return $"{BlueCircleEmj} Сервер занят обработкой предыдущих заявлений.\nПожалуйста, повторите попытку позднее.";
+							var notifyService = scope.ServiceProvider.GetRequiredService<INotifyService>();
+							await notifyService.NotifyAdminsAsync($"{AlertEmj} Внимание, обработайте заявления на вступление в СНО!\nПрием заявлений временно остановлен. Требуется освободить память.", token);
+							return $"{BlueCircleEmj} Сервер занят обработкой предыдущих заявлений.\nПожалуйста, повторите попытку позднее.";
+						}
+
+						await Task.Run(() => FillTemplate(fileInfo.FullName, Path.Combine(fileInfo.DirectoryName, "SNOApplications", chatId.ToString()) + ".docx", replaceList));
+						return $"{CheckMarkEmj} Успешно добавлено!";
 					}
-
-					await Task.Run(() => FillTemplate(fileInfo.FullName, Path.Combine(fileInfo.DirectoryName, "SNOApplications", chatId.ToString()) + ".docx", replaceList));
-					return $"{CheckMarkEmj} Успешно добавлено!";
-				}
-				finally
-				{
-					semaphoreSlim.Release();
+					finally
+					{
+						semaphoreSlim.Release();
+					}
 				}
 			}
 			return $"{AlertEmj} Создать файл не удалось!";
@@ -90,57 +86,56 @@ namespace DiplomProject.Server.Services
 			{
 				throw new ArgumentException($"\"{nameof(lowerCaseMessage)}\" не может быть пустым или содержать только пробел.", nameof(lowerCaseMessage));
 			}
-			if (File.Exists(fileFullPath))
-			{
-				fileInfo = new FileInfo(fileFullPath);
-			}
 			if (chatId <= 0) throw new ArgumentOutOfRangeException("chatId out of range");
-
 			if (token.IsCancellationRequested) token.ThrowIfCancellationRequested();
 
-			lowerCaseMessage = lowerCaseMessage.Replace("/smuapp/", "");
-			var dataArr = lowerCaseMessage.Split('/');
-
-			// Получение ФИО с большой буквы (родительный падеж)
-			var fioRArr = dataArr[1].Split(" ");
-			string fioRStr = string.Join(" ", fioRArr.Select(str => char.ToUpper(str[0]) + str.Substring(1)));
-
-			var replaceList = new List<KeyValuePair<string, string>>
-		{
-			new KeyValuePair<string, string>("<FROM>", dataArr[0]),
-			new KeyValuePair<string, string>("<FIORP>", fioRStr),
-			new KeyValuePair<string, string>("<STRUCT>", dataArr[2].ToUpper()),
-			new KeyValuePair<string, string>("<ISACADEMIC>", dataArr[3]),
-			new KeyValuePair<string, string>("<BIRTHDATE>", dataArr[4]),
-			new KeyValuePair<string, string>("<NUMB>", dataArr[5]),
-			new KeyValuePair<string, string>("<MAIL>", dataArr[6]),
-			new KeyValuePair<string, string>("<DAY>", DateTime.Now.Day.ToString()),
-			new KeyValuePair<string, string>("<MONTH>", DateTime.Now.Month.ToString()),
-			new KeyValuePair<string, string>("<YEAR>", DateTime.Now.Year.ToString())
-		};
-
-			if (!ValidateData(replaceList)) return $"{AlertEmj} Неверно указаны данные.";
-
-			if (fileInfo != null && !string.IsNullOrWhiteSpace(fileInfo.DirectoryName))
+			if (File.Exists(fileFullPath))
 			{
-				await semaphoreSlim.WaitAsync();
-				try
+				FileInfo fileInfo = new FileInfo(fileFullPath);
+				lowerCaseMessage = lowerCaseMessage.Replace("/smuapp/", "");
+				var dataArr = lowerCaseMessage.Split('/');
+
+				// Получение ФИО с большой буквы (родительный падеж)
+				var fioRArr = dataArr[1].Split(" ");
+				string fioRStr = string.Join(" ", fioRArr.Select(str => char.ToUpper(str[0]) + str.Substring(1)));
+
+				var replaceList = new List<KeyValuePair<string, string>>
+													{
+														new KeyValuePair<string, string>("<FROM>", dataArr[0]),
+														new KeyValuePair<string, string>("<FIORP>", fioRStr),
+														new KeyValuePair<string, string>("<STRUCT>", dataArr[2].ToUpper()),
+														new KeyValuePair<string, string>("<ISACADEMIC>", dataArr[3]),
+														new KeyValuePair<string, string>("<BIRTHDATE>", dataArr[4]),
+														new KeyValuePair<string, string>("<NUMB>", dataArr[5]),
+														new KeyValuePair<string, string>("<MAIL>", dataArr[6]),
+														new KeyValuePair<string, string>("<DAY>", DateTime.Now.Day.ToString()),
+														new KeyValuePair<string, string>("<MONTH>", DateTime.Now.Month.ToString()),
+														new KeyValuePair<string, string>("<YEAR>", DateTime.Now.Year.ToString())
+													};
+
+				if (!ValidateData(replaceList)) return $"{AlertEmj} Неверно указаны данные.";
+
+				if (fileInfo != null && !string.IsNullOrWhiteSpace(fileInfo.DirectoryName))
 				{
-					if (DirectorySize(new DirectoryInfo(Path.Combine(fileInfo.DirectoryName, "SMUApplications")), maxSize) > maxSize)
+					await semaphoreSlim.WaitAsync();
+					try
 					{
-						using var scope = serviceProvider.CreateScope();
+						if (DirectorySize(new DirectoryInfo(Path.Combine(fileInfo.DirectoryName, "SMUApplications")), maxSize) > maxSize)
+						{
+							using var scope = serviceProvider.CreateScope();
 
-						var notifyService = scope.ServiceProvider.GetRequiredService<INotifyService>();
-						await notifyService.NotifyAdminsAsync($"{AlertEmj} Внимание, обработайте заявления на вступление в СМУ!\nПрием заявлений временно остановлен. Требуется освободить память.", token);
-						return $"{BlueCircleEmj} Сервер занят обработкой предыдущих заявлений.\nПожалуйста, повторите попытку позднее.";
+							var notifyService = scope.ServiceProvider.GetRequiredService<INotifyService>();
+							await notifyService.NotifyAdminsAsync($"{AlertEmj} Внимание, обработайте заявления на вступление в СМУ!\nПрием заявлений временно остановлен. Требуется освободить память.", token);
+							return $"{BlueCircleEmj} Сервер занят обработкой предыдущих заявлений.\nПожалуйста, повторите попытку позднее.";
+						}
+
+						await Task.Run(() => FillTemplate(fileInfo.FullName, Path.Combine(fileInfo.DirectoryName, "SMUApplications", chatId.ToString()) + ".docx", replaceList));
+						return $"{CheckMarkEmj} Успешно добавлено!";
 					}
-
-					await Task.Run(() => FillTemplate(fileInfo.FullName, Path.Combine(fileInfo.DirectoryName, "SMUApplications", chatId.ToString()) + ".docx", replaceList));
-					return $"{CheckMarkEmj} Успешно добавлено!";
-				}
-				finally
-				{
-					semaphoreSlim.Release();
+					finally
+					{
+						semaphoreSlim.Release();
+					}
 				}
 			}
 			return $"{AlertEmj} Создать файл не удалось!";

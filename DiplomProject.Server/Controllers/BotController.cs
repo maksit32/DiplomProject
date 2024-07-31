@@ -19,14 +19,10 @@ namespace DiplomProject.Server.Controllers
 	public class BotController : ControllerBase
 	{
 		private readonly IOptions<BotConfiguration> _config;
-		private readonly IPasswordHasherService _passwordHasherService;
-		private readonly INotifyService _notificationService;
 
-		public BotController(IOptions<BotConfiguration> config, IPasswordHasherService passwordHasherService, INotifyService notifyService)
+		public BotController(IOptions<BotConfiguration> config)
 		{
 			_config = config ?? throw new ArgumentNullException(nameof(config));
-			_passwordHasherService = passwordHasherService ?? throw new ArgumentNullException(nameof(passwordHasherService));
-			_notificationService = notifyService ?? throw new ArgumentNullException(nameof(notifyService));
 		}
 
 		[HttpPost]
