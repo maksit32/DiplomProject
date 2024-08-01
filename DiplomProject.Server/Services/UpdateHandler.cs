@@ -15,7 +15,7 @@ using API;
 using Microsoft.Extensions.Configuration;
 using System.Text.RegularExpressions;
 
-
+using static Domain.Constants.TelegramTextConstants;
 using static Domain.Constants.EmojiConstants;
 
 
@@ -189,24 +189,12 @@ namespace DiplomProject.Server.Services
 			#region [DefaultReactions]
 			if (lowerCaseMessage == "/start")
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"Добро пожаловать в бот науки МГТУ ГА! {PlaneEmj}\n" +
-					"Пожалуйста, выберите предложенные действия:\n\n" +
-					$"Внимание{AlertEmj} В боте установлена защита от спама.\n" +
-					$"Время задержки между сообщениями 3 секунды.");
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} В соответствии с требованиями статьи 9 Федерального закона от 27.07.2006 № 152-ФЗ «О персональных данных»," +
-					" используя телеграм бот вы даете согласие членам Совета СНО и СМУ МГТУ ГА на автоматизированную, " +
-					"а также без использования средств автоматизации, обработку моих персональных данных, " +
-					"включающих фамилию, имя, отчество, дату рождения, должность, сведения о месте работы, месте учебы, " +
-					"адрес электронной почты, номер контактного телефона.\r\n" +
-					"Так же вы предоставляете свое согласие членам Совета СНО и СМУ МГТУ ГА на совершение действий (операций) с вашими персональными данными, " +
-					"включая сбор, систематизацию, накопление, хранение, обновление, изменение, " +
-					"использование, обезличивание, блокирование, уничтожение.\r\n");
+				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText1);
+				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText2);
 
 				if (user is null)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{GreenCircleEmj}Для продолжения использования телеграмм бота, заполните ваши данные в следующем формате:\n" +
-					$"/addinfo/Ваше имя/Ваша фамилия/Ваше отчество/номер телефона (формат +7)\nПример:", replyMarkup: replyKeyboardUserSub);
+					await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3, replyMarkup: replyKeyboardUserSub);
 					await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
 				}
 				else
@@ -230,7 +218,7 @@ namespace DiplomProject.Server.Services
 					// Валидация
 					if (!Regex.IsMatch(phone, @"^\+7\d{10}$"))
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Неверно указанный номер!\nНомер должен начинаться с +7 и содержать 11 цифр.");
+						await botClient.SendTextMessageAsync(message.Chat.Id, InvalidNumber);
 						return;
 					}
 
@@ -255,15 +243,8 @@ namespace DiplomProject.Server.Services
 			//проверка на логин
 			else if (user is null)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{GreenCircleEmj}Для продолжения использования телеграмм бота, заполните ваши данные в следующем формате:\n" +
-					$"/addinfo/Ваше имя/Ваша фамилия/Ваше отчество/номер телефона (формат +7)\nПример:");
+				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
 				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
-			}
-			else if (lowerCaseMessage == "привет")
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"Добро пожаловать! {PlaneEmj}\n" +
-					"Пожалуйста, выберите предложенные действия:");
 			}
 			#endregion
 
@@ -277,27 +258,14 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage.Contains("возможности работы с вашими участиями в мероприятиях"))
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, "Данный бот позволяет выполнить следующие функции:\n" +
-					$"{CheckMarkInBlockEmj} Добавить участие в мероприятии\n" +
-					$"{ButtonEmj} Изменить участие в мероприятии\n" +
-					$"{NegativeRedEmj} Удалить участие в мероприятии");
-
-				await botClient.SendTextMessageAsync(message.Chat.Id, "Для добавления участия в мероприятии придерживайтесь следующей конструкции:\n" +
-					"/adduserevent/Название мероприятия/Место проведения/Дата проведения/Статус призера (указываете true или false)\n" +
-					$"{RedCircleEmj}Пример:");
-
+				await botClient.SendTextMessageAsync(message.Chat.Id, UserActionsList);
+				await botClient.SendTextMessageAsync(message.Chat.Id, UserAddEvent);
 				await botClient.SendTextMessageAsync(message.Chat.Id, "/adduserevent/Название 1/Москва/01.01.2024/True");
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, "Для изменения участия в мероприятии придерживайтесь следующей конструкции:\n" +
-					"/updateuserevent/Название мероприятия/Место проведения/Дата проведения/Статус призера (указываете true или false)/Номер мероприятия\n" +
-					$"{YellowCircleEmj}Пример:");
-
+				await botClient.SendTextMessageAsync(message.Chat.Id, UserChangeEvent);
 				await botClient.SendTextMessageAsync(message.Chat.Id, "/updateuserevent/Название 1/Москва/01.01.2024/True/11ce84c9-08ba-487d-89ac-97cd166111fc");
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, "Для удаления участия в мероприятии придерживайтесь следующей конструкции:\n" +
-					"/deleteuserevent/Номер мероприятия\n" +
-					$"{GreenCircleEmj}Пример:");
-
+				await botClient.SendTextMessageAsync(message.Chat.Id, UserDeleteEvent);
 				await botClient.SendTextMessageAsync(message.Chat.Id, "/deleteuserevent/11ce84c9-08ba-487d-89ac-97cd166111fc");
 			}
 			else if (lowerCaseMessage.Contains("подписаться на рассылку"))
@@ -316,24 +284,15 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage.Contains("подача заявления онлайн"))
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"{PlaneEmj} Для подачи заявления на вступление в СНО или СМУ воспользуйтесь следующими командами\n\n" +
-					$"{GreenCircleEmj} Вступление в СНО:\n" +
-					$"Формат вступления: /snoapp/Фамилия Имя Отчество(в родительном падеже)/Факультет/Группа/Номер телефона/Почта\n{RedCircleEmj} Пример:");
-
+				await botClient.SendTextMessageAsync(message.Chat.Id, SNOInfo);
 				await botClient.SendTextMessageAsync(message.Chat.Id, $"/snoapp/Иванова Ивана Ивановича/ФАСК/РС-5/+79999999999/example@example.ru");
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{BrownCircleEmj} Вступление в СМУ:\n" +
-					$"Формат вступления: /smuapp/Должность(в родительном падеже)/Фамилия Имя Отчество(в родительном падеже)/Структурное подразделение(наименование кафедры или иного подразделения)/Наличие ученой степени/Дата рождения/Номер телефона/Почта\n{YellowCircleEmj} Пример:");
-
+				await botClient.SendTextMessageAsync(message.Chat.Id, SMUInfo);
 				await botClient.SendTextMessageAsync(message.Chat.Id, $"/smuapp/аспиранта/Иванова Ивана Ивановича/ТЭРЭО ВТ/Ваша научная степень/20.01.1994/+79999999999/example@example.ru");
 			}
 			else if (lowerCaseMessage.Contains("наше местоположение"))
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"{LabelEmj}СМУ и СНО расположен в старом корпусе по адресу:\n" +
-					"      г.Москва, ул.Пулковская, д.6.\n" +
-					"      кабинет: 3-108");
+				await botClient.SendTextMessageAsync(message.Chat.Id, Place);
 			}
 			else if (lowerCaseMessage.Contains("связь с автором"))
 			{
@@ -341,13 +300,6 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage == "!user")
 			{
-				if (user == null)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{AlertEmj}Возникла ошибка.\n" +
-						"Пожалуйста, введите команду: /start");
-					return;
-				}
 				if (user.IsSubscribed)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id, "Выбрана панель обычного пользователя.", replyMarkup: replyKeyboardUserNoSub);
@@ -359,36 +311,21 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage.Contains("изменение ваших данных"))
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj}Для изменения имени введите команду:\n" +
-					$"/chname/Ваше имя\nПример:");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeUserName);
 				await botClient.SendTextMessageAsync(message.Chat.Id, "/chname/Николай");
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{YellowCircleEmj}Для изменения фамилии введите команду:\n" +
-					$"/chsname/Ваша фамилия\nПример:");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeUserSName);
 				await botClient.SendTextMessageAsync(message.Chat.Id, "/chsname/Иванов");
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{GreenCircleEmj}Для изменения отчества введите команду:\n" +
-					$"/chpatr/Ваше отчество\nПример:");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeUserPatronymic);
 				await botClient.SendTextMessageAsync(message.Chat.Id, "/chpatr/Иванович");
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{BlueCircleEmj}Для изменения номера телефона введите команду:\n" +
-					$"/chphone/Ваш номер телефона\nПример:");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeUserPhone);
 				await botClient.SendTextMessageAsync(message.Chat.Id, "/chphone/+79999999999");
 			}
 			else if (lowerCaseMessage.Contains("помощь"))
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"{TabletEmj} Список команд пользователя:\n\n" +
-					"/start - перезапустить бота\n" +
-					"/chname - изменить имя\n" +
-					"/chsname - изменить фамилию\n" +
-					"/chpatr - изменить отчество\n" +
-					"/chphone - изменить номер телефона (формат: +7)\n" +
-					"/adduserevent - добавить участие в мероприятии\n" +
-					"/updateuserevent - изменить ранее добавленное мероприятие\n" +
-					"/deleteuserevent - удаление добавленного мероприятия\n" +
-					"/snoapp - подать заявление на вступление в СНО\n" +
-					"/smuapp - подать заявление на вступление в СМУ");
+				await botClient.SendTextMessageAsync(message.Chat.Id, HelpCommands);
 			}
 			else if (lowerCaseMessage.Contains("/adduserevent"))
 			{
@@ -566,20 +503,13 @@ namespace DiplomProject.Server.Services
 			#region [ReactionsOnAdmin]
 			else if (lowerCaseMessage == "!admin")
 			{
-				if (user == null)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{AlertEmj}Возникла ошибка.\n" +
-						"Пожалуйста, введите команду: /start");
-					return;
-				}
 				if (user.IsAdmin)
 				{
 					await botClient.SendTextMessageAsync(message.Chat.Id, "Выбрана админ-панель.", replyMarkup: replyKeyboardAdmin);
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
 			else if (lowerCaseMessage.Contains("календарь добавленных мероприятий"))
@@ -592,94 +522,60 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
 			else if (lowerCaseMessage.Contains("список действий с мероприятиями"))
 			{
-				if (user == null)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{AlertEmj} Возникла ошибка.\n" +
-						"Пожалуйста, введите команду: /start");
-					return;
-				}
 				if (user.IsAdmin)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{TabletEmj} Форматы действий с мероприятиями:\n\n\n" +
-						$"{GreenCircleEmj} Формат добавления мероприятия:\n/addevent/Название события/Дата события/Место проведения/Требования к участнику/Дополнительная информация\nПример:\n");
+					await botClient.SendTextMessageAsync(message.Chat.Id, AdminEventsActionsList);
 					await botClient.SendTextMessageAsync(message.Chat.Id, $"/addevent/Событие 1/01.01.2024/Москва/нет/Хорошее мероприятие");
 
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{YellowCircleEmj} Формат изменения мероприятия:\n/chevent/Номер мероприятия/Название события/Дата события/Место проведения/Требования к участнику/Дополнительная информация\nПример:");
-
+					await botClient.SendTextMessageAsync(message.Chat.Id, ChangeSEvent);
 					await botClient.SendTextMessageAsync(message.Chat.Id, $"/chevent/1e3eca14-90b2-459c-8471-58c9c9cc4462/Событие 1/01.01.2024/Москва/нет/Хорошее мероприятие");
 
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj} Формат удаления мероприятия:\n/deleteevent/номер события\nПример:");
-
+					await botClient.SendTextMessageAsync(message.Chat.Id, DeleteSEvent);
 					await botClient.SendTextMessageAsync(message.Chat.Id, $"/deleteevent/1e3eca14-90b2-459c-8471-58c9c9cc4462");
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} У вас нет прав администратора.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
 			else if (lowerCaseMessage.Contains("как изменить права администратора"))
 			{
 				if (user.IsAdmin)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						"Для изменения прав администратора нужно:\n\n" +
-						$"{RedCircleEmj} Иметь права администратора\n" +
-						$"{GreenCircleEmj} Получить у пользователя номер чата (вызвать команду просмотра статусов !user)\n" +
-						$"{BlueCircleEmj} Вызвать команду /adminchadm/номер чата\nПример:");
-
+					await botClient.SendTextMessageAsync(message.Chat.Id, ChangeRights);
 					await botClient.SendTextMessageAsync(message.Chat.Id, "/adminchadm/1");
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора!");
+					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
 			else if (lowerCaseMessage.Contains("как изменить пароль"))
 			{
 				if (user.IsAdmin)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"{RedCircleEmj} Для изменения старого пароля проверьте, имеете ли вы права администратора.\n" +
-					$"{GreenCircleEmj} Далее воспользуйтесь командой /adminchpass/ваш пароль.\nПример:");
-
+					await botClient.SendTextMessageAsync(message.Chat.Id, ChangePassword);
 					await botClient.SendTextMessageAsync(message.Chat.Id, "/adminchpass/newpassword");
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} У вас нет прав администратора!");
+					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
 			else if (lowerCaseMessage.Contains("полный список команд"))
 			{
-				if (user == null)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{AlertEmj} Возникла ошибка.\n" +
-						"Пожалуйста, введите команду: /start");
-					return;
-				}
 				if (user.IsAdmin)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"{TabletEmj} Список команд администратора:\n\n" +
-					"!admin - перейти в панель администратора\n" +
-					"!user - перейти в панель пользователя\n" +
-					"/adminchpass - изменение пароля\n" +
-					"/adminchadm - изменение прав пользователя.\n" +
-					"/addevent - добавление нового мероприятия\n" +
-					"/chevent - изменение ранее созданного мероприятия\n" +
-					"/deleteevent - удаление мероприятия");
+					await botClient.SendTextMessageAsync(message.Chat.Id, AdminActionsList);
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора!");
+					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
 			else if (lowerCaseMessage.Contains("/adminchpass"))
@@ -701,7 +597,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора!");
+					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
 			else if (lowerCaseMessage.Contains("/adminchadm"))
@@ -726,44 +622,11 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора!");
-				}
-			}
-			else if (lowerCaseMessage == "/adminhelp")
-			{
-				if (user == null)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{AlertEmj} Возникла ошибка.\n" +
-						"Пожалуйста, введите команду: /start");
-					return;
-				}
-				if (user.IsAdmin)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-					$"{TabletEmj} Список команд администратора:\n\n" +
-					"!admin - перейти в панель администратора\n" +
-					"!user - перейти в панель пользователя\n" +
-					"/adminchpass - изменение пароля\n" +
-					"/adminchadm - изменение прав пользователя.\n" +
-					"/addevent - добавление нового мероприятия\n" +
-					"/chevent - изменение ранее созданного мероприятия\n" +
-					"/deleteevent - удаление мероприятия");
-				}
-				else
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}У вас нет прав администратора!");
+					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
 			else if (lowerCaseMessage.Contains("/addevent"))
 			{
-				if (user == null)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{AlertEmj} Возникла ошибка.\n" +
-						"Пожалуйста, введите команду: /start");
-					return;
-				}
 				if (user.IsAdmin)
 				{
 					try
@@ -778,10 +641,6 @@ namespace DiplomProject.Server.Services
 						await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Мероприятие успешно добавлено!");
 						await notifyService.NotifyLastAddEventUsersAsync($"{GreenCircleEmj} Новое мероприятие!", token);
 					}
-					catch (IrrelevatDateTimeException ex)
-					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{ex.Message}");
-					}
 					catch (Exception)
 					{
 						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Возникла ошибка при добавлении мероприятия. Пожалуйста, проверьте правильность ввода мероприятия.");
@@ -789,7 +648,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} У вас нет прав администратора.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
 			else if (lowerCaseMessage.Contains("/chevent"))
@@ -808,10 +667,6 @@ namespace DiplomProject.Server.Services
 						await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Мероприятие успешно изменено!");
 						await notifyService.NotifyEventChangingUsersAsync(updEvent, $"{RedCircleEmj} Внимание! Изменения!", token);
 					}
-					catch (IrrelevatDateTimeException ex)
-					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{ex.Message}");
-					}
 					catch (Exception)
 					{
 						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Возникла ошибка при изменении мероприятия. Пожалуйста, проверьте правильность ввода мероприятия.");
@@ -819,7 +674,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} У вас нет прав администратора.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
 			else if (lowerCaseMessage.Contains("/deleteevent"))
@@ -846,7 +701,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} У вас нет прав администратора.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
 			#endregion
