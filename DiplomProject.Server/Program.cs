@@ -16,7 +16,6 @@ using Telegram.Bot;
 
 
 
-
 namespace API
 {
 	public class Program
@@ -36,6 +35,9 @@ namespace API
 						.WriteTo.Console()
 						.MinimumLevel.Information();
 				});
+				//добавляем внешний json файл (путь из секретов)
+				builder.Configuration.AddJsonFile(builder.Configuration["TelegramTextConstantsPath"], optional: true, reloadOnChange: true);
+
 
 				var botConfigSection = builder.Configuration.GetSection("BotConfiguration");
 				builder.Services.Configure<BotConfiguration>(botConfigSection);

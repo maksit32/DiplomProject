@@ -185,15 +185,34 @@ namespace DiplomProject.Server.Services
 			//получаем данные о пользователе
 			var user = await telegramUserRepo.GetTgUserByIdAsync(message.Chat.Id, token);
 
+			//string sentMessage = await (lowerCaseMessage switch
+			//{
+			//	var msg when msg == "/photo" => SendPhoto(msg),
+			//	var msg when msg.Contains("/inline_buttons") => SendInlineKeyboard(msg),
+			//	var msg when msg.Contains("/keyboard") => SendReplyKeyboard(msg),
+			//	var msg when msg.Contains("/remove") => RemoveKeyboard(msg),
+			//	var msg when msg.Contains("/request") => RequestContactAndLocation(msg),
+			//	var msg when msg.Contains("/inline_mode") => StartInlineQuery(msg),
+			//	var msg when msg.Contains("/poll") => SendPoll(msg),
+			//	var msg when msg.Contains("/poll_anonymous") => SendAnonymousPoll(msg),
+			//	var msg when msg.Contains("/throw") => FailingHandler(msg),
+			//	_ => Usage(msg)
+			//});
+
 			//старт и приветствие
 			#region [DefaultReactions]
 			if (lowerCaseMessage == "/start")
 			{
+				string WelcomeText1 = _configuration["WelcomeText1"].Replace("{PlaneEmj}", PlaneEmj).Replace("{AlertEmj}", AlertEmj);
+				string WelcomeText2 = _configuration["WelcomeText2"].Replace("{AlertEmj}", AlertEmj);
+
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText1);
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText2);
 
 				if (user is null)
 				{
+					string WelcomeText3 = _configuration["WelcomeText3"].Replace("{GreenCircleEmj}", GreenCircleEmj);
+
 					await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3, replyMarkup: replyKeyboardUserSub);
 					await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
 				}
@@ -243,6 +262,8 @@ namespace DiplomProject.Server.Services
 			//проверка на логин
 			else if (user is null)
 			{
+				string WelcomeText3 = _configuration["WelcomeText3"].Replace("{GreenCircleEmj}", GreenCircleEmj);
+
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
 				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
 			}
@@ -258,6 +279,11 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage.Contains("возможности работы с вашими участиями в мероприятиях"))
 			{
+				string UserActionsList = _configuration["UserActionsList"].Replace("{CheckMarkInBlockEmj}", CheckMarkInBlockEmj).Replace("{ButtonEmj}", ButtonEmj).Replace("{NegativeRedEmj}", NegativeRedEmj);
+				string UserAddEvent = _configuration["UserAddEvent"].Replace("{RedCircleEmj}", RedCircleEmj);
+				string UserChangeEvent = _configuration["UserChangeEvent"].Replace("{YellowCircleEmj}", YellowCircleEmj);
+				string UserDeleteEvent = _configuration["UserDeleteEvent"].Replace("{GreenCircleEmj}", GreenCircleEmj);
+
 				await botClient.SendTextMessageAsync(message.Chat.Id, UserActionsList);
 				await botClient.SendTextMessageAsync(message.Chat.Id, UserAddEvent);
 				await botClient.SendTextMessageAsync(message.Chat.Id, "/adduserevent/Название 1/Москва/01.01.2024/True");
@@ -284,6 +310,9 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage.Contains("подача заявления онлайн"))
 			{
+				string SNOInfo = _configuration["SNOInfo"].Replace("{PlaneEmj}", PlaneEmj).Replace("{GreenCircleEmj}", GreenCircleEmj).Replace("{RedCircleEmj}", RedCircleEmj);
+				string SMUInfo = _configuration["SMUInfo"].Replace("{BrownCircleEmj}", BrownCircleEmj).Replace("{YellowCircleEmj}", YellowCircleEmj);
+
 				await botClient.SendTextMessageAsync(message.Chat.Id, SNOInfo);
 				await botClient.SendTextMessageAsync(message.Chat.Id, $"/snoapp/Иванова Ивана Ивановича/ФАСК/РС-5/+79999999999/example@example.ru");
 
@@ -292,6 +321,7 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage.Contains("наше местоположение"))
 			{
+				string Place = _configuration["Place"].Replace("{LabelEmj}", LabelEmj);
 				await botClient.SendTextMessageAsync(message.Chat.Id, Place);
 			}
 			else if (lowerCaseMessage.Contains("связь с автором"))
@@ -311,6 +341,11 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage.Contains("изменение ваших данных"))
 			{
+				string ChangeUserName = _configuration["ChangeUserName"].Replace("{RedCircleEmj}", RedCircleEmj);
+				string ChangeUserSName = _configuration["ChangeUserSName"].Replace("{YellowCircleEmj}", YellowCircleEmj);
+				string ChangeUserPatronymic = _configuration["ChangeUserPatronymic"].Replace("{GreenCircleEmj}", GreenCircleEmj);
+				string ChangeUserPhone = _configuration["ChangeUserPhone"].Replace("{BlueCircleEmj}", BlueCircleEmj);
+
 				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeUserName);
 				await botClient.SendTextMessageAsync(message.Chat.Id, "/chname/Николай");
 
@@ -325,6 +360,7 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage.Contains("помощь"))
 			{
+				string HelpCommands = _configuration["HelpCommands"].Replace("{TabletEmj}", TabletEmj);
 				await botClient.SendTextMessageAsync(message.Chat.Id, HelpCommands);
 			}
 			else if (lowerCaseMessage.Contains("/adduserevent"))
@@ -509,6 +545,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
+					string NoRules = _configuration["NoRules"].Replace("{AlertEmj}", AlertEmj);
 					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
@@ -522,6 +559,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
+					string NoRules = _configuration["NoRules"].Replace("{AlertEmj}", AlertEmj);
 					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
@@ -529,6 +567,10 @@ namespace DiplomProject.Server.Services
 			{
 				if (user.IsAdmin)
 				{
+					string AdminEventsActionsList = _configuration["AdminEventsActionsList"].Replace("{TabletEmj}", TabletEmj).Replace("{GreenCircleEmj}", GreenCircleEmj);
+					string ChangeSEvent = _configuration["ChangeSEvent"].Replace("{YellowCircleEmj}", YellowCircleEmj);
+					string DeleteSEvent = _configuration["DeleteSEvent"].Replace("{RedCircleEmj}", RedCircleEmj);
+
 					await botClient.SendTextMessageAsync(message.Chat.Id, AdminEventsActionsList);
 					await botClient.SendTextMessageAsync(message.Chat.Id, $"/addevent/Событие 1/01.01.2024/Москва/нет/Хорошее мероприятие");
 
@@ -540,6 +582,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
+					string NoRules = _configuration["NoRules"].Replace("{AlertEmj}", AlertEmj);
 					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
@@ -547,11 +590,14 @@ namespace DiplomProject.Server.Services
 			{
 				if (user.IsAdmin)
 				{
+					string ChangeRights = _configuration["ChangeRights"].Replace("{RedCircleEmj}", RedCircleEmj).Replace("{GreenCircleEmj}", GreenCircleEmj).Replace("{BlueCircleEmj}", BlueCircleEmj);
+
 					await botClient.SendTextMessageAsync(message.Chat.Id, ChangeRights);
 					await botClient.SendTextMessageAsync(message.Chat.Id, "/adminchadm/1");
 				}
 				else
 				{
+					string NoRules = _configuration["NoRules"].Replace("{AlertEmj}", AlertEmj);
 					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
@@ -559,11 +605,14 @@ namespace DiplomProject.Server.Services
 			{
 				if (user.IsAdmin)
 				{
+					string ChangePassword = _configuration["ChangePassword"].Replace("{RedCircleEmj}", RedCircleEmj).Replace("{GreenCircleEmj}", GreenCircleEmj);
+
 					await botClient.SendTextMessageAsync(message.Chat.Id, ChangePassword);
 					await botClient.SendTextMessageAsync(message.Chat.Id, "/adminchpass/newpassword");
 				}
 				else
 				{
+					string NoRules = _configuration["NoRules"].Replace("{AlertEmj}", AlertEmj);
 					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
@@ -571,10 +620,13 @@ namespace DiplomProject.Server.Services
 			{
 				if (user.IsAdmin)
 				{
+					string AdminActionsList = _configuration["AdminActionsList"].Replace("{TabletEmj}", TabletEmj);
+
 					await botClient.SendTextMessageAsync(message.Chat.Id, AdminActionsList);
 				}
 				else
 				{
+					string NoRules = _configuration["NoRules"].Replace("{AlertEmj}", AlertEmj);
 					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
@@ -603,6 +655,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
+					string NoRules = _configuration["NoRules"].Replace("{AlertEmj}", AlertEmj);
 					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
@@ -628,6 +681,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
+					string NoRules = _configuration["NoRules"].Replace("{AlertEmj}", AlertEmj);
 					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
@@ -654,6 +708,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
+					string NoRules = _configuration["NoRules"].Replace("{AlertEmj}", AlertEmj);
 					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
@@ -680,6 +735,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
+					string NoRules = _configuration["NoRules"].Replace("{AlertEmj}", AlertEmj);
 					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
@@ -707,6 +763,7 @@ namespace DiplomProject.Server.Services
 				}
 				else
 				{
+					string NoRules = _configuration["NoRules"].Replace("{AlertEmj}", AlertEmj);
 					await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
 				}
 			}
