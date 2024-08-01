@@ -13,12 +13,15 @@ namespace DiplomProject.Server.Controllers
 		private readonly ITelegramUserRepository _tgusersRepo;
 		private readonly ILogger<TelegramUserController> _logger;
 		private readonly IPasswordHasherService _passwordHasherService;
+		private readonly ITgUserService _tgUserService;
 
-		public TelegramUserController(ITelegramUserRepository repo, IPasswordHasherService passwordHasherService, ILogger<TelegramUserController> logger)
+		public TelegramUserController(ITelegramUserRepository repo, IPasswordHasherService passwordHasherService, 
+			ITgUserService tgUserService,ILogger<TelegramUserController> logger)
 		{
 			_tgusersRepo = repo ?? throw new ArgumentNullException(nameof(repo));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_passwordHasherService = passwordHasherService ?? throw new ArgumentNullException(nameof(passwordHasherService)); 
+			_passwordHasherService = passwordHasherService ?? throw new ArgumentNullException(nameof(passwordHasherService));
+			_tgUserService = tgUserService ?? throw new ArgumentNullException(nameof(tgUserService));
 		}
 
 		[HttpGet("get")]
@@ -110,10 +113,9 @@ namespace DiplomProject.Server.Controllers
 		{
 			try
 			{
-				var hashedPass = _passwordHasherService.HashPassword(user.HashedPassword);
-				user.HashedPassword = hashedPass;
+				var hashedUser = _tgUserService.HashTelegramUser(user, token);
 
-				await _tgusersRepo.AddTgUserAsync(user, token);
+				await _tgusersRepo.AddTgUserAsync(hashedUser, token);
 				return Created();
 			}
 			catch (Exception)

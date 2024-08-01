@@ -24,7 +24,7 @@ namespace DiplomProject.Server.Services
 {
 	public class UpdateHandler(ITelegramBotClient botClient, ILogger<UpdateHandler> logger, ITelegramUserRepository telegramUserRepo,
 		IScienceEventRepository scienceEventRepo, INotifyService notifyService, IUserCreatedEventRepository userCreatedEventRepo,
-		IFillDataService fillDataService, IPasswordHasherService passwordHasherService, IConfiguration _configuration) : IUpdateHandler
+		IFillDataService fillDataService, IPasswordHasherService passwordHasherService, ITgUserService tgUserInfoService, IConfiguration _configuration) : IUpdateHandler
 	{
 		#region [Paths]
 		private readonly string fileSNOFullPath = _configuration["fileSNOFullPath"] ?? throw new ArgumentNullException("FileSNOFullPath is null!");
@@ -312,7 +312,7 @@ namespace DiplomProject.Server.Services
 			}
 			else if (lowerCaseMessage.Contains("проверить ваши статусы и участия в мероприятиях"))
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, await notifyService.GetInfoAboutTgUserAsync(message.Chat.Id, token));
+				await botClient.SendTextMessageAsync(message.Chat.Id, await tgUserInfoService.GetInfoAboutTgUserAsync(message.Chat.Id, token));
 			}
 			else if (lowerCaseMessage.Contains("подача заявления онлайн"))
 			{
@@ -387,13 +387,8 @@ namespace DiplomProject.Server.Services
 					"/adduserevent - добавить участие в мероприятии\n" +
 					"/updateuserevent - изменить ранее добавленное мероприятие\n" +
 					"/deleteuserevent - удаление добавленного мероприятия\n" +
-					"/status - просмотреть ваш статус и мероприятия\n" +
 					"/snoapp - подать заявление на вступление в СНО\n" +
 					"/smuapp - подать заявление на вступление в СМУ");
-			}
-			else if (lowerCaseMessage.Contains("/status"))
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, await notifyService.GetInfoAboutTgUserAsync(message.Chat.Id, token));
 			}
 			else if (lowerCaseMessage.Contains("/adduserevent"))
 			{
@@ -693,7 +688,8 @@ namespace DiplomProject.Server.Services
 				{
 					try
 					{
-						string hashedPassword = passwordHasherService.HashPassword(lowerCaseMessage.Replace("/adminchpass/", ""));
+						string password = lowerCaseMessage.Replace("/adminchpass/", "").Replace(" ", "");
+						string hashedPassword = passwordHasherService.HashPassword(password);
 						bool res = await telegramUserRepo.UpdatePasswordTgUserAsync(hashedPassword, message.Chat.Id, token);
 						if (res) await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Пароль успешно изменен!");
 						else await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj} Ошибка при изменении пароля!");
