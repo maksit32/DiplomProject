@@ -584,7 +584,13 @@ namespace DiplomProject.Server.Services
 				{
 					try
 					{
-						string password = lowerCaseMessage.Replace("/adminchpass/", "").Replace(" ", "");
+						string password = lowerCaseMessage.Replace("/adminchpass", "").Replace("/", "").Replace(" ", "");
+						if(String.IsNullOrWhiteSpace(password))
+						{
+							await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj} Ошибка при изменении пароля!");
+							return;
+						}
+						
 						string hashedPassword = passwordHasherService.HashPassword(password);
 						bool res = await telegramUserRepo.UpdatePasswordTgUserAsync(hashedPassword, message.Chat.Id, token);
 						if (res) await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Пароль успешно изменен!");
