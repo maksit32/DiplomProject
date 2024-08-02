@@ -32,7 +32,7 @@ namespace DiplomProject.Server.Services
 {
 	public class UpdateHandler(ITelegramBotClient botClient, ILogger<UpdateHandler> logger, ITelegramUserRepository telegramUserRepo,
 		IScienceEventRepository scienceEventRepo, INotifyService notifyService, IUserCreatedEventRepository userCreatedEventRepo,
-		IFillDataService fillDataService, IPasswordHasherService passwordHasherService, ITgUserService tgUserInfoService, IConfiguration _configuration) : IUpdateHandler
+		IFillDataService fillDataService, IPasswordHasherService passwordHasherService, ITgUserService tgUserService, IConfiguration _configuration) : IUpdateHandler
 	{
 		private TelegramUser? user = null;
 		#region [Paths]
@@ -285,13 +285,13 @@ namespace DiplomProject.Server.Services
 				case BotEnumCommands.GiveAdminRights:
 					await GiveAdminRights(message, lowerCaseMessage, token);
 					break;
-			case BotEnumCommands.AddAdminEvent:
+				case BotEnumCommands.AddAdminEvent:
 					await AddAdminEvent(message, lowerCaseMessage, token);
 					break;
-			case BotEnumCommands.ChangeAdminEvent:
+				case BotEnumCommands.ChangeAdminEvent:
 					await ChangeAdminEvent(message, lowerCaseMessage, token);
 					break;
-			case BotEnumCommands.DeleteAdminEvent:
+				case BotEnumCommands.DeleteAdminEvent:
 					await DeleteAdminEvent(message, lowerCaseMessage, token);
 					break;
 			};
@@ -302,7 +302,7 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsAdmin)
@@ -312,17 +312,17 @@ namespace DiplomProject.Server.Services
 					var res = await scienceEventRepo.DeleteEventByIdAsync(lowerCaseMessage, token);
 					if (res == null)
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Такого мероприятия не существует!");
+						await botClient.SendTextMessageAsync(message.Chat.Id, ErrorDeleteAdminEvent);
 					}
 					else
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Мероприятие успешно отменено!");
-						await notifyService.NotifyEventChangingUsersAsync(res, $"{NegativeRedEmj} Мероприятие отменено!", token);
+						await botClient.SendTextMessageAsync(message.Chat.Id, SuccessDeleteAdminEvent);
+						await notifyService.NotifyEventChangingUsersAsync(res, DeleteEventNotification, token);
 					}
 				}
 				catch (Exception)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Возникла ошибка при удалении мероприятия. Пожалуйста, проверьте правильность введенного id.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorDeleteAdminEvent2);
 				}
 			}
 			else
@@ -336,7 +336,7 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsAdmin)
@@ -347,15 +347,15 @@ namespace DiplomProject.Server.Services
 					var updEvent = await scienceEventRepo.UpdateFullEventAsync(messageToSend, token);
 					if (updEvent == null)
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Номера такого мероприятия не существует, либо название мероприятия повторяется, либо неверно указана дата мероприятия.");
+						await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeAdminEvent);
 						return;
 					}
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Мероприятие успешно изменено!");
-					await notifyService.NotifyEventChangingUsersAsync(updEvent, $"{RedCircleEmj} Внимание! Изменения!", token);
+					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessChangeAdminEvent);
+					await notifyService.NotifyEventChangingUsersAsync(updEvent, ChangeEventNotification, token);
 				}
 				catch (Exception)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Возникла ошибка при изменении мероприятия. Пожалуйста, проверьте правильность ввода мероприятия.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeAdminEvent2);
 				}
 			}
 			else
@@ -369,7 +369,7 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsAdmin)
@@ -380,15 +380,15 @@ namespace DiplomProject.Server.Services
 					var result = await scienceEventRepo.AddEventAsync(messageToSend, token);
 					if (!result)
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Мероприятие с таким названием уже существует!");
+						await botClient.SendTextMessageAsync(message.Chat.Id, ErrorAddAdminEvent);
 						return;
 					}
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Мероприятие успешно добавлено!");
-					await notifyService.NotifyLastAddEventUsersAsync($"{GreenCircleEmj} Новое мероприятие!", token);
+					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessAddAdminEvent);
+					await notifyService.NotifyLastAddEventUsersAsync(NewEventNotification, token);
 				}
 				catch (Exception)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Возникла ошибка при добавлении мероприятия. Пожалуйста, проверьте правильность ввода мероприятия.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorAddAdminEvent2);
 				}
 			}
 			else
@@ -402,7 +402,7 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsAdmin)
@@ -410,11 +410,11 @@ namespace DiplomProject.Server.Services
 				try
 				{
 					var res = await telegramUserRepo.UpdateAdminStatusTgUserAsync(lowerCaseMessage, message.Chat.Id, token);
-					await botClient.SendTextMessageAsync(message.Chat.Id, res ? $"{CheckMarkInBlockEmj} Права администратора успешно изменены!" : $"{AlertEmj} Права администратора изменить не удалось.\nВозможно у вас отсутствуют права администратора, либо отсутсвует такой идентификатор чата, либо вы пытаетесь изменить свои права.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, res ? SuccessChangeRights : ErrorChangeRights);
 				}
 				catch (Exception)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj} Возникла ошибка при изменении прав. Проверьте правильность ввода.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeRights2);
 				}
 			}
 			else
@@ -428,7 +428,7 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsAdmin)
@@ -438,18 +438,18 @@ namespace DiplomProject.Server.Services
 					string password = lowerCaseMessage.Replace("/adminchpass", "").Replace("/", "").Replace(" ", "");
 					if (String.IsNullOrWhiteSpace(password))
 					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj} Ошибка при изменении пароля!");
+						await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangePassword);
 						return;
 					}
 
 					string hashedPassword = passwordHasherService.HashPassword(password);
 					bool res = await telegramUserRepo.UpdatePasswordTgUserAsync(hashedPassword, message.Chat.Id, token);
-					if (res) await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj} Пароль успешно изменен!");
-					else await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj} Ошибка при изменении пароля!");
+					if (res) await botClient.SendTextMessageAsync(message.Chat.Id, SuccessChangePassword);
+					else await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangePassword);
 				}
 				catch (Exception)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при изменении пароля. Проверьте правильность ввода.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangePassword2);
 				}
 			}
 			else
@@ -463,7 +463,7 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsAdmin)
@@ -481,13 +481,13 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsAdmin)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, ChangePassword);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/adminchpass/newpassword");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ChangePasswordInfo);
+				await botClient.SendTextMessageAsync(message.Chat.Id, ChangePasswordExample);
 			}
 			else
 			{
@@ -500,13 +500,13 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsAdmin)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeRights);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/adminchadm/1");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeRightsInfo);
+				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeRightsExample);
 			}
 			else
 			{
@@ -519,20 +519,20 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsAdmin)
 			{
 				//massive
 				await botClient.SendTextMessageAsync(message.Chat.Id, AdminEventsActionsList);
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"/addevent/Событие 1/01.01.2024/Москва/нет/Хорошее мероприятие");
+				await botClient.SendTextMessageAsync(message.Chat.Id, AddAdminEventExample);
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeSEvent);
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"/chevent/1e3eca14-90b2-459c-8471-58c9c9cc4462/Событие 1/01.01.2024/Москва/нет/Хорошее мероприятие");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeAdminEventInfo);
+				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeAdminEventExample);
 
-				await botClient.SendTextMessageAsync(message.Chat.Id, DeleteSEvent);
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"/deleteevent/1e3eca14-90b2-459c-8471-58c9c9cc4462");
+				await botClient.SendTextMessageAsync(message.Chat.Id, DeleteAdminEventInfo);
+				await botClient.SendTextMessageAsync(message.Chat.Id, DeleteAdminEventExample);
 			}
 			else
 			{
@@ -545,13 +545,13 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsAdmin)
 			{
 				string sendMessage = await scienceEventRepo.ReadAllActualEvAdminToStringAsync(token);
-				if (string.IsNullOrWhiteSpace(sendMessage)) sendMessage = $"{ButtonEmj}  На ближайшее время мероприятий не запланировано.";
+				if (string.IsNullOrWhiteSpace(sendMessage)) sendMessage = EmptyAdminCalendarEvents;
 				await botClient.SendTextMessageAsync(message.Chat.Id, sendMessage);
 			}
 			else
@@ -565,12 +565,12 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsAdmin)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, "Выбрана админ-панель.", replyMarkup: replyKeyboardAdmin);
+				await botClient.SendTextMessageAsync(message.Chat.Id, AdminPanel, replyMarkup: replyKeyboardAdmin);
 			}
 			else
 			{
@@ -583,7 +583,7 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			try
@@ -593,8 +593,7 @@ namespace DiplomProject.Server.Services
 			}
 			catch (Exception)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при создании документа!\n" +
-					$"Пожалуйста, проверьте отправленные вами данные.");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorDocumentCreation);
 			}
 		}
 
@@ -603,7 +602,7 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			try
@@ -613,8 +612,7 @@ namespace DiplomProject.Server.Services
 			}
 			catch (Exception)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при создании документа!\n" +
-					$"Пожалуйста, проверьте отправленные вами данные.");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorDocumentCreation);
 			}
 		}
 
@@ -623,14 +621,14 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			try
 			{
 				if (lowerCaseMessage == "/chphone")
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj} Ошибка! Проверьте правильность введенного номера телефона.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangePhone);
 					return;
 				}
 				string phone = lowerCaseMessage.Replace("/chphone/", "");
@@ -641,8 +639,7 @@ namespace DiplomProject.Server.Services
 			}
 			catch (Exception)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при изменении номера телефона!\n" +
-					$"Пожалуйста, проверьте отправленные вами данные.");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangePhone2);
 			}
 		}
 
@@ -651,14 +648,14 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			try
 			{
 				if (lowerCaseMessage == "/chpatr")
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj} Ошибка! Проверьте правильность введенного отчества.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangePatronymic);
 					return;
 				}
 				string patr = lowerCaseMessage.Replace("/chpatr/", "");
@@ -669,8 +666,7 @@ namespace DiplomProject.Server.Services
 			}
 			catch (Exception)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при изменении отчества!\n" +
-					$"Пожалуйста, проверьте отправленные вами данные.");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangePatronymic2);
 			}
 		}
 
@@ -679,14 +675,14 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			try
 			{
 				if (lowerCaseMessage == "/chsname")
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj} Ошибка! Проверьте правильность введенной фамилии.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeSName);
 					return;
 				}
 				string sName = lowerCaseMessage.Replace("/chsname/", "");
@@ -697,8 +693,7 @@ namespace DiplomProject.Server.Services
 			}
 			catch (Exception)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при изменении фамилии!\n" +
-					$"Пожалуйста, проверьте отправленные вами данные.");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeSName2);
 			}
 		}
 
@@ -707,14 +702,14 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			try
 			{
 				if (lowerCaseMessage == "/chname")
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{RedCircleEmj} Ошибка! Проверьте правильность введенного имени.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeName);
 					return;
 				}
 				string name = lowerCaseMessage.Replace("/chname/", "");
@@ -725,8 +720,7 @@ namespace DiplomProject.Server.Services
 			}
 			catch (Exception)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при изменении имени!\n" +
-					$"Пожалуйста, проверьте отправленные вами данные.");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeName2);
 			}
 		}
 
@@ -735,7 +729,7 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			try
@@ -743,17 +737,16 @@ namespace DiplomProject.Server.Services
 				var deletedEvent = await userCreatedEventRepo.DeleteUserCreatedEventByIdAsync(lowerCaseMessage, message.Chat.Id, token);
 				if (deletedEvent is not null)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkInBlockEmj}Мероприятие успешно удалено!\n{deletedEvent.ToString()}");
+					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessDeleteUserEvent + deletedEvent.ToString());
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{NegativeRedEmj}Мероприятие не удалено! Проверьте правильность ввода данных.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorDeleteUserEvent);
 				}
 			}
 			catch (Exception)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при удалении!\n" +
-					$"Проверьте правильность введенного номера мероприятия.");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorDeleteUserEvent2);
 			}
 		}
 
@@ -762,25 +755,23 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			try
 			{
 				if (await userCreatedEventRepo.UpdateUserCreatedEventAsync(lowerCaseMessage, message.Chat.Id, token))
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkInBlockEmj}Мероприятие успешно изменено!");
+					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessUpdateUserEvent);
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{NegativeRedEmj}Мероприятие не изменено! " +
-						$"Проверьте на правильность ввода данных и повтор названия.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorUpdateUserEvent);
 				}
 			}
 			catch (Exception)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при изменении!\n" +
-					$"Проверьте правильность ввода данных.");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorUpdateUserEvent2);
 			}
 		}
 
@@ -789,25 +780,23 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			try
 			{
 				if (await userCreatedEventRepo.AddUserCreatedEventAsync(lowerCaseMessage, message.Chat.Id, token))
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkInBlockEmj}Мероприятие успешно добавлено!");
+					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessAddUserEvent);
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, $"{NegativeRedEmj}Мероприятие не добавлено! " +
-						$"Возможно мероприятие с данным названием сущестует.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorAddUserEvent);
 				}
 			}
 			catch (Exception)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Возникла ошибка при добавлении!\n" +
-					$"Проверьте правильность ввода данных.");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorAddUserEvent2);
 			}
 		}
 
@@ -816,7 +805,7 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			await botClient.SendTextMessageAsync(message.Chat.Id, HelpCommands);
@@ -827,10 +816,10 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			string[] messages = { ChangeUserName, "/chname/Николай", ChangeUserSName, "/chsname/Иванов", ChangeUserPatronymic, "/chpatr/Иванович", ChangeUserPhone, "/chphone/+79999999999" };
+			string[] messages = { ChangeUserNameInfo, ChangeUserNameExample, ChangeUserSNameInfo, ChangeUserSNameExample, ChangeUserPatronymicInfo, ChangeUserPatronymicExample, ChangeUserPhoneInfo, ChangeUserPhoneExample };
 			foreach (var mes in messages)
 				await botClient.SendTextMessageAsync(message.Chat.Id, mes);
 		}
@@ -840,16 +829,16 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			if (user.IsSubscribed)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, "Выбрана панель обычного пользователя.", replyMarkup: replyKeyboardUserNoSub);
+				await botClient.SendTextMessageAsync(message.Chat.Id, UserPanel, replyMarkup: replyKeyboardUserNoSub);
 			}
 			else
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, "Выбрана панель обычного пользователя.", replyMarkup: replyKeyboardUserSub);
+				await botClient.SendTextMessageAsync(message.Chat.Id, UserPanel, replyMarkup: replyKeyboardUserSub);
 			}
 		}
 
@@ -858,10 +847,10 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			await botClient.SendTextMessageAsync(message.Chat.Id, "Вы можете связаться с автором по:", replyMarkup: inlineAuthorKeyboard);
+			await botClient.SendTextMessageAsync(message.Chat.Id, AuthorInfo, replyMarkup: inlineAuthorKeyboard);
 		}
 
 		private async Task GetPlaceInfo(Message message, CancellationToken token)
@@ -869,7 +858,7 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			string Place = _configuration["Place"].Replace("{LabelEmj}", LabelEmj);
@@ -881,14 +870,14 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			await botClient.SendTextMessageAsync(message.Chat.Id, SNOInfo);
-			await botClient.SendTextMessageAsync(message.Chat.Id, $"/snoapp/Иванова Ивана Ивановича/ФАСК/РС-5/+79999999999/example@example.ru");
+			await botClient.SendTextMessageAsync(message.Chat.Id, SNOExample);
 
 			await botClient.SendTextMessageAsync(message.Chat.Id, SMUInfo);
-			await botClient.SendTextMessageAsync(message.Chat.Id, $"/smuapp/аспиранта/Иванова Ивана Ивановича/ТЭРЭО ВТ/Ваша научная степень/20.01.1994/+79999999999/example@example.ru");
+			await botClient.SendTextMessageAsync(message.Chat.Id, SMUExample);
 		}
 
 		private async Task GetUserStatus(Message message, CancellationToken token)
@@ -896,10 +885,10 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			await botClient.SendTextMessageAsync(message.Chat.Id, await tgUserInfoService.GetInfoAboutTgUserAsync(message.Chat.Id, token));
+			await botClient.SendTextMessageAsync(message.Chat.Id, await tgUserService.GetInfoAboutTgUserAsync(message.Chat.Id, token));
 		}
 
 		private async Task Unsubscribe(Message message, CancellationToken token)
@@ -907,11 +896,11 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			await telegramUserRepo.UpdateSubStatusTgUserAsync(message.Chat.Id, false, token);
-			await botClient.SendTextMessageAsync(message.Chat.Id, $"{SleepZzEmj}Вы успешно отписались от рассылки!", replyMarkup: replyKeyboardUserSub);
+			await botClient.SendTextMessageAsync(message.Chat.Id, UnSubscribe, replyMarkup: replyKeyboardUserSub);
 		}
 
 		private async Task Subscribe(Message message, CancellationToken token)
@@ -919,11 +908,11 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			await telegramUserRepo.UpdateSubStatusTgUserAsync(message.Chat.Id, true, token);
-			await botClient.SendTextMessageAsync(message.Chat.Id, $"{CheckMarkEmj}Вы успешно подписались на рассылку!", replyMarkup: replyKeyboardUserNoSub);
+			await botClient.SendTextMessageAsync(message.Chat.Id, Domain.Constants.TelegramTextConstants.Subscribe, replyMarkup: replyKeyboardUserNoSub);
 		}
 
 		private async Task GetUserEventsActions(Message message, CancellationToken token)
@@ -931,18 +920,18 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			await botClient.SendTextMessageAsync(message.Chat.Id, UserActionsList);
-			await botClient.SendTextMessageAsync(message.Chat.Id, UserAddEvent);
-			await botClient.SendTextMessageAsync(message.Chat.Id, "/adduserevent/Название 1/Москва/01.01.2024/True");
+			await botClient.SendTextMessageAsync(message.Chat.Id, AddUserEventInfo);
+			await botClient.SendTextMessageAsync(message.Chat.Id, AddUserEventExample);
 
-			await botClient.SendTextMessageAsync(message.Chat.Id, UserChangeEvent);
-			await botClient.SendTextMessageAsync(message.Chat.Id, "/updateuserevent/Название 1/Москва/01.01.2024/True/11ce84c9-08ba-487d-89ac-97cd166111fc");
+			await botClient.SendTextMessageAsync(message.Chat.Id, UserChangeEventInfo);
+			await botClient.SendTextMessageAsync(message.Chat.Id, UserChangeEventExample);
 
-			await botClient.SendTextMessageAsync(message.Chat.Id, UserDeleteEvent);
-			await botClient.SendTextMessageAsync(message.Chat.Id, "/deleteuserevent/11ce84c9-08ba-487d-89ac-97cd166111fc");
+			await botClient.SendTextMessageAsync(message.Chat.Id, DeleteUserEventInfo);
+			await botClient.SendTextMessageAsync(message.Chat.Id, DeleteUserEventExample);
 		}
 
 		private async Task GetCalendarEvents(Message message, CancellationToken token)
@@ -950,11 +939,11 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
 			string sendMessage = await scienceEventRepo.ReadAllActualEventsToStringAsync(token);
-			if (string.IsNullOrWhiteSpace(sendMessage)) sendMessage = $"{ButtonEmj}  На ближайшее время мероприятий не запланировано.";
+			if (string.IsNullOrWhiteSpace(sendMessage)) sendMessage = EventsAreEmpty;
 			await botClient.SendTextMessageAsync(message.Chat.Id, sendMessage);
 		}
 
@@ -980,19 +969,17 @@ namespace DiplomProject.Server.Services
 				var res = await telegramUserRepo.AddTgUserAsync(new TelegramUser(message.Chat.Id, name, surname, patronymic, phone, true, false), token);
 				if (!res)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{GreenCircleEmj} Телеграм бот уже активен.");
+					await botClient.SendTextMessageAsync(message.Chat.Id, TgBotIsActive);
 					return;
 				}
 				else
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id,
-						$"{GreenCircleEmj} Данные успешно добавлены.", replyMarkup: replyKeyboardUserNoSub);
+					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessRegistration, replyMarkup: replyKeyboardUserNoSub);
 				}
 			}
 			catch (Exception)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{AlertEmj}Ошибка. Проверьте правильность ввода.");
+				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorRegisterTgUser);
 			}
 		}
 
@@ -1007,11 +994,11 @@ namespace DiplomProject.Server.Services
 			if (user is null)
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText3, replyMarkup: replyKeyboardUserSub);
-				await botClient.SendTextMessageAsync(message.Chat.Id, "/addinfo/Иван/Иванов/Иванович/+79999999999");
+				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 			}
 			else
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, $"{GreenCircleEmj} Телеграм бот уже активен.", replyMarkup: replyKeyboardUserNoSub);
+				await botClient.SendTextMessageAsync(message.Chat.Id, TgBotIsActive, replyMarkup: replyKeyboardUserNoSub);
 				await telegramUserRepo.UpdateSubStatusTgUserAsync(message.Chat.Id, true, token);
 			}
 		}

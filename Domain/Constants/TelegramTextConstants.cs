@@ -33,15 +33,15 @@ namespace Domain.Constants
 					$"{ButtonEmj} Изменить участие в мероприятии\n" +
 					$"{NegativeRedEmj} Удалить участие в мероприятии";
 
-		public const string UserAddEvent = "Для добавления участия в мероприятии придерживайтесь следующей конструкции:\n" +
+		public const string AddUserEventInfo = "Для добавления участия в мероприятии придерживайтесь следующей конструкции:\n" +
 					"/adduserevent/Название мероприятия/Место проведения/Дата проведения/Статус призера (указываете true или false)\n" +
 					$"{RedCircleEmj}Пример:";
 
-		public const string UserChangeEvent = "Для изменения участия в мероприятии придерживайтесь следующей конструкции:\n" +
+		public const string UserChangeEventInfo = "Для изменения участия в мероприятии придерживайтесь следующей конструкции:\n" +
 					"/updateuserevent/Название мероприятия/Место проведения/Дата проведения/Статус призера (указываете true или false)/Номер мероприятия\n" +
 					$"{YellowCircleEmj}Пример:";
 
-		public const string UserDeleteEvent = "Для удаления участия в мероприятии придерживайтесь следующей конструкции:\n" +
+		public const string DeleteUserEventInfo = "Для удаления участия в мероприятии придерживайтесь следующей конструкции:\n" +
 					"/deleteuserevent/Номер мероприятия\n" +
 					$"{GreenCircleEmj}Пример:";
 
@@ -59,16 +59,16 @@ namespace Domain.Constants
 		public const string Error = $"{AlertEmj}Возникла ошибка.\n" +
 						"Пожалуйста, введите команду: /start";
 
-		public const string ChangeUserName = $"{RedCircleEmj}Для изменения имени введите команду:\n" +
+		public const string ChangeUserNameInfo = $"{RedCircleEmj}Для изменения имени введите команду:\n" +
 					$"/chname/Ваше имя\nПример:";
 
-		public const string ChangeUserSName = $"{YellowCircleEmj}Для изменения фамилии введите команду:\n" +
+		public const string ChangeUserSNameInfo = $"{YellowCircleEmj}Для изменения фамилии введите команду:\n" +
 					$"/chsname/Ваша фамилия\nПример:";
 
-		public const string ChangeUserPatronymic = $"{GreenCircleEmj}Для изменения отчества введите команду:\n" +
+		public const string ChangeUserPatronymicInfo = $"{GreenCircleEmj}Для изменения отчества введите команду:\n" +
 					$"/chpatr/Ваше отчество\nПример:";
 
-		public const string ChangeUserPhone = $"{BlueCircleEmj}Для изменения номера телефона введите команду:\n" +
+		public const string ChangeUserPhoneInfo = $"{BlueCircleEmj}Для изменения номера телефона введите команду:\n" +
 					$"/chphone/Ваш номер телефона\nПример:";
 
 		public const string HelpCommands = $"{TabletEmj} Список команд пользователя:\n\n" +
@@ -86,18 +86,18 @@ namespace Domain.Constants
 		public const string AdminEventsActionsList = $"{TabletEmj} Форматы действий с мероприятиями:\n\n\n" +
 						$"{GreenCircleEmj} Формат добавления мероприятия:\n/addevent/Название события/Дата события/Место проведения/Требования к участнику/Дополнительная информация\nПример:";
 
-		public const string ChangeSEvent = $"{YellowCircleEmj} Формат изменения мероприятия:\n/chevent/Номер мероприятия/Название события/Дата события/Место проведения/Требования к участнику/Дополнительная информация\nПример:";
+		public const string ChangeAdminEventInfo = $"{YellowCircleEmj} Формат изменения мероприятия:\n/chevent/Номер мероприятия/Название события/Дата события/Место проведения/Требования к участнику/Дополнительная информация\nПример:";
 
-		public const string DeleteSEvent = $"{RedCircleEmj} Формат удаления мероприятия:\n/deleteevent/номер события\nПример:";
+		public const string DeleteAdminEventInfo = $"{RedCircleEmj} Формат удаления мероприятия:\n/deleteevent/номер события\nПример:";
 
 		public const string NoRules = $"{AlertEmj}У вас нет прав администратора.";
 
-		public const string ChangeRights = "Для изменения прав администратора нужно:\n\n" +
+		public const string ChangeRightsInfo = "Для изменения прав администратора нужно:\n\n" +
 						$"{RedCircleEmj} Иметь права администратора\n" +
 						$"{GreenCircleEmj} Получить у пользователя номер чата (вызвать команду просмотра статусов !user)\n" +
 						$"{BlueCircleEmj} Вызвать команду /adminchadm/номер чата\nПример:";
 
-		public const string ChangePassword = $"{RedCircleEmj} Для изменения старого пароля проверьте, имеете ли вы права администратора.\n" +
+		public const string ChangePasswordInfo = $"{RedCircleEmj} Для изменения старого пароля проверьте, имеете ли вы права администратора.\n" +
 					$"{GreenCircleEmj} Далее воспользуйтесь командой /adminchpass/ваш пароль.\nПример:";
 
 		public const string AdminActionsList = $"{TabletEmj} Список команд администратора:\n\n" +
@@ -108,6 +108,66 @@ namespace Domain.Constants
 					"/addevent - добавление нового мероприятия\n" +
 					"/chevent - изменение ранее созданного мероприятия\n" +
 					"/deleteevent - удаление мероприятия";
-
+		public const string RegisterTgUser = "/addinfo/Иван/Иванов/Иванович/+79999999999";
+		public const string ErrorRegisterTgUser = $"{AlertEmj}Ошибка. Проверьте правильность ввода.";
+		public const string TgBotIsActive = $"{GreenCircleEmj} Телеграм бот уже активен.";
+		public const string SuccessRegistration = $"{GreenCircleEmj} Данные успешно добавлены.";
+		public const string EventsAreEmpty = $"{ButtonEmj}  На ближайшее время мероприятий не запланировано.";
+		public const string AddUserEventExample = "/adduserevent/Название 1/Москва/01.01.2024/True";
+		public const string UserChangeEventExample = "/updateuserevent/Название 1/Москва/01.01.2024/True/11ce84c9-08ba-487d-89ac-97cd166111fc";
+		public const string DeleteUserEventExample = "/deleteuserevent/11ce84c9-08ba-487d-89ac-97cd166111fc";
+		public const string Subscribe = $"{CheckMarkEmj}Вы успешно подписались на рассылку!";
+		public const string UnSubscribe = $"{SleepZzEmj}Вы успешно отписались от рассылки!";
+		public const string SNOExample = $"/snoapp/Иванова Ивана Ивановича/ФАСК/РС-5/+79999999999/example@example.ru";
+		public const string SMUExample = $"/smuapp/аспиранта/Иванова Ивана Ивановича/ТЭРЭО ВТ/Ваша научная степень/20.01.1994/+79999999999/example@example.ru";
+		public const string AuthorInfo = "Вы можете связаться с автором по:";
+		public const string UserPanel = "Выбрана панель обычного пользователя.";
+		public const string ChangeUserNameExample = "/chname/Николай";
+		public const string ChangeUserSNameExample = "/chsname/Иванов";
+		public const string ChangeUserPatronymicExample = "/chpatr/Иванович";
+		public const string ChangeUserPhoneExample = "/chphone/+79999999999";
+		public const string SuccessAddUserEvent = $"{CheckMarkInBlockEmj}Мероприятие успешно добавлено!";
+		public const string SuccessUpdateUserEvent = $"{CheckMarkInBlockEmj}Мероприятие успешно изменено!";
+		public const string SuccessDeleteUserEvent = $"{CheckMarkInBlockEmj}Мероприятие успешно удалено!\n";
+		public const string ErrorAddUserEvent = $"{NegativeRedEmj}Мероприятие не добавлено! Возможно мероприятие с данным названием сущестует.";
+		public const string ErrorUpdateUserEvent = $"{NegativeRedEmj}Мероприятие не изменено! Проверьте на правильность ввода данных и повтор названия.";
+		public const string ErrorDeleteUserEvent = $"{NegativeRedEmj}Мероприятие не удалено! Проверьте правильность ввода данных.";
+		public const string ErrorAddUserEvent2 = $"{AlertEmj}Возникла ошибка при добавлении!\nПроверьте правильность ввода данных.";
+		public const string ErrorUpdateUserEvent2 = $"{AlertEmj}Возникла ошибка при изменении!\nПроверьте правильность ввода данных.";
+		public const string ErrorDeleteUserEvent2 = $"{AlertEmj}Возникла ошибка при удалении!\nПроверьте правильность введенного номера мероприятия.";
+		public const string ErrorChangeName = $"{RedCircleEmj} Ошибка! Проверьте правильность введенного имени.";
+		public const string ErrorChangeName2 = $"{AlertEmj}Возникла ошибка при изменении имени!\nПожалуйста, проверьте отправленные вами данные.";
+		public const string ErrorChangeSName = $"{RedCircleEmj} Ошибка! Проверьте правильность введенной фамилии.";
+		public const string ErrorChangeSName2 = $"{AlertEmj}Возникла ошибка при изменении фамилии!\nПожалуйста, проверьте отправленные вами данные.";
+		public const string ErrorChangePatronymic = $"{RedCircleEmj} Ошибка! Проверьте правильность введенного отчества.";
+		public const string ErrorChangePatronymic2 = $"{AlertEmj}Возникла ошибка при изменении отчества!\nПожалуйста, проверьте отправленные вами данные.";
+		public const string ErrorChangePhone = $"{RedCircleEmj} Ошибка! Проверьте правильность введенного номера телефона.";
+		public const string ErrorChangePhone2 = $"{AlertEmj}Возникла ошибка при изменении номера телефона!\nПожалуйста, проверьте отправленные вами данные.";
+		public const string ErrorDocumentCreation = $"{AlertEmj}Возникла ошибка при создании документа!\nПожалуйста, проверьте отправленные вами данные.";
+		public const string AdminPanel = "Выбрана админ-панель.";
+		public const string EmptyAdminCalendarEvents = $"{ButtonEmj}  На ближайшее время мероприятий не запланировано.";
+		public const string AddAdminEventExample = $"/addevent/Событие 1/01.01.2024/Москва/нет/Хорошее мероприятие";
+		public const string ChangeAdminEventExample = $"/chevent/1e3eca14-90b2-459c-8471-58c9c9cc4462/Событие 1/01.01.2024/Москва/нет/Хорошее мероприятие";
+		public const string DeleteAdminEventExample = $"/deleteevent/1e3eca14-90b2-459c-8471-58c9c9cc4462";
+		public const string ChangeRightsExample = "/adminchadm/1";
+		public const string ChangePasswordExample = "/adminchpass/newpassword";
+		public const string ErrorChangePassword = $"{RedCircleEmj} Ошибка при изменении пароля!";
+		public const string SuccessChangePassword = $"{CheckMarkEmj} Пароль успешно изменен!";
+		public const string ErrorChangePassword2 = $"{AlertEmj}Возникла ошибка при изменении пароля. Проверьте правильность ввода.";
+		public const string SuccessChangeRights = $"{CheckMarkInBlockEmj} Права администратора успешно изменены!";
+		public const string ErrorChangeRights = $"{AlertEmj} Права администратора изменить не удалось.\nВозможно у вас отсутствуют права администратора, либо отсутсвует такой идентификатор чата, либо вы пытаетесь изменить свои права.";
+		public const string ErrorChangeRights2 = $"{AlertEmj} Возникла ошибка при изменении прав. Проверьте правильность ввода.";
+		public const string ErrorAddAdminEvent = $"{AlertEmj} Мероприятие с таким названием уже существует!";
+		public const string ErrorAddAdminEvent2 = $"{AlertEmj} Возникла ошибка при добавлении мероприятия. Пожалуйста, проверьте правильность ввода мероприятия.";
+		public const string SuccessAddAdminEvent = $"{CheckMarkEmj} Мероприятие успешно добавлено!";
+		public const string NewEventNotification = $"{GreenCircleEmj} Новое мероприятие!";
+		public const string ErrorChangeAdminEvent = $"{AlertEmj} Номера такого мероприятия не существует, либо название мероприятия повторяется, либо неверно указана дата мероприятия.";
+		public const string ErrorChangeAdminEvent2 = $"{AlertEmj} Возникла ошибка при изменении мероприятия. Пожалуйста, проверьте правильность ввода мероприятия.";
+		public const string SuccessChangeAdminEvent = $"{CheckMarkEmj} Мероприятие успешно изменено!";
+		public const string ChangeEventNotification = $"{RedCircleEmj} Внимание! Изменения!";
+		public const string ErrorDeleteAdminEvent = $"{AlertEmj} Такого мероприятия не существует!";
+		public const string ErrorDeleteAdminEvent2 = $"{AlertEmj} Возникла ошибка при удалении мероприятия. Пожалуйста, проверьте правильность введенного id.";
+		public const string SuccessDeleteAdminEvent = $"{CheckMarkEmj} Мероприятие успешно отменено!";
+		public const string DeleteEventNotification = $"{NegativeRedEmj} Мероприятие отменено!";
 	}
 }
