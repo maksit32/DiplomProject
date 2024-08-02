@@ -25,7 +25,7 @@ namespace Domain.Repositories.Interfaces
 		Task<bool> UpdateEventRequirementsAsync(string name, string require, CancellationToken token);
 		Task<bool> UpdateEventInformationAsync(string name, string information, CancellationToken token);
 		Task<ScienceEvent?> UpdateFullEventAsync(string lowerCaseMessage, CancellationToken token);
-		Task UpdateFullEventAsync(ScienceEvent sEvent, CancellationToken token);
+		Task<ScienceEvent?> UpdateFullEventAsync(ScienceEvent sEvent, CancellationToken token);
 		Task<ScienceEvent?> DeleteEventByIdAsync(string lowerCaseMessage, CancellationToken token);
 		Task DeleteEventByIdAsync(Guid Id, CancellationToken token);
 		Task<bool> DeleteEventByNameAsync(string name, CancellationToken token);

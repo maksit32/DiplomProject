@@ -38,7 +38,6 @@ namespace API
 				//добавляем внешний json файл (путь из секретов)
 				builder.Configuration.AddJsonFile(builder.Configuration["TelegramTextConstantsPath"], optional: true, reloadOnChange: true);
 
-
 				var botConfigSection = builder.Configuration.GetSection("BotConfiguration");
 				builder.Services.Configure<BotConfiguration>(botConfigSection);
 				builder.Services.AddHttpClient("tgwebhook").RemoveAllLoggers().AddTypedClient<ITelegramBotClient>(

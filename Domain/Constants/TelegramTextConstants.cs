@@ -109,6 +109,5 @@ namespace Domain.Constants
 					"/chevent - изменение ранее созданного мероприятия\n" +
 					"/deleteevent - удаление мероприятия";
 
-
 	}
 }

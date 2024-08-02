@@ -339,25 +339,20 @@ namespace DiplomProject.Server.Repositories
 			return await ScienceEvents.FirstOrDefaultAsync(e => e.Id == Id);
 		}
 
-		public async Task UpdateFullEventAsync(ScienceEvent sEvent, CancellationToken token)
+		public async Task<ScienceEvent?> UpdateFullEventAsync(ScienceEvent sEvent, CancellationToken token)
 		{
-			var oldEvent = await ScienceEvents.FirstOrDefaultAsync(e => e.Id == sEvent.Id);
-			if (oldEvent is null) return;
-
-			oldEvent.NameEvent = sEvent.NameEvent;
-			oldEvent.DateEvent = sEvent.DateEvent;
-			oldEvent.PlaceEvent = sEvent.PlaceEvent;
-			oldEvent.RequirementsEvent = sEvent.RequirementsEvent;
-			oldEvent.InformationEvent = sEvent.InformationEvent;
-			oldEvent.DateEventCreated = sEvent.DateEventCreated;
-
-			await _dbContext.SaveChangesAsync(token);
+			if (sEvent != null)
+			{
+				_dbContext.Update(sEvent);
+				await _dbContext.SaveChangesAsync(token);
+			}
+			return sEvent;
 		}
 
 		public async Task DeleteEventByIdAsync(Guid Id, CancellationToken token)
 		{
 			var evt = await ScienceEvents.FirstOrDefaultAsync(e => e.Id == Id);
-			if(evt is null) return;
+			if (evt is null) return;
 
 			ScienceEvents.Remove(evt);
 			await _dbContext.SaveChangesAsync(token);
