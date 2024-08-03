@@ -22,6 +22,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Domain.Enums;
 
+
 using static Domain.Helpers.EnumExtensions;
 using static Domain.Constants.TelegramTextConstants;
 using static Domain.Constants.EmojiConstants;
@@ -32,7 +33,8 @@ namespace DiplomProject.Server.Services
 {
 	public class UpdateHandler(ITelegramBotClient botClient, ILogger<UpdateHandler> logger, ITelegramUserRepository telegramUserRepo,
 		IScienceEventRepository scienceEventRepo, INotifyService notifyService, IUserCreatedEventRepository userCreatedEventRepo,
-		IFillDataService fillDataService, IPasswordHasherService passwordHasherService, ITgUserService tgUserService, IConfiguration _configuration) : IUpdateHandler
+		IFillDataService fillDataService, IPasswordHasherService passwordHasherService, ITgUserService tgUserService,
+		IScienceEventService scienceEventService, IUserCreatedEventService userCreatedEventService, IConfiguration _configuration) : IUpdateHandler
 	{
 		private TelegramUser? user = null;
 		#region [Paths]
@@ -309,16 +311,10 @@ namespace DiplomProject.Server.Services
 			{
 				try
 				{
-					var res = await scienceEventRepo.DeleteEventByIdAsync(lowerCaseMessage, token);
-					if (res == null)
-					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, ErrorDeleteAdminEvent);
-					}
-					else
-					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, SuccessDeleteAdminEvent);
-						await notifyService.NotifyEventChangingUsersAsync(res, DeleteEventNotification, token);
-					}
+					var delSEvent = await scienceEventService.CreateDeleteAdminEvent(user, lowerCaseMessage, token);
+					await scienceEventRepo.DeleteEventAsync(delSEvent, token);
+					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessDeleteAdminEvent);
+					await notifyService.NotifyEventChangingUsersAsync(delSEvent, DeleteEventNotification, token);
 				}
 				catch (Exception)
 				{
@@ -343,13 +339,8 @@ namespace DiplomProject.Server.Services
 			{
 				try
 				{
-					string messageToSend = lowerCaseMessage + "/" + message.Chat.Id;
-					var updEvent = await scienceEventRepo.UpdateFullEventAsync(messageToSend, token);
-					if (updEvent == null)
-					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeAdminEvent);
-						return;
-					}
+					var updEvent = await scienceEventService.CreateUpdateAdminEvent(user, lowerCaseMessage, token);
+					await scienceEventRepo.UpdateFullEventAsync(updEvent, token);
 					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessChangeAdminEvent);
 					await notifyService.NotifyEventChangingUsersAsync(updEvent, ChangeEventNotification, token);
 				}
@@ -376,13 +367,8 @@ namespace DiplomProject.Server.Services
 			{
 				try
 				{
-					string messageToSend = lowerCaseMessage + "/" + message.Chat.Id;
-					var result = await scienceEventRepo.AddEventAsync(messageToSend, token);
-					if (!result)
-					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, ErrorAddAdminEvent);
-						return;
-					}
+					var newEvent = scienceEventService.CreateAddAdminEvent(user, lowerCaseMessage, token);
+					await scienceEventRepo.AddEventAsync(newEvent, token);
 					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessAddAdminEvent);
 					await notifyService.NotifyLastAddEventUsersAsync(NewEventNotification, token);
 				}
@@ -409,12 +395,13 @@ namespace DiplomProject.Server.Services
 			{
 				try
 				{
-					var res = await telegramUserRepo.UpdateAdminStatusTgUserAsync(lowerCaseMessage, message.Chat.Id, token);
-					await botClient.SendTextMessageAsync(message.Chat.Id, res ? SuccessChangeRights : ErrorChangeRights);
+					var userToUpdate = await tgUserService.ChangeAdminStatusAction(user, lowerCaseMessage, token);
+					await telegramUserRepo.UpdateTgUserAsync(userToUpdate, token);
+					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessChangeRights);
 				}
 				catch (Exception)
 				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeRights2);
+					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeRights);
 				}
 			}
 			else
@@ -435,17 +422,11 @@ namespace DiplomProject.Server.Services
 			{
 				try
 				{
-					string password = lowerCaseMessage.Replace("/adminchpass", "").Replace("/", "").Replace(" ", "");
-					if (String.IsNullOrWhiteSpace(password))
-					{
-						await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangePassword);
-						return;
-					}
-
-					string hashedPassword = passwordHasherService.HashPassword(password);
-					bool res = await telegramUserRepo.UpdatePasswordTgUserAsync(hashedPassword, message.Chat.Id, token);
-					if (res) await botClient.SendTextMessageAsync(message.Chat.Id, SuccessChangePassword);
-					else await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangePassword);
+					string noHashedPassword = tgUserService.GetNoHashedPasswordAction(lowerCaseMessage, token);
+					string hashedPassword = passwordHasherService.HashPassword(noHashedPassword);
+					tgUserService.ChangeAdminPasswordAction(user, hashedPassword, token);
+					await telegramUserRepo.UpdateTgUserAsync(user, token);
+					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessChangePassword);
 				}
 				catch (Exception)
 				{
@@ -466,14 +447,7 @@ namespace DiplomProject.Server.Services
 				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			if (user.IsAdmin)
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, AdminActionsList);
-			}
-			else
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
-			}
+			await (user.IsAdmin ? botClient.SendTextMessageAsync(message.Chat.Id, AdminActionsList) : botClient.SendTextMessageAsync(message.Chat.Id, NoRules));
 		}
 
 		private async Task ChangeAdminPasswordInfo(Message message, CancellationToken token)
@@ -524,15 +498,9 @@ namespace DiplomProject.Server.Services
 			}
 			if (user.IsAdmin)
 			{
-				//massive
-				await botClient.SendTextMessageAsync(message.Chat.Id, AdminEventsActionsList);
-				await botClient.SendTextMessageAsync(message.Chat.Id, AddAdminEventExample);
-
-				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeAdminEventInfo);
-				await botClient.SendTextMessageAsync(message.Chat.Id, ChangeAdminEventExample);
-
-				await botClient.SendTextMessageAsync(message.Chat.Id, DeleteAdminEventInfo);
-				await botClient.SendTextMessageAsync(message.Chat.Id, DeleteAdminEventExample);
+				string[] messages = { AdminEventsActionsList, AddAdminEventExample, ChangeAdminEventInfo, ChangeAdminEventExample, DeleteAdminEventInfo, DeleteAdminEventExample };
+				foreach (var mess in messages)
+					await botClient.SendTextMessageAsync(message.Chat.Id, mess);
 			}
 			else
 			{
@@ -550,7 +518,7 @@ namespace DiplomProject.Server.Services
 			}
 			if (user.IsAdmin)
 			{
-				string sendMessage = await scienceEventRepo.ReadAllActualEvAdminToStringAsync(token);
+				string sendMessage = await scienceEventService.ReadAllActualEvAdminToStringAsync(token);
 				if (string.IsNullOrWhiteSpace(sendMessage)) sendMessage = EmptyAdminCalendarEvents;
 				await botClient.SendTextMessageAsync(message.Chat.Id, sendMessage);
 			}
@@ -568,14 +536,7 @@ namespace DiplomProject.Server.Services
 				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			if (user.IsAdmin)
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, AdminPanel, replyMarkup: replyKeyboardAdmin);
-			}
-			else
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, NoRules);
-			}
+			await (user.IsAdmin ? botClient.SendTextMessageAsync(message.Chat.Id, AdminPanel, replyMarkup: replyKeyboardAdmin) : botClient.SendTextMessageAsync(message.Chat.Id, NoRules));
 		}
 
 		private async Task FillSMUData(Message message, string lowerCaseMessage, CancellationToken token)
@@ -626,16 +587,9 @@ namespace DiplomProject.Server.Services
 			}
 			try
 			{
-				if (lowerCaseMessage == "/chphone")
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangePhone);
-					return;
-				}
-				string phone = lowerCaseMessage.Replace("/chphone/", "");
-				phone.Replace(" ", "");
-
-				string mess = await telegramUserRepo.UpdatePhoneTgUserAsync(message.Chat.Id, phone, token);
-				await botClient.SendTextMessageAsync(message.Chat.Id, mess);
+				tgUserService.ChangeUserPhoneAction(user, lowerCaseMessage, token);
+				await telegramUserRepo.UpdateTgUserAsync(user, token);
+				await botClient.SendTextMessageAsync(message.Chat.Id, SuccessPhoneUpdate);
 			}
 			catch (Exception)
 			{
@@ -653,16 +607,9 @@ namespace DiplomProject.Server.Services
 			}
 			try
 			{
-				if (lowerCaseMessage == "/chpatr")
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangePatronymic);
-					return;
-				}
-				string patr = lowerCaseMessage.Replace("/chpatr/", "");
-				patr.Replace(" ", "");
-
-				string mess = await telegramUserRepo.UpdatePatrTgUserAsync(message.Chat.Id, patr, token);
-				await botClient.SendTextMessageAsync(message.Chat.Id, mess);
+				tgUserService.ChangeUserPatronymicAction(user, lowerCaseMessage, token);
+				await telegramUserRepo.UpdateTgUserAsync(user, token);
+				await botClient.SendTextMessageAsync(message.Chat.Id, SuccessPatronymicUpdate);
 			}
 			catch (Exception)
 			{
@@ -680,16 +627,9 @@ namespace DiplomProject.Server.Services
 			}
 			try
 			{
-				if (lowerCaseMessage == "/chsname")
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeSName);
-					return;
-				}
-				string sName = lowerCaseMessage.Replace("/chsname/", "");
-				sName.Replace(" ", "");
-
-				string mess = await telegramUserRepo.UpdateSNameTgUserAsync(message.Chat.Id, sName, token);
-				await botClient.SendTextMessageAsync(message.Chat.Id, mess);
+				tgUserService.ChangeUserSNameAction(user, lowerCaseMessage, token);
+				await telegramUserRepo.UpdateTgUserAsync(user, token);
+				await botClient.SendTextMessageAsync(message.Chat.Id, SuccessSNameUpdate);
 			}
 			catch (Exception)
 			{
@@ -707,16 +647,9 @@ namespace DiplomProject.Server.Services
 			}
 			try
 			{
-				if (lowerCaseMessage == "/chname")
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorChangeName);
-					return;
-				}
-				string name = lowerCaseMessage.Replace("/chname/", "");
-				name.Replace(" ", "");
-
-				string mess = await telegramUserRepo.UpdateNameTgUserAsync(message.Chat.Id, name, token);
-				await botClient.SendTextMessageAsync(message.Chat.Id, mess);
+				tgUserService.ChangeUserNameAction(user, lowerCaseMessage, token);
+				await telegramUserRepo.UpdateTgUserAsync(user, token);
+				await botClient.SendTextMessageAsync(message.Chat.Id, SuccessNameUpdate);
 			}
 			catch (Exception)
 			{
@@ -734,15 +667,9 @@ namespace DiplomProject.Server.Services
 			}
 			try
 			{
-				var deletedEvent = await userCreatedEventRepo.DeleteUserCreatedEventByIdAsync(lowerCaseMessage, message.Chat.Id, token);
-				if (deletedEvent is not null)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessDeleteUserEvent + deletedEvent.ToString());
-				}
-				else
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorDeleteUserEvent);
-				}
+				var deletedEvent = await userCreatedEventService.CreateDeleteUserEventAsync(user, lowerCaseMessage, token);
+				await userCreatedEventRepo.DeleteUserCreatedEvent(deletedEvent, token);
+				await botClient.SendTextMessageAsync(message.Chat.Id, SuccessDeleteUserEvent + deletedEvent.ToString());
 			}
 			catch (Exception)
 			{
@@ -760,14 +687,9 @@ namespace DiplomProject.Server.Services
 			}
 			try
 			{
-				if (await userCreatedEventRepo.UpdateUserCreatedEventAsync(lowerCaseMessage, message.Chat.Id, token))
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessUpdateUserEvent);
-				}
-				else
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorUpdateUserEvent);
-				}
+				var updatedEv = await userCreatedEventService.CreateUpdateUserEventAsync(user, lowerCaseMessage, token);
+				await userCreatedEventRepo.UpdateUserCreatedEventAsync(updatedEv, token);
+				await botClient.SendTextMessageAsync(message.Chat.Id, SuccessUpdateUserEvent);
 			}
 			catch (Exception)
 			{
@@ -785,18 +707,13 @@ namespace DiplomProject.Server.Services
 			}
 			try
 			{
-				if (await userCreatedEventRepo.AddUserCreatedEventAsync(lowerCaseMessage, message.Chat.Id, token))
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessAddUserEvent);
-				}
-				else
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, ErrorAddUserEvent);
-				}
+				var ev = userCreatedEventService.CreateAddUserEvent(user, lowerCaseMessage, token);
+				await userCreatedEventRepo.AddUserCreatedEventAsync(ev, token);
+				await botClient.SendTextMessageAsync(message.Chat.Id, SuccessAddUserEvent);
 			}
 			catch (Exception)
 			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorAddUserEvent2);
+				await botClient.SendTextMessageAsync(message.Chat.Id, ErrorAddUserEvent);
 			}
 		}
 
@@ -832,14 +749,7 @@ namespace DiplomProject.Server.Services
 				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			if (user.IsSubscribed)
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, UserPanel, replyMarkup: replyKeyboardUserNoSub);
-			}
-			else
-			{
-				await botClient.SendTextMessageAsync(message.Chat.Id, UserPanel, replyMarkup: replyKeyboardUserSub);
-			}
+			await (user.IsSubscribed ? botClient.SendTextMessageAsync(message.Chat.Id, UserPanel, replyMarkup: replyKeyboardUserNoSub) : botClient.SendTextMessageAsync(message.Chat.Id, UserPanel, replyMarkup: replyKeyboardUserSub));
 		}
 
 		private async Task GetAuthorContacts(Message message, CancellationToken token)
@@ -861,8 +771,7 @@ namespace DiplomProject.Server.Services
 				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			string Place = _configuration["Place"].Replace("{LabelEmj}", LabelEmj);
-			await botClient.SendTextMessageAsync(message.Chat.Id, Place);
+			await botClient.SendTextMessageAsync(message.Chat.Id, _configuration["Place"].Replace("{LabelEmj}", LabelEmj));
 		}
 
 		private async Task StatementsInfo(Message message, CancellationToken token)
@@ -873,11 +782,9 @@ namespace DiplomProject.Server.Services
 				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			await botClient.SendTextMessageAsync(message.Chat.Id, SNOInfo);
-			await botClient.SendTextMessageAsync(message.Chat.Id, SNOExample);
-
-			await botClient.SendTextMessageAsync(message.Chat.Id, SMUInfo);
-			await botClient.SendTextMessageAsync(message.Chat.Id, SMUExample);
+			string[] messages = { SNOInfo, SNOExample, SMUInfo, SMUExample };
+			foreach (var mess in messages)
+				await botClient.SendTextMessageAsync(message.Chat.Id, mess);
 		}
 
 		private async Task GetUserStatus(Message message, CancellationToken token)
@@ -899,7 +806,8 @@ namespace DiplomProject.Server.Services
 				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			await telegramUserRepo.UpdateSubStatusTgUserAsync(message.Chat.Id, false, token);
+			tgUserService.UpdateSubStatus(user, false, token);
+			await telegramUserRepo.UpdateTgUserAsync(user, token);
 			await botClient.SendTextMessageAsync(message.Chat.Id, UnSubscribe, replyMarkup: replyKeyboardUserSub);
 		}
 
@@ -911,7 +819,8 @@ namespace DiplomProject.Server.Services
 				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			await telegramUserRepo.UpdateSubStatusTgUserAsync(message.Chat.Id, true, token);
+			tgUserService.UpdateSubStatus(user, true, token);
+			await telegramUserRepo.UpdateTgUserAsync(user, token);
 			await botClient.SendTextMessageAsync(message.Chat.Id, Domain.Constants.TelegramTextConstants.Subscribe, replyMarkup: replyKeyboardUserNoSub);
 		}
 
@@ -923,15 +832,9 @@ namespace DiplomProject.Server.Services
 				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			await botClient.SendTextMessageAsync(message.Chat.Id, UserActionsList);
-			await botClient.SendTextMessageAsync(message.Chat.Id, AddUserEventInfo);
-			await botClient.SendTextMessageAsync(message.Chat.Id, AddUserEventExample);
-
-			await botClient.SendTextMessageAsync(message.Chat.Id, UserChangeEventInfo);
-			await botClient.SendTextMessageAsync(message.Chat.Id, UserChangeEventExample);
-
-			await botClient.SendTextMessageAsync(message.Chat.Id, DeleteUserEventInfo);
-			await botClient.SendTextMessageAsync(message.Chat.Id, DeleteUserEventExample);
+			string[] messages = { UserActionsList, AddUserEventInfo, AddUserEventExample, UserChangeEventInfo, UserChangeEventExample, DeleteUserEventInfo, DeleteUserEventExample };
+			foreach (var mess in messages)
+				await botClient.SendTextMessageAsync(message.Chat.Id, mess);
 		}
 
 		private async Task GetCalendarEvents(Message message, CancellationToken token)
@@ -942,7 +845,7 @@ namespace DiplomProject.Server.Services
 				await botClient.SendTextMessageAsync(message.Chat.Id, RegisterTgUser);
 				return;
 			}
-			string sendMessage = await scienceEventRepo.ReadAllActualEventsToStringAsync(token);
+			string sendMessage = await scienceEventService.ReadAllActualEventsToStringAsync(token);
 			if (string.IsNullOrWhiteSpace(sendMessage)) sendMessage = EventsAreEmpty;
 			await botClient.SendTextMessageAsync(message.Chat.Id, sendMessage);
 		}
@@ -951,31 +854,9 @@ namespace DiplomProject.Server.Services
 		{
 			try
 			{
-				string str = lowerCaseMessage.Replace("/addinfo/", "");
-				var lst = str.Split("/");
-
-				string name = Char.ToUpper(lst[0][0]) + lst[0].Substring(1);
-				string surname = Char.ToUpper(lst[1][0]) + lst[1].Substring(1);
-				string patronymic = Char.ToUpper(lst[2][0]) + lst[2].Substring(1);
-				string phone = lst[3];
-
-				// Валидация
-				if (!Regex.IsMatch(phone, @"^\+7\d{10}$"))
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, InvalidNumber);
-					return;
-				}
-
-				var res = await telegramUserRepo.AddTgUserAsync(new TelegramUser(message.Chat.Id, name, surname, patronymic, phone, true, false), token);
-				if (!res)
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, TgBotIsActive);
-					return;
-				}
-				else
-				{
-					await botClient.SendTextMessageAsync(message.Chat.Id, SuccessRegistration, replyMarkup: replyKeyboardUserNoSub);
-				}
+				var newUser = tgUserService.CreateUser(message.Chat.Id, lowerCaseMessage, token);
+				var res = await telegramUserRepo.AddTgUserAsync(newUser, token);
+				await (res ? botClient.SendTextMessageAsync(message.Chat.Id, SuccessRegistration, replyMarkup: replyKeyboardUserNoSub) : botClient.SendTextMessageAsync(message.Chat.Id, TgBotIsActive));
 			}
 			catch (Exception)
 			{
@@ -985,11 +866,9 @@ namespace DiplomProject.Server.Services
 
 		private async Task Welcome(Message message, string messageText, CancellationToken token)
 		{
-			string WelcomeText1 = _configuration["WelcomeText1"].Replace("{PlaneEmj}", PlaneEmj).Replace("{AlertEmj}", AlertEmj);
-			string WelcomeText2 = _configuration["WelcomeText2"].Replace("{AlertEmj}", AlertEmj);
-
-			await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText1);
-			await botClient.SendTextMessageAsync(message.Chat.Id, WelcomeText2);
+			string[] textArray = { _configuration["WelcomeText1"].Replace("{PlaneEmj}", PlaneEmj).Replace("{AlertEmj}", AlertEmj), _configuration["WelcomeText2"].Replace("{AlertEmj}", AlertEmj) };
+			foreach (var text in textArray)
+				await botClient.SendTextMessageAsync(message.Chat.Id, text);
 
 			if (user is null)
 			{
@@ -999,7 +878,8 @@ namespace DiplomProject.Server.Services
 			else
 			{
 				await botClient.SendTextMessageAsync(message.Chat.Id, TgBotIsActive, replyMarkup: replyKeyboardUserNoSub);
-				await telegramUserRepo.UpdateSubStatusTgUserAsync(message.Chat.Id, true, token);
+				tgUserService.UpdateSubStatus(user, true, token);
+				await telegramUserRepo.UpdateTgUserAsync(user, token);
 			}
 		}
 

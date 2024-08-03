@@ -18,46 +18,6 @@ namespace DiplomProject.Server.Repositories
 		{
 			_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 		}
-
-		public async Task<bool> AddEventAsync(string lowerCaseMessage, CancellationToken token)
-		{
-			if (string.IsNullOrWhiteSpace(lowerCaseMessage))
-			{
-				throw new ArgumentException($"\"{nameof(lowerCaseMessage)}\" не может быть пустым или содержать только пробел.", nameof(lowerCaseMessage));
-			}
-
-			lowerCaseMessage = lowerCaseMessage.Replace("/addevent/", "");
-			var dataArray = lowerCaseMessage.Split("/");
-
-
-			//NameEvent
-			string nameEvent = char.ToUpper(dataArray[0][0]) + dataArray[0].Substring(1);
-			//DateEvent
-			var cultureInfo = new CultureInfo("ru-RU");
-			DateTime dateEventLocal = DateTime.Parse(dataArray[1], cultureInfo);
-			// Преобразование в UTC
-			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
-			if (dateEventUtc < DateTime.UtcNow) { throw new IrrelevatDateTimeException($"{AlertEmj}Неверно указана дата события!"); }
-			//PlaceEvent
-			string placeEvent = char.ToUpper(dataArray[2][0]) + dataArray[2].Substring(1);
-			//Requirement
-			string requirement = dataArray[3];
-			//Information
-			string information = dataArray[4];
-			//ChatId
-			long chatId = long.Parse(dataArray[5]);
-			ScienceEvent sEvent = new ScienceEvent(nameEvent, dateEventUtc, placeEvent, requirement, information, chatId);
-
-
-			if (ScienceEvents.ToList().Exists(e => e.NameEvent.ToLower() == sEvent.NameEvent.ToLower()))
-			{
-				return false;
-			}
-
-			await ScienceEvents.AddAsync(sEvent);
-			await _dbContext.SaveChangesAsync(token);
-			return true;
-		}
 		public async Task<List<ScienceEvent>> ReadAllEventsAsync(CancellationToken token)
 		{
 			return await ScienceEvents.ToListAsync();
@@ -73,32 +33,6 @@ namespace DiplomProject.Server.Repositories
 			foreach (var e in events)
 			{
 				messageToSend += e.ToString();
-			}
-			return messageToSend;
-		}
-		public async Task<string> ReadAllActualEventsToStringAsync(CancellationToken token)
-		{
-			var events = await ScienceEvents.ToListAsync();
-			string messageToSend = "";
-			foreach (var e in events)
-			{
-				if (e.DateEvent > DateTime.UtcNow)
-				{
-					messageToSend += e.ToString();
-				}
-			}
-			return messageToSend;
-		}
-		public async Task<string> ReadAllActualEvAdminToStringAsync(CancellationToken token)
-		{
-			var events = await ScienceEvents.ToListAsync();
-			string messageToSend = "";
-			foreach (var e in events)
-			{
-				if (e.DateEvent > DateTime.UtcNow)
-				{
-					messageToSend += e.ToStringAdmin();
-				}
 			}
 			return messageToSend;
 		}
@@ -229,80 +163,6 @@ namespace DiplomProject.Server.Repositories
 			await _dbContext.SaveChangesAsync(token);
 			return true;
 		}
-		public async Task<ScienceEvent?> UpdateFullEventAsync(string lowerCaseMessage, CancellationToken token)
-		{
-			if (string.IsNullOrWhiteSpace(lowerCaseMessage))
-			{
-				throw new ArgumentException($"\"{nameof(lowerCaseMessage)}\" не может быть пустым или содержать только пробел.", nameof(lowerCaseMessage));
-			}
-
-			lowerCaseMessage = lowerCaseMessage.Replace("/chevent/", "");
-			var dataArray = lowerCaseMessage.Split("/");
-
-			//IdEvent
-			Guid idEvent = Guid.Parse(dataArray[0]);
-			//NameEvent
-			string nameEvent = char.ToUpper(dataArray[1][0]) + dataArray[1].Substring(1);
-			//проверка на повтор названия
-			if (ScienceEvents.ToList().Exists(e => e.NameEvent.ToLower() == nameEvent.ToLower() && e.Id != idEvent))
-			{
-				return null;
-			}
-			//DateEvent
-			var cultureInfo = new CultureInfo("ru-RU");
-			DateTime dateEventLocal = DateTime.Parse(dataArray[2], cultureInfo);
-			// Преобразование в UTC
-			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
-			if (dateEventUtc < DateTime.UtcNow) { throw new IrrelevatDateTimeException($"{AlertEmj} Неверно указана дата события!"); }
-			//PlaceEvent
-			string placeEvent = char.ToUpper(dataArray[3][0]) + dataArray[3].Substring(1);
-			//Requirement
-			string requirement = dataArray[4];
-			//Information
-			string information = dataArray[5];
-			//ChatId
-			long chatId = long.Parse(dataArray[6]);
-
-
-			//получаем старое мероприятие и меняем его значения
-			var sEvent = await GetScienceEventByIdAsync(idEvent);
-			if (sEvent == null) return null;
-
-
-			sEvent.NameEvent = nameEvent;
-			sEvent.DateEvent = dateEventUtc;
-			sEvent.PlaceEvent = placeEvent;
-			sEvent.RequirementsEvent = requirement;
-			sEvent.InformationEvent = information;
-			sEvent.DateEventCreated = DateTime.UtcNow;
-			sEvent.AddByAdminChatId = chatId;
-
-
-			await _dbContext.SaveChangesAsync(token);
-			return sEvent;
-		}
-		public async Task<ScienceEvent?> DeleteEventByIdAsync(string lowerCaseMessage, CancellationToken token)
-		{
-			if (string.IsNullOrWhiteSpace(lowerCaseMessage))
-			{
-				throw new ArgumentException($"\"{nameof(lowerCaseMessage)}\" не может быть пустым или содержать только пробел.", nameof(lowerCaseMessage));
-			}
-
-			lowerCaseMessage = lowerCaseMessage.Replace("/deleteevent/", "");
-			lowerCaseMessage.Replace(" ", "");
-			Guid id = Guid.Parse(lowerCaseMessage);
-
-
-			var sEvent = await GetScienceEventByIdAsync(id);
-			var noticeObject = sEvent;
-			if (sEvent is not null)
-			{
-				ScienceEvents.Remove(sEvent);
-				await _dbContext.SaveChangesAsync(token);
-				return noticeObject;
-			}
-			return null;
-		}
 		public async Task<bool> DeleteEventByNameAsync(string name, CancellationToken token)
 		{
 			if (string.IsNullOrWhiteSpace(name))
@@ -330,6 +190,8 @@ namespace DiplomProject.Server.Repositories
 
 		public async Task AddEventAsync(ScienceEvent newEvent, CancellationToken token)
 		{
+			if (newEvent is null) throw new ArgumentNullException(nameof(newEvent));
+
 			await ScienceEvents.AddAsync(newEvent, token);
 			await _dbContext.SaveChangesAsync(token);
 		}
@@ -339,14 +201,12 @@ namespace DiplomProject.Server.Repositories
 			return await ScienceEvents.FirstOrDefaultAsync(e => e.Id == Id);
 		}
 
-		public async Task<ScienceEvent?> UpdateFullEventAsync(ScienceEvent sEvent, CancellationToken token)
+		public async Task UpdateFullEventAsync(ScienceEvent sEvent, CancellationToken token)
 		{
-			if (sEvent != null)
-			{
-				_dbContext.Update(sEvent);
-				await _dbContext.SaveChangesAsync(token);
-			}
-			return sEvent;
+			if (sEvent is null) throw new ArgumentNullException(nameof(sEvent));
+
+			_dbContext.Update(sEvent);
+			await _dbContext.SaveChangesAsync(token);
 		}
 
 		public async Task DeleteEventByIdAsync(Guid Id, CancellationToken token)
@@ -355,6 +215,14 @@ namespace DiplomProject.Server.Repositories
 			if (evt is null) return;
 
 			ScienceEvents.Remove(evt);
+			await _dbContext.SaveChangesAsync(token);
+		}
+
+		public async Task DeleteEventAsync(ScienceEvent sEvent, CancellationToken token)
+		{
+			if (sEvent is null) throw new ArgumentNullException(nameof(sEvent));
+
+			ScienceEvents.Remove(sEvent);
 			await _dbContext.SaveChangesAsync(token);
 		}
 	}

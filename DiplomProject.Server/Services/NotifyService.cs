@@ -15,13 +15,12 @@ namespace DiplomProject.Server.Services
 {
 	public class NotifyService : INotifyService
 	{
-		private readonly ITelegramUserRepository tgUserRepo;
-		private readonly IScienceEventRepository scienceEventRepo;
-		private readonly IUserCreatedEventRepository userCreatedEvRepo;
+		private readonly ITelegramUserRepository _tgUserRepo;
+		private readonly IScienceEventRepository _scienceEventRepo;
 		private ITelegramBotClient _botClient;
 
 
-		public NotifyService(ITelegramBotClient botClient, ITelegramUserRepository repo1, IScienceEventRepository repo2, IUserCreatedEventRepository userCreatedEvRepo)
+		public NotifyService(ITelegramBotClient botClient, ITelegramUserRepository repo1, IScienceEventRepository repo2)
 		{
 			if (botClient == null) throw new ArgumentNullException("ITelegramBotClient is null");
 			if (repo1 == null) throw new ArgumentNullException("TelegramUserDb is null");
@@ -29,9 +28,8 @@ namespace DiplomProject.Server.Services
 
 
 			_botClient = botClient;
-			tgUserRepo = repo1;
-			scienceEventRepo = repo2;
-			this.userCreatedEvRepo = userCreatedEvRepo;
+			_tgUserRepo = repo1;
+			_scienceEventRepo = repo2;
 		}
 
 		//специльно для экстренного оповещения ВСЕХ пользователей (собрания, перезагрузка бота итд)
@@ -42,9 +40,9 @@ namespace DiplomProject.Server.Services
 				throw new ArgumentException($"\"{nameof(notifyMessage)}\" не может быть пустым или содержать только пробел.", nameof(notifyMessage));
 			}
 
-			if (tgUserRepo == null) throw new NullReferenceException(nameof(tgUserRepo));
+			if (_tgUserRepo == null) throw new NullReferenceException(nameof(_tgUserRepo));
 
-			var tgUsersList = await tgUserRepo.GetUsersListAsync(token);
+			var tgUsersList = await _tgUserRepo.GetUsersListAsync(token);
 
 			foreach (var tgUser in tgUsersList)
 			{
@@ -59,7 +57,7 @@ namespace DiplomProject.Server.Services
 			}
 
 			//отправляем всем кто подписан
-			var subUsersGroup = await tgUserRepo.GetSubUsersListAsync(token);
+			var subUsersGroup = await _tgUserRepo.GetSubUsersListAsync(token);
 			foreach (var subUser in subUsersGroup)
 			{
 				await WriteToTgUserAsync(_botClient, subUser.TgChatId, notifyMessage);
@@ -69,15 +67,13 @@ namespace DiplomProject.Server.Services
 		public async Task NotifyLastAddEventUsersAsync(string notifyMessage, CancellationToken token)
 		{
 			if (string.IsNullOrWhiteSpace(notifyMessage))
-			{
 				throw new ArgumentException($"\"{nameof(notifyMessage)}\" не может быть пустым или содержать только пробел.", nameof(notifyMessage));
-			}
 
-			if (tgUserRepo == null) throw new NullReferenceException(nameof(tgUserRepo));
-
+			if (_tgUserRepo == null) 
+				throw new NullReferenceException(nameof(_tgUserRepo));
 
 			//находим событие
-			var lastCreatedEvent = await scienceEventRepo.GetLastCreatedEventAsync(token);
+			var lastCreatedEvent = await _scienceEventRepo.GetLastCreatedEventAsync(token);
 			if (lastCreatedEvent == null) return;
 
 
@@ -101,9 +97,9 @@ namespace DiplomProject.Server.Services
 			{
 				throw new ArgumentException($"\"{nameof(notifyMessage)}\" не может быть пустым или содержать только пробел.", nameof(notifyMessage));
 			}
-			if (tgUserRepo == null) throw new NullReferenceException(nameof(tgUserRepo));
+			if (_tgUserRepo == null) throw new NullReferenceException(nameof(_tgUserRepo));
 
-			var adminTgUsers = await tgUserRepo.GetAdminUsersListAsync(token);
+			var adminTgUsers = await _tgUserRepo.GetAdminUsersListAsync(token);
 
 			foreach (var adminTgUser in adminTgUsers)
 			{

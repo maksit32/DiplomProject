@@ -17,6 +17,9 @@ namespace DiplomProject.Server.Services
 
 		public string HashPassword(string password)
 		{
+			if (string.IsNullOrWhiteSpace(password))
+				throw new ArgumentException($"\"{nameof(password)}\" не может быть пустым или содержать только пробел.", nameof(password));
+
 			return _passwordHasher.HashPassword(null!, password);
 		}
 

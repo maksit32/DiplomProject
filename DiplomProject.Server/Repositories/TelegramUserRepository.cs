@@ -37,7 +37,14 @@ namespace DiplomProject.Server.Repositories
 			await _dbContext.SaveChangesAsync(token);
 			return true;
 		}
+		public async Task UpdateTgUserAsync(TelegramUser user, CancellationToken token)
+		{
+			if (user is null)
+				throw new ArgumentNullException(nameof(user));
 
+			TelegramUsers.Update(user);
+			await _dbContext.SaveChangesAsync(token);
+		}
 		public async Task<bool> UpdateSubStatusTgUserAsync(long chatId, bool subStatus, CancellationToken token)
 		{
 			if (chatId < 0) throw new ArgumentOutOfRangeException(nameof(chatId));
@@ -60,33 +67,6 @@ namespace DiplomProject.Server.Repositories
 
 			await _dbContext.SaveChangesAsync(token);
 			return true;
-		}
-		public async Task<bool> UpdateAdminStatusTgUserAsync(string lowerCaseMessage, long senderChatId, CancellationToken token)
-		{
-			if (string.IsNullOrWhiteSpace(lowerCaseMessage))
-			{
-				throw new ArgumentException($"\"{nameof(lowerCaseMessage)}\" не может быть пустым или содержать только пробел.", nameof(lowerCaseMessage));
-			}
-
-			if (senderChatId < 0) throw new ArgumentOutOfRangeException(nameof(senderChatId));
-
-			lowerCaseMessage = lowerCaseMessage.Replace("/adminchadm/", "");
-			lowerCaseMessage.Replace(" ", "");
-
-			long chatId = long.Parse(lowerCaseMessage);
-
-			var _sender = await GetTgUserByIdAsync(senderChatId, token);
-			var _user = await GetTgUserByIdAsync(chatId, token);
-			if (_sender == null || _user == null) return false;
-
-			if (_sender.IsAdmin && senderChatId != chatId)
-			{
-				_user.IsAdmin = !_user.IsAdmin;
-
-				await _dbContext.SaveChangesAsync(token);
-				return true;
-			}
-			return false;
 		}
 		public async Task<string> UpdateNameTgUserAsync(long chatId, string newName, CancellationToken token)
 		{
@@ -235,20 +215,6 @@ namespace DiplomProject.Server.Repositories
 		public async Task<List<TelegramUser>> GetUsersListAsync(CancellationToken token)
 		{
 			return await TelegramUsers.ToListAsync();
-		}
-		public async Task UpdateTgUserAsync(TelegramUser newUser, CancellationToken token)
-		{
-			var _user = await GetTgUserByIdAsync(newUser.Id, token);
-			if (_user == null) return;
-
-			_user.Name = newUser.Name;
-			_user.Surname = newUser.Surname;
-			_user.Patronymic = newUser.Patronymic;
-			_user.PhoneNumber = newUser.PhoneNumber;
-			_user.IsSubscribed = newUser.IsSubscribed;
-			_user.IsAdmin = newUser.IsAdmin;
-
-			await _dbContext.SaveChangesAsync(token);
 		}
 		public async Task<bool> CheckLastTimeMessageAsync(long chatId, CancellationToken token)
 		{

@@ -61,6 +61,8 @@ namespace API
 				builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
 				builder.Services.AddScoped<INotifyService, NotifyService>();
 				builder.Services.AddScoped<ITgUserService, TgUserService>();
+				builder.Services.AddScoped<IScienceEventService, ScienceEventService>();
+				builder.Services.AddScoped<IUserCreatedEventService, UserCreatedEventService>();
 				builder.Services.AddSingleton<IFillDataService, FillDocxOpenXMLDataService>();
 
 
