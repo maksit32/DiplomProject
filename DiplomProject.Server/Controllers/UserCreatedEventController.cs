@@ -1,11 +1,13 @@
 ﻿using Domain.Entities;
 using Domain.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
+	[Authorize]
 	[Route("api/usercreatedevents")]
 	public class UserCreatedEventController : ControllerBase
 	{

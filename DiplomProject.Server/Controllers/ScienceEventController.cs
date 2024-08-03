@@ -1,12 +1,14 @@
 ﻿using Domain.Entities;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
+	[Authorize]
 	[Route("api/scienceevents")]
 	public class ScienceEventController : ControllerBase
 	{

@@ -1,12 +1,14 @@
 ﻿using Domain.Entities;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.InteropServices;
 
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
+	[Authorize]
 	[Route("api/tgusers")]
 	public class TelegramUserController : ControllerBase
 	{

@@ -7,11 +7,14 @@ using Domain.Models;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Core;
+using System.Text;
 using Telegram.Bot;
 
 
@@ -57,12 +60,13 @@ namespace API
 				builder.Services.AddScoped<IUserCreatedEventRepository, UserCreatedEventRepository>();
 				builder.Services.AddScoped<ITelegramUserRepository, TelegramUserRepository>();
 				builder.Services.AddScoped<IScienceEventRepository, ScienceEventRepository>();
-				builder.Services.AddScoped<IPasswordHasher<TelegramUser>, PasswordHasher<TelegramUser>>();
 				builder.Services.AddScoped<IPasswordHasherService, PasswordHasherService>();
 				builder.Services.AddScoped<INotifyService, NotifyService>();
 				builder.Services.AddScoped<ITgUserService, TgUserService>();
 				builder.Services.AddScoped<IScienceEventService, ScienceEventService>();
 				builder.Services.AddScoped<IUserCreatedEventService, UserCreatedEventService>();
+				builder.Services.AddScoped<IJwtService, JwtService>();
+				builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 				builder.Services.AddSingleton<IFillDataService, FillDocxOpenXMLDataService>();
 
 
@@ -75,6 +79,27 @@ namespace API
 											| HttpLoggingFields.RequestBody
 											| HttpLoggingFields.ResponseBody;
 				});
+				builder.Services.AddAuthentication(options =>
+				{
+					options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+					options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+				})
+				.AddJwtBearer(options =>
+				{
+					options.TokenValidationParameters = new TokenValidationParameters
+					{
+						ValidateIssuer = true,
+						ValidateAudience = true,
+						ValidateLifetime = true,
+						ValidateIssuerSigningKey = true,
+						ValidIssuer = builder.Configuration["Jwt:Issuer"],
+						ValidAudience = builder.Configuration["Jwt:Audience"],
+						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+					};
+				});
+				builder.Services.AddAuthorization();
+
+				//middleware
 				var app = builder.Build();
 				app.UseHttpsRedirection();
 				app.UseHttpLogging();
