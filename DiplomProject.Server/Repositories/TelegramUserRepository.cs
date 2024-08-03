@@ -105,6 +105,10 @@ namespace DiplomProject.Server.Repositories
 		{
 			return await TelegramUsers.FirstOrDefaultAsync(e => e.TgChatId == chatId);
 		}
+		public async Task<TelegramUser?> GetTgUserByPhoneAsync(string phoneNumber, CancellationToken token)
+		{
+			return await TelegramUsers.FirstOrDefaultAsync(e => e.PhoneNumber == phoneNumber);
+		}
 		public async Task<TelegramUser?> GetTgUserByIdAsync(Guid Id, CancellationToken token)
 		{
 			return await TelegramUsers.FirstOrDefaultAsync(e => e.Id == Id);

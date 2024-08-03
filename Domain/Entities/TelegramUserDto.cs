@@ -8,12 +8,12 @@ namespace Domain.Entities
 {
 	public class TelegramUserDto
 	{
-        public long ChatId { get; set; }
+        public string PhoneNumber { get; set; }
         public string Password { get; set; }
 
-        public TelegramUserDto(long chatId, string password)
+        public TelegramUserDto(string phoneNumber, string password)
         {
-            ChatId = chatId;
+            PhoneNumber = phoneNumber;
             Password = password;
         }
     }

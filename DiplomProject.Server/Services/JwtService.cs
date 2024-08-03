@@ -15,11 +15,11 @@ namespace DiplomProject.Server.Services
 		{
 			_configuration = configuration;
 		}
-		public string GenerateJwtToken(long chatId)
+		public string GenerateJwtToken(string phoneNumber)
 		{
 			var claims = new[]
 			{
-				new Claim(JwtRegisteredClaimNames.Sub, chatId.ToString()),
+				new Claim(JwtRegisteredClaimNames.Sub, phoneNumber),
 				new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 			};
 

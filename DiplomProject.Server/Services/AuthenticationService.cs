@@ -20,11 +20,11 @@ namespace DiplomProject.Server.Services
 
 		public async Task<string> AuthenticateUserAsync(TelegramUserDto login, CancellationToken ct)
 		{
-			var user = await _telegramUserRepository.GetTgUserByIdAsync(login.ChatId, ct);
+			var user = await _telegramUserRepository.GetTgUserByPhoneAsync(login.PhoneNumber, ct);
 			if (user == null || !_passwordHasherService.VerifyPassword(user.HashedPassword, login.Password))
 				return string.Empty;
 
-			return _jwtService.GenerateJwtToken(login.ChatId);
+			return _jwtService.GenerateJwtToken(login.PhoneNumber);
 		}
 	}
 }

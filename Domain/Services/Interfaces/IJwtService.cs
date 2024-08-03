@@ -8,6 +8,6 @@ namespace Domain.Services.Interfaces
 {
 	public interface IJwtService
 	{
-		string GenerateJwtToken(long chatId);
+		string GenerateJwtToken(string phoneNumber);
 	}
 }
