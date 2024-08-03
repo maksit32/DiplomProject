@@ -12,7 +12,6 @@ namespace DiplomProject.Server.Repositories
 	{
 		private readonly DiplomDbContext _dbContext;
 		private DbSet<UserCreatedEvent> UserCreatedEvents => _dbContext.Set<UserCreatedEvent>();
-		private DbSet<TelegramUser> TelegramUsers => _dbContext.Set<TelegramUser>();
 
 
 		public UserCreatedEventRepository(DiplomDbContext dbContext)
@@ -41,9 +40,9 @@ namespace DiplomProject.Server.Repositories
 		{
 			return await UserCreatedEvents.ToListAsync(token);
 		}
-		public async Task<List<UserCreatedEvent>> ReadAllUserEventsAsync(Guid Id, CancellationToken token)
+		public async Task<List<UserCreatedEvent>> ReadAllUserEventsAsync(Guid UserId, CancellationToken token)
 		{
-			return await UserCreatedEvents.Where(e => e.TgUser.Id == Id).ToListAsync(token);
+			return await UserCreatedEvents.Where(e => e.TgUser.Id == UserId).ToListAsync(token);
 		}
 		public async Task DeleteUserCreatedEventByIdAsync(Guid Id, CancellationToken token)
 		{
@@ -64,14 +63,6 @@ namespace DiplomProject.Server.Repositories
 			if (ev is null) throw new ArgumentNullException("event is null!");
 			UserCreatedEvents.Remove(ev);
 			await _dbContext.SaveChangesAsync(token);
-		}
-		private async Task<TelegramUser?> GetTgUserByIdAsync(long chatId)
-		{
-			return await TelegramUsers.FirstOrDefaultAsync(e => e.TgChatId == chatId);
-		}
-		private async Task<TelegramUser?> GetTgUserByIdAsync(Guid Id)
-		{
-			return await TelegramUsers.FirstOrDefaultAsync(e => e.Id == Id);
 		}
 	}
 }

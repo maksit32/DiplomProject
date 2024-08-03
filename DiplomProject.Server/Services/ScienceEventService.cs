@@ -100,7 +100,7 @@ namespace DiplomProject.Server.Services
 			string information = dataArray[5];
 
 			//получаем старое мероприятие и меняем его значения
-			var sEvent = await _scienceEventRepository.GetScienceEventById(idEvent, token);
+			var sEvent = await _scienceEventRepository.GetScienceEventByIdAsync(idEvent, token);
 			if (sEvent == null) return null;
 
 			sEvent.NameEvent = nameEvent;
@@ -123,7 +123,7 @@ namespace DiplomProject.Server.Services
 			lowerCaseMessage = lowerCaseMessage.Replace("/deleteevent/", "").Replace(" ", "");
 			Guid id = Guid.Parse(lowerCaseMessage);
 
-			var sEvent = await _scienceEventRepository.GetScienceEventById(id, token);
+			var sEvent = await _scienceEventRepository.GetScienceEventByIdAsync(id, token);
 			return sEvent is not null ? sEvent : null;
 		}
 	}

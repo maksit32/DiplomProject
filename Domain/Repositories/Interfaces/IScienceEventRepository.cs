@@ -13,17 +13,9 @@ namespace Domain.Repositories.Interfaces
 		Task AddEventAsync(ScienceEvent newEvent, CancellationToken token);
 		Task<List<ScienceEvent>> ReadAllEventsAsync(CancellationToken token);
 		Task<List<ScienceEvent>> ReadAllActualEventsAsync(CancellationToken token);
-		Task<ScienceEvent?> GetScienceEventById(Guid Id, CancellationToken token);
-		Task<ScienceEvent?> ReadScienceEventByIdAsync(Guid id, CancellationToken token);
-		Task<ScienceEvent?> ReadScienceEventByNameAsync(string name, CancellationToken token);
-		Task<bool> UpdateEventNameAsync(string oldName, string newName, CancellationToken token);
-		Task<bool> UpdateEventDateAsync(string name, DateTime newDate, CancellationToken token);
-		Task<bool> UpdateEventPlaceAsync(string name, string place, CancellationToken token);
-		Task<bool> UpdateEventRequirementsAsync(string name, string require, CancellationToken token);
-		Task<bool> UpdateEventInformationAsync(string name, string information, CancellationToken token);
+		Task<ScienceEvent?> GetScienceEventByIdAsync(Guid Id, CancellationToken token);
 		Task UpdateFullEventAsync(ScienceEvent sEvent, CancellationToken token);
 		Task DeleteEventByIdAsync(Guid Id, CancellationToken token);
-		Task<bool> DeleteEventByNameAsync(string name, CancellationToken token);
 		Task DeleteEventAsync(ScienceEvent sEvent, CancellationToken token);
 		Task<ScienceEvent?> GetLastCreatedEventAsync(CancellationToken token);
 	}

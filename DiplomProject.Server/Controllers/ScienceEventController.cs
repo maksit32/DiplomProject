@@ -52,7 +52,7 @@ namespace DiplomProject.Server.Controllers
 		{
 			try
 			{
-				var scEvent = await _scEventsRepo.GetScienceEventById(id, token);
+				var scEvent = await _scEventsRepo.GetScienceEventByIdAsync(id, token);
 				if (scEvent == null) return NotFound();
 
 				return scEvent;

@@ -13,7 +13,7 @@ namespace Domain.Repositories.Interfaces
 		Task AddUserCreatedEventAsync(UserCreatedEvent userCreatedEvent, CancellationToken token);
 		Task<List<UserCreatedEvent>> ReadAllEventsAsync(CancellationToken token);
 		Task<List<UserCreatedEvent>> ReadAllUserEventsAsync(TelegramUser tgUser, CancellationToken token);
-		Task<List<UserCreatedEvent>> ReadAllUserEventsAsync(Guid Id, CancellationToken token);
+		Task<List<UserCreatedEvent>> ReadAllUserEventsAsync(Guid UserId, CancellationToken token);
 		Task UpdateUserCreatedEventAsync(UserCreatedEvent newEvent, CancellationToken token);
 		Task<UserCreatedEvent?> GetUserCreatedEventByIdAsync(Guid uEventId, CancellationToken token);
 		Task DeleteUserCreatedEvent(UserCreatedEvent ev,  CancellationToken token);

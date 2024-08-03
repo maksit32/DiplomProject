@@ -40,7 +40,7 @@ namespace DiplomProject.Server.Services
 			UserCreatedEvent uEvent = new UserCreatedEvent(nameEvent, placeEvent, dateEventUtc, isWinner, user);
 
 			//проверка на уже добавленное ранее событие этим пользователем
-			if (_userCreatedEventRepository.ReadAllUserEventsAsync(user, token).Result.Exists(e => e.NameEvent.ToLower() == uEvent.NameEvent.ToLower() && e.TgUser.Id == user.Id))
+			if (_userCreatedEventRepository.ReadAllUserEventsAsync(user, token).Result.Exists(e => e.NameEvent.ToLower() == uEvent.NameEvent.ToLower()))
 				return null;
 
 			return uEvent;
