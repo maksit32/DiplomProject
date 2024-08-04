@@ -10,7 +10,6 @@ namespace Domain.Services.Interfaces
 	public interface ITgUserService
 	{
 		Task<string> GetInfoAboutTgUserAsync(long chatId, CancellationToken token);
-		TelegramUser HashTelegramUser(TelegramUser user, CancellationToken token);
 		TelegramUser? CreateUser(long chatId, string lowerCaseMessage, CancellationToken token);
 		void UpdateSubStatus(TelegramUser user, bool status, CancellationToken token);
 		void ChangeUserNameAction(TelegramUser user, string lowerCaseMessage, CancellationToken token);

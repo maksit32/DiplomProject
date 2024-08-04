@@ -16,12 +16,15 @@ namespace DiplomProject.Server.Services
 		private readonly ITelegramUserRepository _tgUserRepo;
 		private readonly IUserCreatedEventRepository _userCreatedEvRepo;
 		private readonly IPasswordHasherService _passwordHasherService;
+		private readonly IValidationService _validationService;
 
-		public TgUserService(ITelegramUserRepository tgUserRepo, IUserCreatedEventRepository userCreatedEvRepo, IPasswordHasherService passwordHasherService)
+		public TgUserService(ITelegramUserRepository tgUserRepo, IValidationService validationService, 
+			IUserCreatedEventRepository userCreatedEvRepo, IPasswordHasherService passwordHasherService)
 		{
-			_tgUserRepo = tgUserRepo ?? throw new ArgumentNullException("tgUserRepo is null!");
-			_userCreatedEvRepo = userCreatedEvRepo ?? throw new ArgumentNullException("userCreatedEvRepo is null!");
-			_passwordHasherService = passwordHasherService ?? throw new ArgumentNullException("passwordHasherService is null!");
+			_tgUserRepo = tgUserRepo ?? throw new ArgumentNullException(nameof(tgUserRepo));
+			_userCreatedEvRepo = userCreatedEvRepo ?? throw new ArgumentNullException(nameof(userCreatedEvRepo));
+			_passwordHasherService = passwordHasherService ?? throw new ArgumentNullException(nameof(passwordHasherService));
+			_validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
 		}
 		public async Task<string> GetInfoAboutTgUserAsync(long chatId, CancellationToken token)
 		{
@@ -38,14 +41,6 @@ namespace DiplomProject.Server.Services
 			}
 			return $"{GreenCircleEmj} Статус подписки:	{tgUser.IsSubscribed}\n{YellowCircleEmj} Фамилия: {tgUser.Surname}\n{BrownCircleEmj} Имя: {tgUser.Name}\n{YellowCircleEmj} Отчество: {tgUser.Patronymic}\n{BrownCircleEmj} Номер телефона: {tgUser.PhoneNumber}\n{RedCircleEmj} Статус админа:	{tgUser.IsAdmin}\n{BlueCircleEmj} Номер чата:	{tgUser.TgChatId}\nУчастие в мероприятиях:\n\n{evString}";
 		}
-		public TelegramUser HashTelegramUser(TelegramUser user, CancellationToken token)
-		{
-			if (user is null) throw new ArgumentNullException("User is null!");
-
-			var hashedPass = _passwordHasherService.HashPassword(user.HashedPassword);
-			user.HashedPassword = hashedPass;
-			return user;
-		}
 		public TelegramUser? CreateUser(long chatId, string lowerCaseMessage, CancellationToken token)
 		{
 			string str = lowerCaseMessage.Replace("/addinfo/", "");
@@ -56,15 +51,14 @@ namespace DiplomProject.Server.Services
 			string patronymic = Char.ToUpper(lst[2][0]) + lst[2].Substring(1);
 			string phone = lst[3];
 
-			// Валидация
-			if (!Regex.IsMatch(phone, @"^\+7\d{10}$"))
-				return null;
+			TelegramUser newUser =  new TelegramUser(chatId, name, surname, patronymic, phone, true, false);
+			_validationService.ValidateTgUser(newUser, token);
 
-			return new TelegramUser(chatId, name, surname, patronymic, phone, true, false);
+			return newUser;
 		}
 		public void UpdateSubStatus(TelegramUser user, bool status, CancellationToken token)
 		{
-			if (user is null) throw new ArgumentNullException("user");
+			if (user is null) throw new ArgumentNullException(nameof(user));
 			user.IsSubscribed = status;
 		}
 		public void ChangeUserNameAction(TelegramUser user, string lowerCaseMessage, CancellationToken token)
@@ -116,10 +110,10 @@ namespace DiplomProject.Server.Services
 			if (lowerCaseMessage == "/chphone")
 				throw new ArgumentException(nameof(lowerCaseMessage));
 
-			string phone = lowerCaseMessage.Replace("/chphone/", "");
-			phone.Replace(" ", "");
-			string pattern = @"^\+7\d{10}$";
-			if(!Regex.IsMatch(phone, pattern)) throw new InvalidDataException(nameof(phone));
+			string phone = lowerCaseMessage.Replace("/chphone/", "").Replace(" ", "");
+
+			TelegramUser tmpUser = new TelegramUser(user.TgChatId, user.Name, user.Surname, user.Patronymic, phone);
+			_validationService.ValidateTgUser(tmpUser, token);
 
 			user.PhoneNumber = phone;
 		}

@@ -10,10 +10,13 @@ namespace DiplomProject.Server.Services
 	public class UserCreatedEventService : IUserCreatedEventService
 	{
 		private readonly IUserCreatedEventRepository _userCreatedEventRepository;
+		private readonly IValidationService _validationService;
 
-		public UserCreatedEventService(IUserCreatedEventRepository userCreatedEventRepository)
+
+		public UserCreatedEventService(IUserCreatedEventRepository userCreatedEventRepo, IValidationService validationService)
 		{
-			_userCreatedEventRepository = userCreatedEventRepository ?? throw new ArgumentNullException("userCreatedEventRepository is null!");
+			_userCreatedEventRepository = userCreatedEventRepo ?? throw new ArgumentNullException(nameof(userCreatedEventRepo));
+			_validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
 		}
 
 		public UserCreatedEvent? CreateAddUserEvent(TelegramUser user, string lowerCaseMessage, CancellationToken token)
@@ -33,11 +36,11 @@ namespace DiplomProject.Server.Services
 			DateTime dateEventLocal = DateTime.Parse(dataArr[2], cultureInfo);
 			// Преобразование в UTC
 			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
-			if(dateEventUtc > DateTime.UtcNow) return null;
 			//IsWinner
 			bool isWinner = bool.Parse(dataArr[3]);
 
 			UserCreatedEvent uEvent = new UserCreatedEvent(nameEvent, placeEvent, dateEventUtc, isWinner, user);
+			_validationService.ValidateUserCreatedEvent(uEvent, token);
 
 			//проверка на уже добавленное ранее событие этим пользователем
 			if (_userCreatedEventRepository.ReadAllUserEventsAsync(user, token).Result.Exists(e => e.NameEvent.ToLower() == uEvent.NameEvent.ToLower()))
@@ -62,11 +65,13 @@ namespace DiplomProject.Server.Services
 			DateTime dateEventLocal = DateTime.Parse(dataArr[2], cultureInfo);
 			// Преобразование в UTC
 			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
-			if (dateEventUtc > DateTime.UtcNow) return null;
 			//IsWinner
 			bool isWinner = bool.Parse(dataArr[3]);
 			//EventId
 			Guid eventId = Guid.Parse(dataArr[4]);
+
+			UserCreatedEvent updatedEv = new UserCreatedEvent(nameEvent, placeEvent, dateEventUtc, isWinner, user);
+			_validationService.ValidateUserCreatedEvent(updatedEv, token);
 
 			//проверка, что событие именно этого пользователя
 			var evToChange = await _userCreatedEventRepository.GetUserCreatedEventByIdAsync(eventId, token);

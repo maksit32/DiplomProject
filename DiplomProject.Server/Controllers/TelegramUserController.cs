@@ -14,11 +14,13 @@ namespace DiplomProject.Server.Controllers
 	{
 		private readonly ITelegramUserRepository _tgusersRepo;
 		private readonly ILogger<TelegramUserController> _logger;
+		private readonly IValidationService _validationService;
 
-		public TelegramUserController(ITelegramUserRepository tgUserRepo, ILogger<TelegramUserController> logger)
+		public TelegramUserController(ITelegramUserRepository tgUserRepo, IValidationService validationService, ILogger<TelegramUserController> logger)
 		{
 			_tgusersRepo = tgUserRepo ?? throw new ArgumentNullException(nameof(tgUserRepo));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
 		}
 
 		[HttpGet("get")]
@@ -104,12 +106,12 @@ namespace DiplomProject.Server.Controllers
 				return BadRequest();
 			}
 		}
-		//валидация нужна
 		[HttpPut("update")]
 		public async Task<ActionResult> UpdateTgUser([FromBody] TelegramUser user, CancellationToken token)
 		{
 			try
 			{
+				_validationService.ValidateTgUser(user, token);
 				await _tgusersRepo.UpdateTgUserAsync(user, token);
 				return Ok();
 			}

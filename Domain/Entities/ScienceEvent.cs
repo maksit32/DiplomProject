@@ -56,18 +56,6 @@ namespace Domain.Entities
 			DateEventCreated = DateTime.UtcNow;
 			AddByAdminChatId = addByAdminChatId;
 		}
-		//      public ScienceEvent(string lowerCaseMessage)
-		//      {
-		//	lowerCaseMessage = lowerCaseMessage.Replace("/chevent/", "");
-		//	var dataArray = lowerCaseMessage.Split("/");
-		//	Guid idEvent = Guid.Parse(dataArray[0]);
-		//	this.NameEvent = char.ToUpper(dataArray[1][0]) + dataArray[1].Substring(1);
-		//	this.DateEvent = DateTime.Parse(dataArray[2], new CultureInfo("ru-RU")).ToUniversalTime();
-		//	this.PlaceEvent = char.ToUpper(dataArray[3][0]) + dataArray[3].Substring(1);
-		//	this.RequirementsEvent = dataArray[4];
-		//	this.InformationEvent = dataArray[5];
-		//	this.AddByAdminChatId = long.Parse(dataArray[6]);
-		//}
 		public override string ToString()
 		{
 			return $"{ButtonEmj} Мероприятие:   {NameEvent}\nДата:   {DateEvent.ToLocalTime().ToShortDateString()}\nМесто проведения:\n{PlaceEvent}\nТребования:   {RequirementsEvent}\nДополнительная информация:\n{InformationEvent}\n\n";

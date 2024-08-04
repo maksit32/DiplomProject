@@ -18,12 +18,15 @@ namespace DiplomProject.Server.Controllers
 		private readonly IScienceEventRepository _scEventsRepo;
 		private readonly ILogger<ScienceEventController> _logger;
 		private readonly INotifyService _notificationService;
+		private readonly IValidationService _validationService;
 
-		public ScienceEventController(IScienceEventRepository scEvRepo, ILogger<ScienceEventController> logger, INotifyService notifyService)
+		public ScienceEventController(IScienceEventRepository scEvRepo, IValidationService validationService, 
+			ILogger<ScienceEventController> logger, INotifyService notifyService)
 		{
 			_scEventsRepo = scEvRepo ?? throw new ArgumentNullException(nameof(scEvRepo));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_notificationService = notifyService ?? throw new ArgumentNullException(nameof(notifyService));
+			_validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
 		}
 
 		[HttpGet("get")]
@@ -67,12 +70,12 @@ namespace DiplomProject.Server.Controllers
 				return NotFound();
 			}
 		}
-		//валидация нужна
 		[HttpPut("update")]
 		public async Task<ActionResult> UpdateScienceEvent([FromBody] ScienceEvent updatedEv, CancellationToken token)
 		{
 			try
 			{
+				_validationService.ValidateScienceEvent(updatedEv, token);
 				await _scEventsRepo.UpdateFullEventAsync(updatedEv, token);
 				await _notificationService.NotifyEventChangingUsersAsync(updatedEv, ChangeEventNotification, token);
 				return Ok();
@@ -82,12 +85,12 @@ namespace DiplomProject.Server.Controllers
 				return BadRequest();
 			}
 		}
-		//валидация нужна
 		[HttpPost("add")]
 		public async Task<ActionResult> AddScienceEvent([FromBody] ScienceEvent newEvent, CancellationToken token)
 		{
 			try
 			{
+				_validationService.ValidateScienceEvent(newEvent, token);
 				await _scEventsRepo.AddEventAsync(newEvent, token);
 				await _notificationService.NotifyLastAddEventUsersAsync(NewEventNotification, token);
 				return Created();

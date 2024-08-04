@@ -12,10 +12,12 @@ namespace DiplomProject.Server.Services
 	public class ScienceEventService : IScienceEventService
 	{
 		private readonly IScienceEventRepository _scienceEventRepository;
+		private readonly IValidationService _validationService;
 
-		public ScienceEventService(IScienceEventRepository scienceEventRepository)
+		public ScienceEventService(IScienceEventRepository scienceEventRepository, IValidationService validationService)
 		{
-			_scienceEventRepository = scienceEventRepository ?? throw new ArgumentNullException("scienceEventRepository is null!");
+			_scienceEventRepository = scienceEventRepository ?? throw new ArgumentNullException(nameof(scienceEventRepository));
+			_validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
 		}
 		public async Task<string> ReadAllActualEventsToStringAsync(CancellationToken token)
 		{
@@ -52,7 +54,6 @@ namespace DiplomProject.Server.Services
 			DateTime dateEventLocal = DateTime.Parse(dataArray[1], cultureInfo);
 			// Преобразование в UTC
 			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
-			if (dateEventUtc < DateTime.UtcNow) { throw new IrrelevatDateTimeException($"{AlertEmj}Неверно указана дата события!"); }
 			//PlaceEvent
 			string placeEvent = char.ToUpper(dataArray[2][0]) + dataArray[2].Substring(1);
 			//Requirement
@@ -60,12 +61,12 @@ namespace DiplomProject.Server.Services
 			//Information
 			string information = dataArray[4];
 			ScienceEvent sEvent = new ScienceEvent(nameEvent, dateEventUtc, placeEvent, requirement, information, user.TgChatId);
+			_validationService.ValidateScienceEvent(sEvent, token);
 
 
 			if (_scienceEventRepository.ReadAllActualEventsAsync(token).Result.ToList().Exists(e => e.NameEvent.ToLower() == sEvent.NameEvent.ToLower()))
-			{
 				return null;
-			}
+
 			return sEvent;
 		}
 		public async Task<ScienceEvent?> CreateUpdateAdminEvent(TelegramUser user, string lowerCaseMessage, CancellationToken token)
@@ -91,7 +92,6 @@ namespace DiplomProject.Server.Services
 			DateTime dateEventLocal = DateTime.Parse(dataArray[2], cultureInfo);
 			// Преобразование в UTC
 			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
-			if (dateEventUtc < DateTime.UtcNow) { throw new IrrelevatDateTimeException($"{AlertEmj} Неверно указана дата события!"); }
 			//PlaceEvent
 			string placeEvent = char.ToUpper(dataArray[3][0]) + dataArray[3].Substring(1);
 			//Requirement
@@ -110,6 +110,7 @@ namespace DiplomProject.Server.Services
 			sEvent.InformationEvent = information;
 			sEvent.DateEventCreated = DateTime.UtcNow;
 			sEvent.AddByAdminChatId = user.TgChatId;
+			_validationService.ValidateScienceEvent(sEvent, token);
 
 			return sEvent;
 		}

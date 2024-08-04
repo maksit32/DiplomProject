@@ -1,5 +1,7 @@
-﻿using Domain.Entities;
+﻿using DiplomProject.Server.Services;
+using Domain.Entities;
 using Domain.Repositories.Interfaces;
+using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,11 +15,13 @@ namespace DiplomProject.Server.Controllers
 	{
 		private readonly IUserCreatedEventRepository _userCreatedEventsRepo;
 		private readonly ILogger<UserCreatedEventController> _logger;
+		private readonly IValidationService _validationService;
 
-		public UserCreatedEventController(IUserCreatedEventRepository userCreatedEvRepo, ILogger<UserCreatedEventController> logger)
+		public UserCreatedEventController(IUserCreatedEventRepository userCreatedEvRepo, IValidationService validationService, ILogger<UserCreatedEventController> logger)
 		{
 			_userCreatedEventsRepo = userCreatedEvRepo ?? throw new ArgumentNullException(nameof(userCreatedEvRepo)); ;
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
 		}
 
 		[HttpGet("get")]
@@ -46,12 +50,12 @@ namespace DiplomProject.Server.Controllers
 				return NotFound();
 			}
 		}
-		//валидация нужна
 		[HttpPut("update")]
 		public async Task<ActionResult> UpdateUserCreatedEvent([FromBody] UserCreatedEvent updatedEvent, CancellationToken token)
 		{
 			try
 			{
+				_validationService.ValidateUserCreatedEvent(updatedEvent, token);
 				await _userCreatedEventsRepo.UpdateUserCreatedEventAsync(updatedEvent, token);
 				return Ok();
 			}
