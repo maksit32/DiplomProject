@@ -20,11 +20,11 @@ namespace DiplomProject.Server.Repositories
 		}
 		public async Task<List<ScienceEvent>> ReadAllEventsAsync(CancellationToken token)
 		{
-			return await ScienceEvents.ToListAsync();
+			return await ScienceEvents.ToListAsync(token);
 		}
 		public async Task<List<ScienceEvent>> ReadAllActualEventsAsync(CancellationToken token)
 		{
-			return await ScienceEvents.Where(e => e.DateEvent > DateTime.UtcNow).ToListAsync();
+			return await ScienceEvents.Where(e => e.DateEvent > DateTime.UtcNow).ToListAsync(token);
 		}
 		public async Task<ScienceEvent?> GetLastCreatedEventAsync(CancellationToken token)
 		{

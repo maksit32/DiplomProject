@@ -30,7 +30,7 @@ namespace DiplomProject.Server.Repositories
 			var lst = from e in UserCreatedEvents
 					  where e.TgUser.Id == tgUser.Id
 					  select e;
-			return await lst.ToListAsync();
+			return await lst.ToListAsync(token);
 		}
 		public async Task<UserCreatedEvent?> GetUserCreatedEventByIdAsync(Guid uEventId, CancellationToken token)
 		{
@@ -50,13 +50,13 @@ namespace DiplomProject.Server.Repositories
 			if (createdEvent is null) return;
 
 			UserCreatedEvents.Remove(createdEvent);
-			await _dbContext.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync(token);
 		}
 		public async Task UpdateUserCreatedEventAsync(UserCreatedEvent newEvent, CancellationToken token)
 		{
 			if(newEvent is null) throw new ArgumentNullException("event is null!");
 			UserCreatedEvents.Update(newEvent);
-			await _dbContext.SaveChangesAsync();
+			await _dbContext.SaveChangesAsync(token);
 		}
 		public async Task DeleteUserCreatedEvent(UserCreatedEvent ev, CancellationToken token)
 		{

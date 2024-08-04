@@ -12,8 +12,6 @@ namespace Domain.Repositories.Interfaces
 	{
 		Task<bool> AddTgUserAsync(TelegramUser user, CancellationToken token);
 		Task UpdateTgUserAsync(TelegramUser user, CancellationToken token);
-		Task<bool> UpdateSubStatusTgUserAsync(Guid Id, bool subStatus, CancellationToken token);
-		Task<bool> UpdateAdminStatusTgUserAsync(Guid Id, bool adminStatus, CancellationToken token);
 		Task UpdateLastTimeMessageTgUserAsync(long chatId, CancellationToken token);
 		Task<bool> DeleteTgUserByIdAsync(Guid Id, CancellationToken token);
 		Task<TelegramUser?> GetTgUserByIdAsync(long chatId, CancellationToken token);

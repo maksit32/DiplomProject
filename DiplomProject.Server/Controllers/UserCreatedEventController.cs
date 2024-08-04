@@ -14,9 +14,9 @@ namespace DiplomProject.Server.Controllers
 		private readonly IUserCreatedEventRepository _userCreatedEventsRepo;
 		private readonly ILogger<UserCreatedEventController> _logger;
 
-		public UserCreatedEventController(IUserCreatedEventRepository repo, ILogger<UserCreatedEventController> logger)
+		public UserCreatedEventController(IUserCreatedEventRepository userCreatedEvRepo, ILogger<UserCreatedEventController> logger)
 		{
-			_userCreatedEventsRepo = repo ?? throw new ArgumentNullException(nameof(repo)); ;
+			_userCreatedEventsRepo = userCreatedEvRepo ?? throw new ArgumentNullException(nameof(userCreatedEvRepo)); ;
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
@@ -46,6 +46,7 @@ namespace DiplomProject.Server.Controllers
 				return NotFound();
 			}
 		}
+		//валидация нужна
 		[HttpPut("update")]
 		public async Task<ActionResult> UpdateUserCreatedEvent([FromBody] UserCreatedEvent updatedEvent, CancellationToken token)
 		{
@@ -60,11 +61,11 @@ namespace DiplomProject.Server.Controllers
 			}
 		}
 		[HttpDelete("delete")]
-		public async Task<ActionResult> DeleteUserCreatedEvent([FromQuery] Guid Id, CancellationToken token)
+		public async Task<ActionResult> DeleteUserCreatedEvent([FromQuery] UserCreatedEvent deleteEvent, CancellationToken token)
 		{
 			try
 			{
-				await _userCreatedEventsRepo.DeleteUserCreatedEventByIdAsync(Id, token);
+				await _userCreatedEventsRepo.DeleteUserCreatedEvent(deleteEvent, token);
 				return Ok();
 			}
 			catch (Exception)

@@ -14,16 +14,11 @@ namespace DiplomProject.Server.Controllers
 	{
 		private readonly ITelegramUserRepository _tgusersRepo;
 		private readonly ILogger<TelegramUserController> _logger;
-		private readonly IPasswordHasherService _passwordHasherService;
-		private readonly ITgUserService _tgUserService;
 
-		public TelegramUserController(ITelegramUserRepository repo, IPasswordHasherService passwordHasherService, 
-			ITgUserService tgUserService,ILogger<TelegramUserController> logger)
+		public TelegramUserController(ITelegramUserRepository tgUserRepo, ILogger<TelegramUserController> logger)
 		{
-			_tgusersRepo = repo ?? throw new ArgumentNullException(nameof(repo));
+			_tgusersRepo = tgUserRepo ?? throw new ArgumentNullException(nameof(tgUserRepo));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_passwordHasherService = passwordHasherService ?? throw new ArgumentNullException(nameof(passwordHasherService));
-			_tgUserService = tgUserService ?? throw new ArgumentNullException(nameof(tgUserService));
 		}
 
 		[HttpGet("get")]
@@ -109,54 +104,13 @@ namespace DiplomProject.Server.Controllers
 				return BadRequest();
 			}
 		}
-		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!ВНИМАНИЕ. Добавление с React пользователя. Нужно хешировать пароль на сервере!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		[HttpPost("add")]
-		public async Task<ActionResult> AddTgUser([FromBody] TelegramUser user, CancellationToken token)
-		{
-			try
-			{
-				var hashedUser = _tgUserService.HashTelegramUser(user, token);
-
-				await _tgusersRepo.AddTgUserAsync(hashedUser, token);
-				return Created();
-			}
-			catch (Exception)
-			{
-				return BadRequest();
-			}
-		}
+		//валидация нужна
 		[HttpPut("update")]
 		public async Task<ActionResult> UpdateTgUser([FromBody] TelegramUser user, CancellationToken token)
 		{
 			try
 			{
 				await _tgusersRepo.UpdateTgUserAsync(user, token);
-				return Ok();
-			}
-			catch (Exception)
-			{
-				return BadRequest();
-			}
-		}
-		[HttpPut("update_sub")]
-		public async Task<ActionResult> UpdateSubTgUser([FromQuery] Guid Id, [FromBody] bool subStatus, CancellationToken token)
-		{
-			try
-			{
-				await _tgusersRepo.UpdateSubStatusTgUserAsync(Id, subStatus, token);
-				return Ok();
-			}
-			catch (Exception)
-			{
-				return BadRequest();
-			}
-		}
-		[HttpPut("update_adm")]
-		public async Task<ActionResult> UpdateAdmTgUser([FromQuery] Guid Id, [FromBody] bool admStatus, CancellationToken token)
-		{
-			try
-			{
-				await _tgusersRepo.UpdateAdminStatusTgUserAsync(Id, admStatus, token);
 				return Ok();
 			}
 			catch (Exception)

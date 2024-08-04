@@ -41,27 +41,6 @@ namespace DiplomProject.Server.Repositories
 			TelegramUsers.Update(user);
 			await _dbContext.SaveChangesAsync(token);
 		}
-		public async Task<bool> UpdateSubStatusTgUserAsync(Guid Id, bool subStatus, CancellationToken token)
-		{
-			var _user = await GetTgUserByIdAsync(Id, token);
-			if (_user == null) return false;
-
-
-			_user.IsSubscribed = subStatus;
-
-			await _dbContext.SaveChangesAsync(token);
-			return true;
-		}
-		public async Task<bool> UpdateAdminStatusTgUserAsync(Guid Id, bool adminStatus, CancellationToken token)
-		{
-			var _user = await GetTgUserByIdAsync(Id, token);
-			if (_user == null) return false;
-
-			_user.IsAdmin = adminStatus;
-
-			await _dbContext.SaveChangesAsync(token);
-			return true;
-		}
 		public async Task UpdateLastTimeMessageTgUserAsync(long chatId, CancellationToken token)
 		{
 			if (chatId < 0) throw new ArgumentOutOfRangeException(nameof(chatId));
@@ -91,7 +70,7 @@ namespace DiplomProject.Server.Repositories
 					  where u.IsSubscribed == true
 					  select u;
 
-			return await lst.ToListAsync();
+			return await lst.ToListAsync(token);
 		}
 		public async Task<List<TelegramUser>> GetAdminUsersListAsync(CancellationToken token)
 		{
@@ -99,7 +78,7 @@ namespace DiplomProject.Server.Repositories
 					  where u.IsAdmin == true
 					  select u;
 
-			return await lst.ToListAsync();
+			return await lst.ToListAsync(token);
 		}
 		public async Task<TelegramUser?> GetTgUserByIdAsync(long chatId, CancellationToken token)
 		{
@@ -116,7 +95,7 @@ namespace DiplomProject.Server.Repositories
 
 		public async Task<List<TelegramUser>> GetUsersListAsync(CancellationToken token)
 		{
-			return await TelegramUsers.ToListAsync();
+			return await TelegramUsers.ToListAsync(token);
 		}
 		public async Task<bool> CheckLastTimeMessageAsync(long chatId, CancellationToken token)
 		{

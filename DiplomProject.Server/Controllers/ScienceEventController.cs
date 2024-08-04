@@ -1,8 +1,11 @@
-﻿using Domain.Entities;
+﻿using DiplomProject.Server.Services;
+using Domain.Entities;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+using static Domain.Constants.TelegramTextConstants;
 
 
 namespace DiplomProject.Server.Controllers
@@ -16,9 +19,9 @@ namespace DiplomProject.Server.Controllers
 		private readonly ILogger<ScienceEventController> _logger;
 		private readonly INotifyService _notificationService;
 
-		public ScienceEventController(IScienceEventRepository repo, ILogger<ScienceEventController> logger, INotifyService notifyService)
+		public ScienceEventController(IScienceEventRepository scEvRepo, ILogger<ScienceEventController> logger, INotifyService notifyService)
 		{
-			_scEventsRepo = repo ?? throw new ArgumentNullException(nameof(repo));
+			_scEventsRepo = scEvRepo ?? throw new ArgumentNullException(nameof(scEvRepo));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_notificationService = notifyService ?? throw new ArgumentNullException(nameof(notifyService));
 		}
@@ -64,12 +67,14 @@ namespace DiplomProject.Server.Controllers
 				return NotFound();
 			}
 		}
+		//валидация нужна
 		[HttpPut("update")]
-		public async Task<ActionResult> UpdateScienceEvent([FromBody] ScienceEvent sEvent, CancellationToken token)
+		public async Task<ActionResult> UpdateScienceEvent([FromBody] ScienceEvent updatedEv, CancellationToken token)
 		{
 			try
 			{
-				await _scEventsRepo.UpdateFullEventAsync(sEvent, token);
+				await _scEventsRepo.UpdateFullEventAsync(updatedEv, token);
+				await _notificationService.NotifyEventChangingUsersAsync(updatedEv, ChangeEventNotification, token);
 				return Ok();
 			}
 			catch (Exception)
@@ -77,12 +82,14 @@ namespace DiplomProject.Server.Controllers
 				return BadRequest();
 			}
 		}
+		//валидация нужна
 		[HttpPost("add")]
 		public async Task<ActionResult> AddScienceEvent([FromBody] ScienceEvent newEvent, CancellationToken token)
 		{
 			try
 			{
 				await _scEventsRepo.AddEventAsync(newEvent, token);
+				await _notificationService.NotifyLastAddEventUsersAsync(NewEventNotification, token);
 				return Created();
 			}
 			catch (Exception)
@@ -91,11 +98,12 @@ namespace DiplomProject.Server.Controllers
 			}
 		}
 		[HttpDelete("delete")]
-		public async Task<ActionResult> DeleteScienceEvent([FromQuery] Guid id, CancellationToken token)
+		public async Task<ActionResult> DeleteScienceEvent([FromQuery] ScienceEvent scEvent, CancellationToken token)
 		{
 			try
 			{
-				await _scEventsRepo.DeleteEventByIdAsync(id, token);
+				await _scEventsRepo.DeleteEventAsync(scEvent, token);
+				await _notificationService.NotifyEventChangingUsersAsync(scEvent, DeleteEventNotification, token);
 				return Ok();
 			}
 			catch (Exception)
