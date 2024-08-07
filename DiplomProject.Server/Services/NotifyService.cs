@@ -27,7 +27,7 @@ namespace DiplomProject.Server.Services
 			_scienceEventRepo = scEvRepo ?? throw new ArgumentNullException("ScienceEventDb is null");
 		}
 
-		//специльно для экстренного оповещения ВСЕХ пользователей (собрания, перезагрузка бота итд)
+		//специально для экстренного оповещения ВСЕХ пользователей (собрания, перезагрузка бота итд)
 		public async Task NotifyAllUsersAsync(string notifyMessage, CancellationToken token)
 		{
 			if (string.IsNullOrWhiteSpace(notifyMessage))
@@ -45,7 +45,6 @@ namespace DiplomProject.Server.Services
 			if (string.IsNullOrWhiteSpace(notifyMessage))
 				throw new ArgumentException($"\"{nameof(notifyMessage)}\" не может быть пустым или содержать только пробел.", nameof(notifyMessage));
 
-			//отправляем всем кто подписан
 			var subUsersGroup = await _tgUserRepo.GetSubUsersListAsync(token);
 			foreach (var subUser in subUsersGroup)
 				await WriteToTgUserAsync(_botClient, subUser.TgChatId, notifyMessage);
@@ -59,7 +58,6 @@ namespace DiplomProject.Server.Services
 			if (_tgUserRepo == null) 
 				throw new NullReferenceException(nameof(_tgUserRepo));
 
-			//находим событие
 			var lastCreatedEvent = await _scienceEventRepo.GetLastCreatedEventAsync(token);
 			if (lastCreatedEvent == null) return;
 

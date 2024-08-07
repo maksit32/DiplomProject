@@ -47,18 +47,13 @@ namespace DiplomProject.Server.Services
 			lowerCaseMessage = lowerCaseMessage.Replace("/addevent/", "");
 			var dataArray = lowerCaseMessage.Split("/");
 
-			//NameEvent
 			string nameEvent = char.ToUpper(dataArray[0][0]) + dataArray[0].Substring(1);
-			//DateEvent
 			var cultureInfo = new CultureInfo("ru-RU");
 			DateTime dateEventLocal = DateTime.Parse(dataArray[1], cultureInfo);
 			// Преобразование в UTC
 			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
-			//PlaceEvent
 			string placeEvent = char.ToUpper(dataArray[2][0]) + dataArray[2].Substring(1);
-			//Requirement
 			string requirement = dataArray[3];
-			//Information
 			string information = dataArray[4];
 			ScienceEvent sEvent = new ScienceEvent(nameEvent, dateEventUtc, placeEvent, requirement, information, user.TgChatId);
 			_validationService.ValidateScienceEvent(sEvent, token);
@@ -78,25 +73,19 @@ namespace DiplomProject.Server.Services
 			lowerCaseMessage = lowerCaseMessage.Replace("/chevent/", "");
 			var dataArray = lowerCaseMessage.Split("/");
 
-			//IdEvent
 			Guid idEvent = Guid.Parse(dataArray[0]);
-			//NameEvent
 			string nameEvent = char.ToUpper(dataArray[1][0]) + dataArray[1].Substring(1);
 			//проверка на повтор названия
 			if (_scienceEventRepository.ReadAllActualEventsAsync(token).Result.ToList().Exists(e => e.NameEvent.ToLower() == nameEvent.ToLower() && e.Id != idEvent))
 			{
 				return null;
 			}
-			//DateEvent
 			var cultureInfo = new CultureInfo("ru-RU");
 			DateTime dateEventLocal = DateTime.Parse(dataArray[2], cultureInfo);
 			// Преобразование в UTC
 			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
-			//PlaceEvent
 			string placeEvent = char.ToUpper(dataArray[3][0]) + dataArray[3].Substring(1);
-			//Requirement
 			string requirement = dataArray[4];
-			//Information
 			string information = dataArray[5];
 
 			//получаем старое мероприятие и меняем его значения

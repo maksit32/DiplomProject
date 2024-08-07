@@ -22,11 +22,11 @@ namespace DiplomProject.Server.Controllers
 		}
 
 		[HttpPost("login")]
-		public async Task<ActionResult> Login([FromBody] TelegramUserDto login, CancellationToken ct)
+		public async Task<ActionResult> Login([FromBody] TelegramUserDto user, CancellationToken ct)
 		{
 			try
 			{
-				var token = await _authenticationService.AuthenticateUserAsync(login, ct);
+				var token = await _authenticationService.AuthenticateUserAsync(user, ct);
 
 				if (String.IsNullOrWhiteSpace(token))
 					return Unauthorized();

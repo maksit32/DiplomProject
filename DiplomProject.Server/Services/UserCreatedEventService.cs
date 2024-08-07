@@ -27,16 +27,13 @@ namespace DiplomProject.Server.Services
 
 			lowerCaseMessage = lowerCaseMessage.Replace("/adduserevent/", "");
 			var dataArr = lowerCaseMessage.Split('/');
-			//NameEvent
+
 			string nameEvent = char.ToUpper(dataArr[0][0]) + dataArr[0].Substring(1);
-			//PlaceEvent
 			string placeEvent = char.ToUpper(dataArr[1][0]) + dataArr[1].Substring(1);
-			//DateEvent
 			var cultureInfo = new CultureInfo("ru-RU");
 			DateTime dateEventLocal = DateTime.Parse(dataArr[2], cultureInfo);
 			// Преобразование в UTC
 			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
-			//IsWinner
 			bool isWinner = bool.Parse(dataArr[3]);
 
 			UserCreatedEvent uEvent = new UserCreatedEvent(nameEvent, placeEvent, dateEventUtc, isWinner, user);
@@ -56,18 +53,14 @@ namespace DiplomProject.Server.Services
 
 			lowerCaseMessage = lowerCaseMessage.Replace("/updateuserevent/", "");
 			var dataArr = lowerCaseMessage.Split('/');
-			//NameEvent
+
 			string nameEvent = char.ToUpper(dataArr[0][0]) + dataArr[0].Substring(1);
-			//PlaceEvent
 			string placeEvent = char.ToUpper(dataArr[1][0]) + dataArr[1].Substring(1);
-			//DateEvent
 			var cultureInfo = new CultureInfo("ru-RU");
 			DateTime dateEventLocal = DateTime.Parse(dataArr[2], cultureInfo);
 			// Преобразование в UTC
 			DateTime dateEventUtc = dateEventLocal.ToUniversalTime();
-			//IsWinner
 			bool isWinner = bool.Parse(dataArr[3]);
-			//EventId
 			Guid eventId = Guid.Parse(dataArr[4]);
 
 			UserCreatedEvent updatedEv = new UserCreatedEvent(nameEvent, placeEvent, dateEventUtc, isWinner, user);

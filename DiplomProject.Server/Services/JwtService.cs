@@ -13,7 +13,7 @@ namespace DiplomProject.Server.Services
 
 		public JwtService(IConfiguration configuration)
 		{
-			_configuration = configuration;
+			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 		}
 		public string GenerateJwtToken(string phoneNumber)
 		{
