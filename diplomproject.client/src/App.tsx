@@ -1,28 +1,25 @@
-import { useEffect, useState } from 'react';
 import './App.css';
-
+import store from "./store/store"
+import { Navbar } from "./components/NavBar"
+import { Home } from './pages/Home';
+import { DocumentPage } from './pages/DocumentPage';
+import { Route, Routes } from 'react-router-dom';
+import { Container } from 'react-bootstrap';
+import { Provider } from 'react-redux';
 
 
 function App() {
-    const [password, setPassword] = useState<string>();
-
-    useEffect(() => {
-        testApi();
-    });
-
     return (
-        <div>
-            <h1 id="tabelLabel">Weather forecast</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {password}
-        </div>
-    );
-
-    async function testApi() {
-        const response = await fetch('api/passwords/get/123');
-        const data = await response.json();
-        setPassword(data);
-    }
+        <Provider store={store}>
+            <Navbar />
+            <Container className="mb-4">
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/documents" element={<DocumentPage />} />
+                </Routes>
+            </Container>
+        </Provider>
+    )
 }
 
 export default App;
