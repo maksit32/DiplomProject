@@ -35,7 +35,7 @@ namespace DiplomProject.Server.Services
 		}
 		public async Task<bool> UploadWordFile(IFormFile file, string folderPath)
 		{
-			if(string.IsNullOrWhiteSpace(folderPath)) throw new ArgumentNullException(nameof(folderPath));
+			if (string.IsNullOrWhiteSpace(folderPath)) throw new ArgumentNullException(nameof(folderPath));
 			if (file == null || file.Length == 0)
 				throw new ArgumentNullException(nameof(file));
 
@@ -46,6 +46,21 @@ namespace DiplomProject.Server.Services
 
 			using var stream = new FileStream(filePath, FileMode.Create);
 			await file.CopyToAsync(stream);
+			return true;
+		}
+		public bool DeleteWordFile(string folderPath, string fileName)
+		{
+			if (string.IsNullOrEmpty(folderPath))
+				throw new ArgumentNullException(nameof(folderPath));
+			if (string.IsNullOrEmpty(fileName))
+				throw new ArgumentNullException(nameof(fileName));
+
+			var filePath = Path.Combine(folderPath, fileName);
+
+			if (!System.IO.File.Exists(filePath))
+				throw new FileNotFoundException(nameof(filePath));
+
+			System.IO.File.Delete(filePath);
 			return true;
 		}
 	}

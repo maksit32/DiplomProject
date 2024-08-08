@@ -74,5 +74,31 @@ namespace DiplomProject.Server.Controllers
 				return NotFound();
 			}
 		}
+		[HttpDelete("sno")]
+		public IActionResult DeleteSNODocument([FromQuery]string fileName)
+		{
+			try
+			{
+				_documentService.DeleteWordFile(_wordSNOFolderPath, fileName);
+				return Ok();
+			}
+			catch (Exception)
+			{
+				return NotFound();
+			}
+		}
+		[HttpDelete("smu")]
+		public IActionResult DeleteSMUDocument([FromQuery]string fileName)
+		{
+			try
+			{
+				_documentService.DeleteWordFile(_wordSMUFolderPath, fileName);
+				return Ok();
+			}
+			catch (Exception)
+			{
+				return NotFound();
+			}
+		}
 	}
 }

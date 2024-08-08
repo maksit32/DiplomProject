@@ -13,5 +13,6 @@ namespace Domain.Services.Interfaces
 		List<string?> GetWordList(string wordFolderPath);
 		Task<byte[]> GetWordFile(string folderPath, string fileName);
 		Task<bool> UploadWordFile(IFormFile file, string folderPath);
+		bool DeleteWordFile(string folderPath, string fileName);
 	}
 }

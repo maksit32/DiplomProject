@@ -18,7 +18,6 @@ using System.Text;
 using Telegram.Bot;
 
 
-
 namespace API
 {
 	public class Program
@@ -101,7 +100,6 @@ namespace API
 				});
 				builder.Services.AddAuthorization();
 
-				//middleware
 				var app = builder.Build();
 				app.UseHttpsRedirection();
 				app.UseHttpLogging();
