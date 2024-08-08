@@ -68,6 +68,7 @@ namespace API
 				builder.Services.AddScoped<IJwtService, JwtService>();
 				builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 				builder.Services.AddScoped<IValidationService, ValidationService>();
+				builder.Services.AddScoped<IDocumentService, WordDocumentService>();
 				builder.Services.AddSingleton<IFillDataService, FillDocxOpenXMLDataService>();
 
 
