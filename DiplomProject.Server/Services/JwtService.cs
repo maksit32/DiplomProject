@@ -1,40 +1,50 @@
-﻿using Domain.Services.Interfaces;
+﻿using DiplomProject.Server.Configurations;
+using Domain.Entities;
+using Domain.Services.Interfaces;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Telegram.Bot.Types;
 
 
 namespace DiplomProject.Server.Services
 {
 	public class JwtService : IJwtService
 	{
-		private readonly IConfiguration _configuration;
+		private readonly JwtConfig _jwtConfig;
 
-		public JwtService(IConfiguration configuration)
+		public JwtService(IOptions<JwtConfig> jwtConfig)
 		{
-			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			ArgumentNullException.ThrowIfNull(jwtConfig);
+			_jwtConfig = jwtConfig.Value;
 		}
-		public string GenerateJwtToken(string phoneNumber)
+		public string GenerateJwtToken(TelegramUser user)
 		{
-			var claims = new[]
+			var tokenDescriptor = new SecurityTokenDescriptor
 			{
-				new Claim(JwtRegisteredClaimNames.Sub, phoneNumber),
-				new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+				Subject = CreateClaimsIdentity(user),
+				Expires = DateTime.UtcNow.Add(_jwtConfig.LifeTime),
+				Audience = _jwtConfig.Audience,
+				Issuer = _jwtConfig.Issuer,
+				SigningCredentials = new SigningCredentials(
+					new SymmetricSecurityKey(_jwtConfig.SigningKeyBytes),
+					SecurityAlgorithms.HmacSha256Signature
+				)
 			};
+			var tokenHandler = new JwtSecurityTokenHandler();
+			var securityToken = tokenHandler.CreateToken(tokenDescriptor);
+			return tokenHandler.WriteToken(securityToken);
+		}
+		private ClaimsIdentity CreateClaimsIdentity(TelegramUser user)
+		{
+			var claimsIdentity = new ClaimsIdentity(new[]
+			{
+			new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+			});
 
-			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-			var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-			var token = new JwtSecurityToken(
-				issuer: _configuration["Jwt:Issuer"],
-				audience: _configuration["Jwt:Audience"],
-				claims: claims,
-				expires: DateTime.Now.AddDays(int.Parse(_configuration["Jwt:ExpireDays"])),
-				signingCredentials: creds
-			);
-
-			return new JwtSecurityTokenHandler().WriteToken(token);
+			return claimsIdentity;
 		}
 	}
 }

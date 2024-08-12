@@ -1,10 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { Navbar } from "../components/NavBar";
-import { NotifyBlock } from "../components/NotifyBlock";
+import { Navbar } from "../components/NavBar"
 
 
 
-export function NotifyPage() {
+export function UserCreatedEventPage() {
     const navigate = useNavigate();
     // checkAndRemoveToken(navigate);
 
@@ -12,7 +11,7 @@ export function NotifyPage() {
     return (
         <>
             <Navbar />
-            <NotifyBlock />
+            <p>UserCreatedEvent</p>
         </>
     )
 }

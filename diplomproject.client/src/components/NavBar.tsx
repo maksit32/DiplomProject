@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom"
 import "../styles/navBar.css"
 
 export function Navbar() {
-    //просмотр состояний
     return (
         <NavbarBs sticky="top" className="navbar-custom bg-white shadow-sm mb-3">
             <Container>
@@ -13,6 +12,15 @@ export function Navbar() {
                     </Nav.Link>
                     <Nav.Link to="/notify" as={NavLink}>
                         Уведомить пользователей
+                    </Nav.Link>
+                    <Nav.Link to="/tgusers" as={NavLink}>
+                        Просмотр телеграм пользователей
+                    </Nav.Link>
+                    <Nav.Link to="/scienceevents" as={NavLink}>
+                        Администраторские мероприятия
+                    </Nav.Link>
+                    <Nav.Link to="/usercreatedevents" as={NavLink}>
+                        Пользовательские мероприятия
                     </Nav.Link>
                     {/* <Nav.Link to="/admin" as={NavLink}>
                         {isLogged === true ? "Sign out" : "Sign in"}

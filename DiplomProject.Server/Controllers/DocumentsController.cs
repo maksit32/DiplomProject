@@ -7,7 +7,7 @@ namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
 	[Authorize]
-	[Route("api/[controller]")]
+	[Route("api/[Controller]")]
 	public class DocumentsController : ControllerBase
 	{
 		private readonly IDocumentService _documentService;

@@ -31,7 +31,7 @@ namespace DiplomProject.Server.Controllers
 				if (String.IsNullOrWhiteSpace(token))
 					return Unauthorized();
 
-				return Ok(new { token });
+				return Ok(new { token = token });
 			}
 			catch (Exception)
 			{

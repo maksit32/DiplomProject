@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,6 @@ namespace Domain.Services.Interfaces
 {
 	public interface IJwtService
 	{
-		string GenerateJwtToken(string phoneNumber);
+		string GenerateJwtToken(TelegramUser user);
 	}
 }

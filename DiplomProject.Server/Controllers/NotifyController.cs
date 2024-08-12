@@ -6,7 +6,7 @@ namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
 	[Authorize]
-	[Route("api/[controller]")]
+	[Route("api/[Controller]")]
 	public class NotifyController : ControllerBase
 	{
 		private readonly INotifyService _notifyService;
@@ -14,7 +14,7 @@ namespace DiplomProject.Server.Controllers
 		{
 			_notifyService = notifyService ?? throw new ArgumentNullException(nameof(notifyService));
 		}
-		[HttpPost("/sub")]
+		[HttpPost("sub")]
 		public async Task<ActionResult> NotifySubUsers([FromBody] string notifyMessage, CancellationToken ct)
 		{
 			try
@@ -27,7 +27,7 @@ namespace DiplomProject.Server.Controllers
 				return BadRequest();
 			}
 		}
-		[HttpPost("/adm")]
+		[HttpPost("adm")]
 		public async Task<ActionResult> NotifyAdminUsers([FromBody] string notifyMessage, CancellationToken ct)
 		{
 			try
@@ -40,7 +40,7 @@ namespace DiplomProject.Server.Controllers
 				return BadRequest();
 			}
 		}
-		[HttpPost("/all")]
+		[HttpPost("all")]
 		public async Task<ActionResult> NotifyAllUsers([FromBody] string notifyMessage, CancellationToken ct)
 		{
 			try

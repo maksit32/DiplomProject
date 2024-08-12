@@ -1,3 +1,4 @@
+using DiplomProject.Server.Configurations;
 using DiplomProject.Server.DbContexts;
 using DiplomProject.Server.Repositories;
 using DiplomProject.Server.Services;
@@ -12,6 +13,8 @@ using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Core;
 using System.Text;
@@ -40,6 +43,18 @@ namespace API
 				//добавляем внешний json файл (путь из секретов)
 				builder.Configuration.AddJsonFile(builder.Configuration["TelegramTextConstantsPath"], optional: true, reloadOnChange: true);
 
+				//регистрируем конфиг jwt
+				var jwtConfig = builder.Configuration
+				.GetRequiredSection("Jwt")
+				.Get<JwtConfig>();
+				builder.Services.Configure<JwtConfig>(config =>
+				{
+					config.SigningKey = jwtConfig.SigningKey;
+					config.Audience = jwtConfig.Audience;
+					config.Issuer = jwtConfig.Issuer;
+					config.LifeTime = jwtConfig.LifeTime;
+				});
+
 				var botConfigSection = builder.Configuration.GetSection("BotConfiguration");
 				builder.Services.Configure<BotConfiguration>(botConfigSection);
 				builder.Services.AddHttpClient("tgwebhook").RemoveAllLoggers().AddTypedClient<ITelegramBotClient>(
@@ -47,9 +62,35 @@ namespace API
 				builder.Services.AddScoped<UpdateHandler>();
 				builder.Services.AddControllers().AddNewtonsoftJson();
 
-
 				builder.Services.AddEndpointsApiExplorer();
-				builder.Services.AddSwaggerGen();
+				builder.Services.AddSwaggerGen(options =>
+				{
+					options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+					{
+						Name = "Authorization",
+						Type = SecuritySchemeType.ApiKey,
+						Scheme = "Bearer",
+						BearerFormat = "JWT",
+						In = ParameterLocation.Header,
+						Description = "JWT Authorization header using the Bearer scheme. " +
+									  "\r\n\r\n Enter 'Bearer' [space] and then your token in the text input below." +
+										 "\r\n\r\nExample: \"Bearer {token}\"",
+					});
+					options.AddSecurityRequirement(new OpenApiSecurityRequirement
+				{
+					{
+						new OpenApiSecurityScheme
+						{
+							Reference = new OpenApiReference
+							{
+								Type = ReferenceType.SecurityScheme,
+								Id = "Bearer"
+							}
+						},
+						Array.Empty<string>()
+					}
+				});
+				});
 
 				//из secrets.json автоматом
 				builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
@@ -83,21 +124,24 @@ namespace API
 				builder.Services.AddAuthentication(options =>
 				{
 					options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+					options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
 					options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 				})
-				.AddJwtBearer(options =>
-				{
-					options.TokenValidationParameters = new TokenValidationParameters
-					{
-						ValidateIssuer = true,
-						ValidateAudience = true,
-						ValidateLifetime = true,
-						ValidateIssuerSigningKey = true,
-						ValidIssuer = builder.Configuration["Jwt:Issuer"],
-						ValidAudience = builder.Configuration["Jwt:Audience"],
-						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-					};
-				});
+								.AddJwtBearer(options =>
+								{
+									options.TokenValidationParameters = new TokenValidationParameters
+									{
+										IssuerSigningKey = new SymmetricSecurityKey(jwtConfig.SigningKeyBytes),
+										ValidateIssuerSigningKey = true,
+										ValidateLifetime = true,
+										RequireExpirationTime = true,
+										RequireSignedTokens = true,
+										ValidateAudience = true,
+										ValidateIssuer = true,
+										ValidAudiences = new[] { jwtConfig.Audience },
+										ValidIssuer = jwtConfig.Issuer
+									};
+								});
 				builder.Services.AddAuthorization();
 
 				var app = builder.Build();
@@ -108,8 +152,9 @@ namespace API
 				{
 					policy
 						.AllowAnyMethod()
-						.AllowAnyOrigin()
-						.AllowAnyHeader();
+						.WithOrigins("http://localhost:8443", "http://localhost:5173/", "http://localhost:5174/")
+						.AllowAnyHeader()
+						.AllowCredentials();
 				});
 				app.UseAuthentication();
 				app.UseAuthorization();

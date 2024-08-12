@@ -14,7 +14,7 @@ export function LoginBlock() {
     const navigate = useNavigate();
 
     // //проверка на jwt
-    CheckJwt(navigate);
+    // CheckJwt(navigate);
 
 
     const handleInputChange = (e: any) => {
@@ -29,6 +29,7 @@ export function LoginBlock() {
         e.preventDefault();
         try {
             const response = await axios.post(loginPath, loginData);
+            console.log(response.data);
             const token = response.data.token;
 
             if (token) {

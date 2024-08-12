@@ -24,7 +24,7 @@ namespace DiplomProject.Server.Services
 			if (user == null || !_passwordHasherService.VerifyPassword(user.HashedPassword, userData.Password) || !user.IsAdmin)
 				return string.Empty;
 
-			return _jwtService.GenerateJwtToken(userData.PhoneNumber);
+			return _jwtService.GenerateJwtToken(user);
 		}
 	}
 }

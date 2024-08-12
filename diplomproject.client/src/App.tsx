@@ -6,6 +6,9 @@ import { Route, Routes } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import { Provider } from 'react-redux';
 import { NotifyPage } from './pages/NotifyPage';
+import { TgUsersPage } from './pages/TgUsersPage';
+import { ScienceEventPage } from './pages/ScienceEventPage';
+import { UserCreatedEventPage } from './pages/UserCreatedEventPage';
 
 
 function App() {
@@ -16,6 +19,9 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/documents" element={<DocumentPage />} />
                     <Route path="/notify" element={<NotifyPage />} />
+                    <Route path="/tgusers" element={<TgUsersPage />} />
+                    <Route path="/scienceevents" element={<ScienceEventPage />} />
+                    <Route path="/usercreatedevents" element={<UserCreatedEventPage />} />
                 </Routes>
             </Container>
         </Provider>
