@@ -1,19 +1,18 @@
 import { Container, Nav, Navbar as NavbarBs } from "react-bootstrap"
 import { NavLink } from "react-router-dom"
-import { useAppSelector } from "../store/store"
+import "../styles/navBar.css"
 
 export function Navbar() {
     //просмотр состояний
-    const { isLogged } = useAppSelector(state => state.user)
     return (
-        <NavbarBs sticky="top" className="bg-white shadow-sm mb-3">
+        <NavbarBs sticky="top" className="navbar-custom bg-white shadow-sm mb-3">
             <Container>
                 <Nav className="me-auto">
-                    <Nav.Link to="/" as={NavLink}>
-                        Home
-                    </Nav.Link>
                     <Nav.Link to="/documents" as={NavLink}>
-                        Documents
+                        Документы
+                    </Nav.Link>
+                    <Nav.Link to="/notify" as={NavLink}>
+                        Уведомить пользователей
                     </Nav.Link>
                     {/* <Nav.Link to="/admin" as={NavLink}>
                         {isLogged === true ? "Sign out" : "Sign in"}

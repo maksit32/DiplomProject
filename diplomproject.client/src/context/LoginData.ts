@@ -10,6 +10,6 @@ export class UserLogin {
 
     constructor(data: LoginData) {
         this.phoneNumber = data.phoneNumber;
-        this.password = data.password;
+        this.password = data.password.toLowerCase();
     }
 }
