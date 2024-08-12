@@ -1,0 +1,65 @@
+.admin-main-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px;
+}
+
+@media (max-width: 768px) {
+    .flex-container {
+        flex-direction: column;
+    }
+}
+
+.text-div {
+    text-align: center;
+}
+
+.planeContainer {
+    display: flex;
+    justify-content: center;
+    /* Горизонтальное центрирование */
+    align-items: center;
+    /* Вертикальное центрирование */
+    margin-top: 25px;
+}
+
+.btn-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.btn-primary:hover {
+    background-color: #34568B;
+    /* Цвет фона кнопки при наведении */
+    color: #FFFFFF;
+    /* Цвет текста кнопки при наведении */
+}
+
+.hover-td-green:hover {
+    cursor: pointer;
+    background-color: #45ff93;
+}
+
+.hover-td-red:hover {
+    cursor: pointer;
+    background-color: #ff3f3f;
+}
+
+.table-actions {
+    margin-top: 25px
+}
+
+.delete-div-button {
+    margin-top: 15px;
+}
+
+.btn-danger:hover {
+    background-color: #28a745 !important;
+}
+
+#deleteId:focus {
+    border-color: red;
+}
