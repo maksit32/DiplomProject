@@ -155,7 +155,7 @@ namespace API
 				{
 					policy
 						.AllowAnyMethod()
-						.WithOrigins("http://localhost:8443", "http://localhost:5173/", "http://localhost:5174/")
+						.WithOrigins("http://localhost:8443", "https://localhost:5173", "http://localhost:5174")
 						.AllowAnyHeader()
 						.AllowCredentials();
 				});

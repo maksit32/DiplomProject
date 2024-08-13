@@ -10,6 +10,6 @@ namespace Domain.Services.Interfaces
 {
 	public interface IAuthenticationService
 	{
-		Task<string> AuthenticateUserAsync(TelegramUserDto login, CancellationToken ct);
+		Task<string> AuthenticateUserAsync(WebsiteUserDto login, CancellationToken ct);
 	}
 }

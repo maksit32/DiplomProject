@@ -32,24 +32,16 @@ namespace Domain.Entities
 		public TelegramUser(Guid id, string name, string surname, string patronymic, string phoneNumber, long tgChatId, bool isSubscribed = false, bool isAdmin = false, string? hashedPassword = null)
 		{
 			if (string.IsNullOrWhiteSpace(name))
-			{
 				throw new ArgumentException($"\"{nameof(name)}\" не может быть пустым или содержать только пробел.", nameof(name));
-			}
 
 			if (string.IsNullOrWhiteSpace(surname))
-			{
 				throw new ArgumentException($"\"{nameof(surname)}\" не может быть пустым или содержать только пробел.", nameof(surname));
-			}
 
 			if (string.IsNullOrWhiteSpace(patronymic))
-			{
 				throw new ArgumentException($"\"{nameof(patronymic)}\" не может быть пустым или содержать только пробел.", nameof(patronymic));
-			}
 
 			if (string.IsNullOrWhiteSpace(phoneNumber))
-			{
 				throw new ArgumentException($"\"{nameof(phoneNumber)}\" не может быть пустым или содержать только пробел.", nameof(phoneNumber));
-			}
 			string pattern = @"^\+7\d{10}$";
 			if (!Regex.IsMatch(phoneNumber, pattern)) throw new InvalidDataException("Invalid phone number!");
 			if (tgChatId <= 0) throw new ArgumentOutOfRangeException("Поле tgChatId не должно быть меньше 0!");
@@ -69,24 +61,16 @@ namespace Domain.Entities
 		public TelegramUser(long tgChatId, string name, string surname, string patronymic, string phoneNumber, bool isSubscribed = false, bool isAdmin = false, string? hashedPassword = null)
 		{
 			if (string.IsNullOrWhiteSpace(name))
-			{
 				throw new ArgumentException($"\"{nameof(name)}\" не может быть пустым или содержать только пробел.", nameof(name));
-			}
 
 			if (string.IsNullOrWhiteSpace(surname))
-			{
 				throw new ArgumentException($"\"{nameof(surname)}\" не может быть пустым или содержать только пробел.", nameof(surname));
-			}
 
 			if (string.IsNullOrWhiteSpace(patronymic))
-			{
 				throw new ArgumentException($"\"{nameof(patronymic)}\" не может быть пустым или содержать только пробел.", nameof(patronymic));
-			}
 
 			if (string.IsNullOrWhiteSpace(phoneNumber))
-			{
 				throw new ArgumentException($"\"{nameof(phoneNumber)}\" не может быть пустым или содержать только пробел.", nameof(phoneNumber));
-			}
 			if (tgChatId <= 0) throw new ArgumentOutOfRangeException("tgChatId");
 
 			TgChatId = tgChatId;

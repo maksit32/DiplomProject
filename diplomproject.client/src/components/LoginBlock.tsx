@@ -1,12 +1,11 @@
 import axios from "axios";
 import { useState } from "react";
-import "../styles/loginBlock.css"
 import { UserLogin } from "../context/LoginData";
 import { loginPath } from "../data/APIPaths";
 import { loginImagePath } from "../data/ImagesPath";
 import { useNavigate } from "react-router-dom";
 import { CheckJwt } from "../data/Functions";
-
+import "../styles/loginBlock.css"
 
 export function LoginBlock() {
     const [loginData, setLoginData] = useState(new UserLogin({ phoneNumber: "", password: "" }));
@@ -15,7 +14,6 @@ export function LoginBlock() {
 
     // //проверка на jwt
     // CheckJwt(navigate);
-
 
     const handleInputChange = (e: any) => {
         const { name, value } = e.target;
@@ -35,7 +33,6 @@ export function LoginBlock() {
             if (token) {
                 localStorage.setItem("jwtToken", token);
                 console.log("Токен сохранен:", token);
-                //Описано в app.tsx
                 navigate("/documents");
             }
         } catch (error) {
@@ -46,8 +43,8 @@ export function LoginBlock() {
 
     return (
         <>
-            <div className="planeContainer">
-                <img id="loginImage" src={loginImagePath} alt="Plane" />
+            <div className="telegramContainer">
+                <img id="loginImage" src={loginImagePath} alt="Telegram" />
             </div>
             <div className="login-form">
                 <div className="container mt-5">

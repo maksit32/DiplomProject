@@ -14,7 +14,7 @@ export function Navbar() {
                         Уведомить пользователей
                     </Nav.Link>
                     <Nav.Link to="/tgusers" as={NavLink}>
-                        Просмотр телеграм пользователей
+                        Просмотр пользователей
                     </Nav.Link>
                     <Nav.Link to="/scienceevents" as={NavLink}>
                         Администраторские мероприятия

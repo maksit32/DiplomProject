@@ -1,8 +1,8 @@
 import { useState } from "react";
-import "../styles/notifyBlock.css"
 import { Form } from 'react-bootstrap';
 import { submitText } from "../data/Functions";
 import { useNavigate } from "react-router-dom";
+import "../styles/notifyBlock.css"
 
 
 export function NotifyBlock() {

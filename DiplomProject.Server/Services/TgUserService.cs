@@ -18,7 +18,7 @@ namespace DiplomProject.Server.Services
 		private readonly IPasswordHasherService _passwordHasherService;
 		private readonly IValidationService _validationService;
 
-		public TgUserService(ITelegramUserRepository tgUserRepo, IValidationService validationService, 
+		public TgUserService(ITelegramUserRepository tgUserRepo, IValidationService validationService,
 			IUserCreatedEventRepository userCreatedEvRepo, IPasswordHasherService passwordHasherService)
 		{
 			_tgUserRepo = tgUserRepo ?? throw new ArgumentNullException(nameof(tgUserRepo));
@@ -51,7 +51,7 @@ namespace DiplomProject.Server.Services
 			string patronymic = Char.ToUpper(lst[2][0]) + lst[2].Substring(1);
 			string phone = lst[3];
 
-			TelegramUser newUser =  new TelegramUser(chatId, name, surname, patronymic, phone, true, false);
+			TelegramUser newUser = new TelegramUser(chatId, name, surname, patronymic, phone, true, false);
 			_validationService.ValidateTgUser(newUser, token);
 
 			return newUser;
@@ -152,6 +152,44 @@ namespace DiplomProject.Server.Services
 				return user;
 			}
 			return null;
+		}
+		public List<TelegramUserDto> ConvertToTelegramUserDtoList(List<TelegramUser> users, CancellationToken token)
+		{
+			if (users is null)
+				throw new ArgumentNullException(nameof(users));
+
+			List<TelegramUserDto> lst = new List<TelegramUserDto>();
+			foreach (var user in users)
+			{
+				TelegramUserDto newUser = new TelegramUserDto(user.Id, user.Name, user.Surname, user.Patronymic, user.PhoneNumber, user.TgChatId, user.LastMessageTime, user.IsSubscribed, user.IsAdmin);
+				lst.Add(newUser);
+			}
+			return lst;
+		}
+		public TelegramUserDto ConvertToTelegramUserDto(TelegramUser user, CancellationToken token)
+		{
+			if (user is null)
+				throw new ArgumentNullException(nameof(user));
+
+			return new TelegramUserDto(user.Id, user.Name, user.Surname, user.Patronymic, user.PhoneNumber, user.TgChatId, user.LastMessageTime, user.IsSubscribed, user.IsAdmin);
+		}
+		public async Task<TelegramUser> ConvertToTelegramUser(TelegramUserDto userDto, CancellationToken token)
+		{
+			if (userDto is null)
+				throw new ArgumentNullException(nameof(userDto));
+
+			var user = await _tgUserRepo.GetTgUserByIdAsync(userDto.Id, token);
+			if (user is null) throw new ArgumentNullException(nameof(user));
+
+			user.Name = userDto.Name;
+			user.Surname = userDto.Surname;
+			user.Patronymic = userDto.Patronymic;
+			user.PhoneNumber = userDto.PhoneNumber;
+			user.TgChatId = userDto.TgChatId;
+			user.IsSubscribed = userDto.IsSubscribed;
+			user.IsAdmin = userDto.IsAdmin;
+			user.LastMessageTime = userDto.LastMessageTime;
+			return user;
 		}
 	}
 }
