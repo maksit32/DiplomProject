@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getAdmTgUsersPath, getAllTgUsersPath, getSubTgUsersPath } from "../data/APIPaths";
-import "../styles/tgUsersBlock.css"
+import { getAdmTgUsersPath, getAllTgUsersPath, getSubTgUsersPath, deleteTgUserPath } from "../data/APIPaths";
+import "../styles/tgUsersBlock.css";
 
 function TgUsersBlock() {
     const [choice, setChoice] = useState(1);
@@ -22,13 +22,38 @@ function TgUsersBlock() {
         }
 
         fetch(url)
-            .then(response => response.json())
-            .then(data => setUsers(data))
-            .catch(error => console.error("Ошибка при получении данных:", error));
+            .then(response => {
+                console.log("Received response:", response);
+                return response.json();
+            })
+            .then(data => {
+                console.log("Parsed JSON data:", data);
+                setUsers(data);
+            })
+            .catch(error => {
+                console.error("Ошибка при получении данных:", error);
+            });
     }, [choice]);
 
     const handleChange = (event: any) => {
         setChoice(parseInt(event.target.value));
+    };
+
+    const handleDelete = (id: number) => {
+        if (window.confirm("Вы уверены, что хотите удалить этого пользователя?")) {
+            fetch(`${deleteTgUserPath}?id=${id}`, {
+                method: "DELETE",
+            })
+                .then(response => {
+                    if (response.ok) {
+                        //удаляем из таблицы
+                        setUsers(users.filter(user => user.id !== id));
+                    } else {
+                        console.error("Ошибка при удалении пользователя.");
+                    }
+                })
+                .catch(error => console.error("Ошибка при удалении пользователя:", error));
+        }
     };
 
     return (
@@ -90,19 +115,24 @@ function TgUsersBlock() {
                             <th>Подписка активна?</th>
                             <th>Права администратора</th>
                             <th>Последнее сообщение</th>
+                            <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
                         {users.map((user) => (
                             <tr key={user.id}>
-                                <td>{user.name}</td>
-                                <td>{user.surname}</td>
-                                <td>{user.patronymic}</td>
-                                <td>{user.phoneNumber}</td>
-                                <td>{user.tgChatId}</td>
-                                <td>{user.isSubscribed ? "Да" : "Нет"}</td>
-                                <td>{user.isAdmin ? "Да" : "Нет"}</td>
+                                <td>{user.name}</td><td>{user.surname}</td><td>{user.patronymic}</td>
+                                <td>{user.phoneNumber}</td><td>{user.tgChatId}</td>
+                                <td>{user.isSubscribed ? "Да" : "Нет"}</td><td>{user.isAdmin ? "Да" : "Нет"}</td>
                                 <td>{new Date(user.lastMessageTime).toLocaleString()}</td>
+                                <td>
+                                    <button
+                                        className="btn btn-danger"
+                                        onClick={() => handleDelete(user.id)}
+                                    >
+                                        Удалить
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
