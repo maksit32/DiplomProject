@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
-	[Authorize]
+	//[Authorize]
 	[Route("api/usercreatedevents")]
 	public class UserCreatedEventController : ControllerBase
 	{

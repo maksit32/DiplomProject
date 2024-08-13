@@ -11,7 +11,7 @@ using static Domain.Constants.TelegramTextConstants;
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
-	[Authorize]
+	//[Authorize]
 	[Route("api/scienceevents")]
 	public class ScienceEventController : ControllerBase
 	{

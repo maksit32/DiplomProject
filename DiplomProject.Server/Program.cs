@@ -1,5 +1,6 @@
 using DiplomProject.Server.Configurations;
 using DiplomProject.Server.DbContexts;
+using DiplomProject.Server.Middlewares;
 using DiplomProject.Server.Repositories;
 using DiplomProject.Server.Services;
 using Domain.Entities;
@@ -139,12 +140,14 @@ namespace API
 										ValidateAudience = true,
 										ValidateIssuer = true,
 										ValidAudiences = new[] { jwtConfig.Audience },
-										ValidIssuer = jwtConfig.Issuer
+										ValidIssuer = jwtConfig.Issuer,
 									};
 								});
 				builder.Services.AddAuthorization();
 
 				var app = builder.Build();
+				//must be deleted!
+				app.UseMiddleware<AuthenticationMiddleware>();
 				app.UseHttpsRedirection();
 				app.UseHttpLogging();
 				app.UseRouting();

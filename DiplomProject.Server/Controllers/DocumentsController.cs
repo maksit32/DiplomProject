@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
-	[Authorize]
-	[Route("api/[Controller]")]
+	//[Authorize]
+	[Route("api/[controller]")]
 	public class DocumentsController : ControllerBase
 	{
 		private readonly IDocumentService _documentService;

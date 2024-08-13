@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
-	[Authorize]
-	[Route("api/[Controller]")]
+	//[Authorize]
+	[Route("api/[controller]")]
 	public class NotifyController : ControllerBase
 	{
 		private readonly INotifyService _notifyService;
