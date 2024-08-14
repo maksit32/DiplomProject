@@ -19,14 +19,16 @@ namespace DiplomProject.Server.Controllers
 		private readonly ILogger<ScienceEventController> _logger;
 		private readonly INotifyService _notificationService;
 		private readonly IValidationService _validationService;
+		private readonly IDtoConverterService _dtoConverterService;
 
 		public ScienceEventController(IScienceEventRepository scEvRepo, IValidationService validationService, 
-			ILogger<ScienceEventController> logger, INotifyService notifyService)
+			ILogger<ScienceEventController> logger, INotifyService notifyService, IDtoConverterService dtoConverterService)
 		{
 			_scEventsRepo = scEvRepo ?? throw new ArgumentNullException(nameof(scEvRepo));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_notificationService = notifyService ?? throw new ArgumentNullException(nameof(notifyService));
 			_validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
+			_dtoConverterService = dtoConverterService ?? throw new ArgumentNullException(nameof(dtoConverterService));
 		}
 
 		[HttpGet("get")]
@@ -85,11 +87,13 @@ namespace DiplomProject.Server.Controllers
 				return BadRequest();
 			}
 		}
+		//data + phoneNumb(store) --> tgUser --> chatId
 		[HttpPost("add")]
-		public async Task<ActionResult> AddScienceEvent([FromBody] ScienceEvent newEvent, CancellationToken token)
+		public async Task<ActionResult> AddScienceEvent([FromBody] ScienceEventAddDto scEventDto, CancellationToken token)
 		{
 			try
 			{
+				var newEvent = await _dtoConverterService.ConvertToScienceEvent(scEventDto, token);
 				_validationService.ValidateScienceEvent(newEvent, token);
 				await _scEventsRepo.AddEventAsync(newEvent, token);
 				await _notificationService.NotifyLastAddEventUsersAsync(NewEventNotification, token);

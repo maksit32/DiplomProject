@@ -19,13 +19,15 @@ namespace DiplomProject.Server.Services
 				throw new InvalidDataException(nameof(scEvent.InformationEvent));
 			if (scEvent.DateEvent.ToUniversalTime() <= DateTime.UtcNow)
 				throw new InvalidDataException(nameof(scEvent.NameEvent));
+			if (scEvent.AddByAdminChatId <= 0)
+				throw new ArgumentOutOfRangeException(nameof(scEvent.AddByAdminChatId));
 
 			return true;
 		}
 
 		public bool ValidateTgUser(TelegramUser tgUser, CancellationToken token)
 		{
-			if(string.IsNullOrWhiteSpace(tgUser.Name)) 
+			if (string.IsNullOrWhiteSpace(tgUser.Name))
 				throw new InvalidDataException(nameof(tgUser.Name));
 			if (string.IsNullOrWhiteSpace(tgUser.Surname))
 				throw new InvalidDataException(nameof(tgUser.Surname));
@@ -34,7 +36,7 @@ namespace DiplomProject.Server.Services
 			if (!Regex.IsMatch(tgUser.PhoneNumber, @"^\+7\d{10}$"))
 				throw new InvalidDataException(nameof(tgUser.PhoneNumber));
 			if (tgUser.TgChatId <= 0) throw new ArgumentOutOfRangeException(nameof(tgUser.TgChatId));
-			
+
 			return true;
 		}
 
@@ -46,6 +48,8 @@ namespace DiplomProject.Server.Services
 				throw new InvalidDataException(nameof(uCreatedEv.PlaceEvent));
 			if (uCreatedEv.DateEvent.ToUniversalTime() >= DateTime.UtcNow)
 				throw new InvalidDataException(nameof(uCreatedEv.DateEvent));
+			if(string.IsNullOrWhiteSpace(uCreatedEv.TgUserId.ToString()))
+				throw new ArgumentNullException(nameof(uCreatedEv.TgUserId));
 
 			return true;
 		}

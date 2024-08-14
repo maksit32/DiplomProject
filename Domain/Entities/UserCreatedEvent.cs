@@ -19,9 +19,10 @@ namespace Domain.Entities
 		public string NameEvent { get; set; }
 		public string PlaceEvent { get; set; }
 		public DateTime DateEvent { get; set; }
+        public Guid TgUserId { get; set; }
 		public TelegramUser TgUser { get; set; }
-		//призер
-		public bool IsWinner { get; set; }
+        //призер
+        public bool IsWinner { get; set; }
 
 		protected UserCreatedEvent() { }
 		public UserCreatedEvent(string nameEvent, string placeEvent, DateTime dateEvent, bool isWinner, TelegramUser tgUser)

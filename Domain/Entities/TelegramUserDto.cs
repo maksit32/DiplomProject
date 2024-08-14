@@ -20,21 +20,6 @@ namespace Domain.Entities
 		public DateTime LastMessageTime { get; set; }
 		public TelegramUserDto(Guid id, string name, string surname, string patronymic, string phoneNumber, long tgChatId, DateTime _lastMessageTime, bool isSubscribed = false, bool isAdmin = false)
 		{
-			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentException($"\"{nameof(name)}\" не может быть пустым или содержать только пробел.", nameof(name));
-
-			if (string.IsNullOrWhiteSpace(surname))
-				throw new ArgumentException($"\"{nameof(surname)}\" не может быть пустым или содержать только пробел.", nameof(surname));
-
-			if (string.IsNullOrWhiteSpace(patronymic))
-				throw new ArgumentException($"\"{nameof(patronymic)}\" не может быть пустым или содержать только пробел.", nameof(patronymic));
-
-			if (string.IsNullOrWhiteSpace(phoneNumber))
-				throw new ArgumentException($"\"{nameof(phoneNumber)}\" не может быть пустым или содержать только пробел.", nameof(phoneNumber));
-			string pattern = @"^\+7\d{10}$";
-			if (!Regex.IsMatch(phoneNumber, pattern)) throw new InvalidDataException("Invalid phone number!");
-			if (tgChatId <= 0) throw new ArgumentOutOfRangeException("Поле tgChatId не должно быть меньше 0!");
-
 			Id = id;
 			TgChatId = tgChatId;
 			IsSubscribed = isSubscribed;

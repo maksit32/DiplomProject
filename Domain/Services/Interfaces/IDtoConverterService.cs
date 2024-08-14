@@ -12,5 +12,10 @@ namespace Domain.Services.Interfaces
 		List<TelegramUserDto> ConvertToTelegramUserDtoList(List<TelegramUser> users, CancellationToken token);
 		TelegramUserDto ConvertToTelegramUserDto(TelegramUser user, CancellationToken token);
 		Task<TelegramUser> ConvertToTelegramUser(TelegramUserDto userDto, CancellationToken token);
+		Task<ScienceEvent> ConvertToScienceEvent(ScienceEventAddDto scEventDto, CancellationToken token);
+		Task<List<UserCreatedEventDto>> ConvertToUserCreatedEventDtoList(List<UserCreatedEvent> uCreatedEvents, CancellationToken token);
+		Task<UserCreatedEventDto> ConvertToUserCreatedEventDto(UserCreatedEvent uCreatedEvent, CancellationToken token);
+		Task<UserCreatedEvent> ConvertToUserCreatedEvent(UserCreatedEventDto uCreatedEvDto, CancellationToken token);
+		Task<UserCreatedEvent> ConvertToUserCreatedEvent(UserCreatedEventAddDto addDto, CancellationToken token);
 	}
 }

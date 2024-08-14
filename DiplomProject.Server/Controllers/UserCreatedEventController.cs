@@ -14,23 +14,29 @@ namespace DiplomProject.Server.Controllers
 	public class UserCreatedEventController : ControllerBase
 	{
 		private readonly IUserCreatedEventRepository _userCreatedEventsRepo;
+		private readonly ITelegramUserRepository _tgUserRepository;
 		private readonly ILogger<UserCreatedEventController> _logger;
 		private readonly IValidationService _validationService;
+		private readonly IDtoConverterService _dtoConverterService;
 
-		public UserCreatedEventController(IUserCreatedEventRepository userCreatedEvRepo, IValidationService validationService, ILogger<UserCreatedEventController> logger)
+		public UserCreatedEventController(IUserCreatedEventRepository userCreatedEvRepo, IValidationService validationService, 
+			ILogger<UserCreatedEventController> logger, IDtoConverterService dtoConverterService, ITelegramUserRepository tgUserRepository)
 		{
 			_userCreatedEventsRepo = userCreatedEvRepo ?? throw new ArgumentNullException(nameof(userCreatedEvRepo)); ;
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
+			_dtoConverterService = dtoConverterService ?? throw new ArgumentNullException(nameof(dtoConverterService));
+			_tgUserRepository = tgUserRepository ?? throw new ArgumentNullException(nameof(tgUserRepository));
 		}
 
 		[HttpGet("get")]
-		public async Task<ActionResult<List<UserCreatedEvent>>> GetUserCreatedEvents(CancellationToken token)
+		public async Task<ActionResult<List<UserCreatedEventDto>>> GetUserCreatedEvents(CancellationToken token)
 		{
 			try
 			{
 				var lstEvents = await _userCreatedEventsRepo.ReadAllEventsAsync(token);
-				return lstEvents;
+				var dtoLst = await _dtoConverterService.ConvertToUserCreatedEventDtoList(lstEvents, token);
+				return dtoLst;
 			}
 			catch (Exception)
 			{
@@ -38,12 +44,14 @@ namespace DiplomProject.Server.Controllers
 			}
 		}
 		[HttpGet("id")]
-		public async Task<ActionResult<List<UserCreatedEvent>>> GetUserCreatedEventsById([FromQuery] Guid Id, CancellationToken token)
+		public async Task<ActionResult<List<UserCreatedEventDto>>> GetUserCreatedEventsByUserId([FromQuery] long chatId, CancellationToken token)
 		{
 			try
 			{
-				var lstEvents = await _userCreatedEventsRepo.ReadAllUserEventsAsync(Id, token);
-				return lstEvents;
+				var tgUser = await _tgUserRepository.GetTgUserByIdAsync(chatId, token);
+				var lstEvents = await _userCreatedEventsRepo.ReadAllUserEventsAsync(tgUser, token);
+				var dtoLst = await _dtoConverterService.ConvertToUserCreatedEventDtoList(lstEvents, token);
+				return dtoLst;
 			}
 			catch (Exception)
 			{
@@ -51,10 +59,11 @@ namespace DiplomProject.Server.Controllers
 			}
 		}
 		[HttpPut("update")]
-		public async Task<ActionResult> UpdateUserCreatedEvent([FromBody] UserCreatedEvent updatedEvent, CancellationToken token)
+		public async Task<ActionResult> UpdateUserCreatedEvent([FromBody] UserCreatedEventDto eventDto, CancellationToken token)
 		{
 			try
 			{
+				var updatedEvent = await _dtoConverterService.ConvertToUserCreatedEvent(eventDto, token);
 				_validationService.ValidateUserCreatedEvent(updatedEvent, token);
 				await _userCreatedEventsRepo.UpdateUserCreatedEventAsync(updatedEvent, token);
 				return Ok();
