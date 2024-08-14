@@ -18,7 +18,7 @@ namespace DiplomProject.Server.Services
 			_jwtService = jwtService ?? throw new ArgumentNullException(nameof(jwtService));
 		}
 
-		public async Task<string> AuthenticateUserAsync(WebsiteUserDto userData, CancellationToken ct)
+		public async Task<string> AuthenticateUserAsync(WebsiteLoginUserDto userData, CancellationToken ct)
 		{
 			var user = await _telegramUserRepository.GetTgUserByPhoneAsync(userData.PhoneNumber, ct);
 			if (user == null || !_passwordHasherService.VerifyPassword(user.HashedPassword, userData.Password) || !user.IsAdmin)

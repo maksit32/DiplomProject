@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-	public class WebsiteUserDto
+	public class WebsiteLoginUserDto
 	{
         public string PhoneNumber { get; set; }
         public string Password { get; set; }
 
-        public WebsiteUserDto(string phoneNumber, string password)
+        public WebsiteLoginUserDto(string phoneNumber, string password)
         {
             PhoneNumber = phoneNumber;
             Password = password;

@@ -22,7 +22,7 @@ namespace DiplomProject.Server.Controllers
 		}
 
 		[HttpPost("login")]
-		public async Task<ActionResult> Login([FromBody] WebsiteUserDto user, CancellationToken ct)
+		public async Task<ActionResult> Login([FromBody] WebsiteLoginUserDto user, CancellationToken ct)
 		{
 			try
 			{

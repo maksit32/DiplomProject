@@ -33,6 +33,7 @@ namespace DiplomProject.Server.Services
 				throw new InvalidDataException(nameof(tgUser.Patronymic));
 			if (!Regex.IsMatch(tgUser.PhoneNumber, @"^\+7\d{10}$"))
 				throw new InvalidDataException(nameof(tgUser.PhoneNumber));
+			if (tgUser.TgChatId <= 0) throw new ArgumentOutOfRangeException(nameof(tgUser.TgChatId));
 			
 			return true;
 		}

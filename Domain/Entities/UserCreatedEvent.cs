@@ -26,20 +26,8 @@ namespace Domain.Entities
 		protected UserCreatedEvent() { }
 		public UserCreatedEvent(string nameEvent, string placeEvent, DateTime dateEvent, bool isWinner, TelegramUser tgUser)
 		{
-			if (string.IsNullOrWhiteSpace(nameEvent))
-			{
-				throw new ArgumentException($"\"{nameof(nameEvent)}\" не может быть пустым или содержать только пробел.", nameof(nameEvent));
-			}
-
-			if (string.IsNullOrWhiteSpace(placeEvent))
-			{
-				throw new ArgumentException($"\"{nameof(placeEvent)}\" не может быть пустым или содержать только пробел.", nameof(placeEvent));
-			}
-
 			if (tgUser is null)
-			{
 				throw new ArgumentNullException(nameof(tgUser));
-			}
 
 			NameEvent = nameEvent;
 			PlaceEvent = placeEvent;
@@ -51,7 +39,6 @@ namespace Domain.Entities
 		public override string ToString()
 		{
 			return $"{ButtonEmj} Название:   {NameEvent}\nНомер мероприятия:   {Id}\nДата:   {DateEvent.ToLocalTime().ToShortDateString()}\nМесто проведения:   {PlaceEvent}\nПризер:   {IsWinner}\n\n";
-
 		}
 	}
 }

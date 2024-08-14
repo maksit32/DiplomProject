@@ -110,6 +110,7 @@ namespace API
 				builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 				builder.Services.AddScoped<IValidationService, ValidationService>();
 				builder.Services.AddScoped<IDocumentService, WordDocumentService>();
+				builder.Services.AddScoped<IDtoConverterService, DtoConverterService>();
 				builder.Services.AddSingleton<IFillDataService, FillDocxOpenXMLDataService>();
 
 

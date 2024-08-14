@@ -16,14 +16,16 @@ namespace DiplomProject.Server.Controllers
 		private readonly ILogger<TelegramUserController> _logger;
 		private readonly IValidationService _validationService;
 		private readonly ITgUserService _tgUserService;
+		private readonly IDtoConverterService _dtoConverterService;
 
 		public TelegramUserController(ITelegramUserRepository tgUserRepo, IValidationService validationService,
-			ILogger<TelegramUserController> logger, ITgUserService tgUserService)
+			ILogger<TelegramUserController> logger, ITgUserService tgUserService, IDtoConverterService dtoConverterService)
 		{
 			_tgusersRepo = tgUserRepo ?? throw new ArgumentNullException(nameof(tgUserRepo));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
 			_tgUserService = tgUserService ?? throw new ArgumentNullException(nameof(tgUserService));
+			_dtoConverterService = dtoConverterService ?? throw new ArgumentNullException(nameof(dtoConverterService));
 		}
 
 		[HttpGet("get")]
@@ -32,7 +34,7 @@ namespace DiplomProject.Server.Controllers
 			try
 			{
 				var lstTgUsers = await _tgusersRepo.GetUsersListAsync(token);
-				var lstTgUserDTO = _tgUserService.ConvertToTelegramUserDtoList(lstTgUsers, token);
+				var lstTgUserDTO = _dtoConverterService.ConvertToTelegramUserDtoList(lstTgUsers, token);
 				return lstTgUserDTO;
 			}
 			catch (Exception)
@@ -46,7 +48,7 @@ namespace DiplomProject.Server.Controllers
 			try
 			{
 				var lstTgUsers = await _tgusersRepo.GetAdminUsersListAsync(token);
-				var lstTgUserDTO = _tgUserService.ConvertToTelegramUserDtoList(lstTgUsers, token);
+				var lstTgUserDTO = _dtoConverterService.ConvertToTelegramUserDtoList(lstTgUsers, token);
 				return lstTgUserDTO;
 			}
 			catch (Exception)
@@ -60,7 +62,7 @@ namespace DiplomProject.Server.Controllers
 			try
 			{
 				var lstTgUsers = await _tgusersRepo.GetSubUsersListAsync(token);
-				var lstTgUserDTO = _tgUserService.ConvertToTelegramUserDtoList(lstTgUsers, token);
+				var lstTgUserDTO = _dtoConverterService.ConvertToTelegramUserDtoList(lstTgUsers, token);
 				return lstTgUserDTO;
 			}
 			catch (Exception)
@@ -76,7 +78,7 @@ namespace DiplomProject.Server.Controllers
 				var tgUser = await _tgusersRepo.GetTgUserByIdAsync(id, token);
 				if (tgUser == null) return NotFound();
 
-				var tgUserDto = _tgUserService.ConvertToTelegramUserDto(tgUser, token);
+				var tgUserDto = _dtoConverterService.ConvertToTelegramUserDto(tgUser, token);
 				return tgUserDto;
 			}
 			catch (Exception)
@@ -92,7 +94,7 @@ namespace DiplomProject.Server.Controllers
 				var tgUser = await _tgusersRepo.GetTgUserByIdAsync(chatId, token);
 				if (tgUser == null) return NotFound();
 
-				var tgUserDto = _tgUserService.ConvertToTelegramUserDto(tgUser, token);
+				var tgUserDto = _dtoConverterService.ConvertToTelegramUserDto(tgUser, token);
 				return tgUserDto;
 			}
 			catch (Exception)
@@ -119,7 +121,7 @@ namespace DiplomProject.Server.Controllers
 		{
 			try
 			{
-				var user = await _tgUserService.ConvertToTelegramUser(userDto, token);
+				var user = await _dtoConverterService.ConvertToTelegramUser(userDto, token);
 				_validationService.ValidateTgUser(user, token);
 				await _tgusersRepo.UpdateTgUserAsync(user, token);
 				return Ok();

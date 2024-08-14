@@ -28,26 +28,6 @@ namespace Domain.Entities
 		protected ScienceEvent() { }
 		public ScienceEvent(string nameEvent, DateTime dateEvent, string placeEvent, string requirementsEvent, string informationEvent, long addByAdminChatId)
 		{
-			if (string.IsNullOrWhiteSpace(nameEvent))
-			{
-				throw new ArgumentException($"\"{nameof(nameEvent)}\" не может быть пустым или содержать только пробел.", nameof(nameEvent));
-			}
-
-			if (string.IsNullOrWhiteSpace(placeEvent))
-			{
-				throw new ArgumentException($"\"{nameof(placeEvent)}\" не может быть пустым или содержать только пробел.", nameof(placeEvent));
-			}
-
-			if (string.IsNullOrWhiteSpace(requirementsEvent))
-			{
-				throw new ArgumentException($"\"{nameof(requirementsEvent)}\" не может быть пустым или содержать только пробел.", nameof(requirementsEvent));
-			}
-
-			if (string.IsNullOrWhiteSpace(informationEvent))
-			{
-				throw new ArgumentException($"\"{nameof(informationEvent)}\" не может быть пустым или содержать только пробел.", nameof(informationEvent));
-			}
-
 			NameEvent = nameEvent;
 			DateEvent = dateEvent;
 			PlaceEvent = placeEvent;

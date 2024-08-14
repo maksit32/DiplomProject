@@ -19,8 +19,5 @@ namespace Domain.Services.Interfaces
 		void ChangeAdminPasswordAction(TelegramUser user, string hashedPassword, CancellationToken token);
 		Task<TelegramUser?> ChangeAdminStatusAction(TelegramUser user, string lowerCaseMessage, CancellationToken token);
 		string GetNoHashedPasswordAction(string lowerCaseMessage, CancellationToken token);
-		List<TelegramUserDto> ConvertToTelegramUserDtoList(List<TelegramUser> users, CancellationToken token);
-		TelegramUserDto ConvertToTelegramUserDto(TelegramUser user, CancellationToken token);
-		Task<TelegramUser> ConvertToTelegramUser(TelegramUserDto userDto, CancellationToken token);
 	}
 }
