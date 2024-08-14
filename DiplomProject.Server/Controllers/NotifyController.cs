@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
-	//[Authorize]
+	[Authorize("Jwt")]
 	[Route("api/[controller]")]
 	public class NotifyController : ControllerBase
 	{

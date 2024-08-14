@@ -10,6 +10,7 @@ using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -133,18 +134,26 @@ namespace API
 								{
 									options.TokenValidationParameters = new TokenValidationParameters
 									{
-										IssuerSigningKey = new SymmetricSecurityKey(jwtConfig.SigningKeyBytes),
-										ValidateIssuerSigningKey = true,
-										ValidateLifetime = true,
-										RequireExpirationTime = true,
-										RequireSignedTokens = true,
-										ValidateAudience = true,
-										ValidateIssuer = true,
-										ValidAudiences = new[] { jwtConfig.Audience },
 										ValidIssuer = jwtConfig.Issuer,
+										ValidAudience = jwtConfig.Audience,
+										IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SigningKey)),
+										ValidateIssuer = true,
+										ValidateAudience = true,
+										ValidateLifetime = false,
+										ValidateIssuerSigningKey = true
 									};
 								});
-				builder.Services.AddAuthorization();
+				//authorise по jwt
+				builder.Services.AddAuthorization(options => {
+					options.FallbackPolicy = new AuthorizationPolicyBuilder()
+												.RequireAuthenticatedUser()
+												.Build();
+					options.AddPolicy("Jwt", new AuthorizationPolicyBuilder()
+								.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+								.RequireAuthenticatedUser()
+								.Build());
+				});
+
 
 				var app = builder.Build();
 				//must be deleted!

@@ -1,6 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,6 +12,7 @@ using System.Text;
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
+	[AllowAnonymous]
 	[Route("api/[controller]")]
 	public class AuthController : ControllerBase
 	{
