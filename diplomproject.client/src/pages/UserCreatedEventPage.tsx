@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/NavBar"
+import UserCreatedEventBlock from "../components/UserCreatedEventsBlock";
 
 
 
@@ -11,7 +12,7 @@ export function UserCreatedEventPage() {
     return (
         <>
             <Navbar />
-            <p>UserCreatedEvent</p>
+            <UserCreatedEventBlock />
         </>
     )
 }

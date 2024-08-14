@@ -37,23 +37,23 @@ namespace DiplomProject.Server.Services
 			return new TelegramUserDto(user.Id, user.Name, user.Surname, user.Patronymic, user.PhoneNumber, user.TgChatId, user.LastMessageTime, user.IsSubscribed, user.IsAdmin);
 		}
 		//изменение TelegramUser
-		public async Task<TelegramUser> ConvertToTelegramUser(TelegramUserDto userDto, CancellationToken token)
+		public async Task<TelegramUser> ConvertToTgUserFromUpdatedDto(TelegramUserDto updatedUserDto, CancellationToken token)
 		{
-			if (userDto is null)
-				throw new ArgumentNullException(nameof(userDto));
+			if (updatedUserDto is null)
+				throw new ArgumentNullException(nameof(updatedUserDto));
 
-			var user = await _tgUserRepo.GetTgUserByIdAsync(userDto.Id, token);
-			if (user is null) throw new ArgumentNullException(nameof(user));
+			var updatedUser = await _tgUserRepo.GetTgUserByIdAsync(updatedUserDto.Id, token);
+			if (updatedUser is null) throw new ArgumentNullException(nameof(updatedUser));
 
-			user.Name = userDto.Name;
-			user.Surname = userDto.Surname;
-			user.Patronymic = userDto.Patronymic;
-			user.PhoneNumber = userDto.PhoneNumber;
-			user.TgChatId = userDto.TgChatId;
-			user.IsSubscribed = userDto.IsSubscribed;
-			user.IsAdmin = userDto.IsAdmin;
-			user.LastMessageTime = userDto.LastMessageTime;
-			return user;
+			updatedUser.Name = updatedUserDto.Name;
+			updatedUser.Surname = updatedUserDto.Surname;
+			updatedUser.Patronymic = updatedUserDto.Patronymic;
+			updatedUser.PhoneNumber = updatedUserDto.PhoneNumber;
+			updatedUser.TgChatId = updatedUserDto.TgChatId;
+			updatedUser.IsSubscribed = updatedUserDto.IsSubscribed;
+			updatedUser.IsAdmin = updatedUserDto.IsAdmin;
+			updatedUser.LastMessageTime = updatedUserDto.LastMessageTime;
+			return updatedUser;
 		}
 		//добавление ScienceEvent
 		public async Task<ScienceEvent> ConvertToScienceEvent(ScienceEventAddDto scEventDto, CancellationToken token)
@@ -80,17 +80,17 @@ namespace DiplomProject.Server.Services
 			return new UserCreatedEventDto(uEvent.Id, uEvent.NameEvent, uEvent.PlaceEvent, uEvent.DateEvent, uEvent.IsWinner, tgUser.TgChatId);
 		}
 		//для изменения
-		public async Task<UserCreatedEvent> ConvertToUserCreatedEvent(UserCreatedEventDto uCreatedEvDto, CancellationToken token)
+		public async Task<UserCreatedEvent> ConvertToUsCrEventFromUpdatedDto(UserCreatedEventDto updatedDto, CancellationToken token)
 		{
-			if (uCreatedEvDto is null) throw new ArgumentNullException(nameof(uCreatedEvDto));
+			if (updatedDto is null) throw new ArgumentNullException(nameof(updatedDto));
 
-			var updatedEvent = await _userCreatedEventRepo.GetUserCreatedEventByIdAsync(uCreatedEvDto.Id, token);
+			var updatedEvent = await _userCreatedEventRepo.GetUserCreatedEventByIdAsync(updatedDto.Id, token);
 			if(updatedEvent is null) throw new ArgumentNullException(nameof(updatedEvent));
 
-			updatedEvent.NameEvent = uCreatedEvDto.NameEvent;
-			updatedEvent.PlaceEvent = uCreatedEvDto.PlaceEvent;
-			updatedEvent.DateEvent = uCreatedEvDto.DateEvent;
-			updatedEvent.IsWinner = uCreatedEvDto.IsWinner;
+			updatedEvent.NameEvent = updatedDto.NameEvent;
+			updatedEvent.PlaceEvent = updatedDto.PlaceEvent;
+			updatedEvent.DateEvent = updatedDto.DateEvent;
+			updatedEvent.IsWinner = updatedDto.IsWinner;
 
 			return updatedEvent;
 		}

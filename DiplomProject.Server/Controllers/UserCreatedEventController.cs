@@ -63,7 +63,7 @@ namespace DiplomProject.Server.Controllers
 		{
 			try
 			{
-				var updatedEvent = await _dtoConverterService.ConvertToUserCreatedEvent(eventDto, token);
+				var updatedEvent = await _dtoConverterService.ConvertToUsCrEventFromUpdatedDto(eventDto, token);
 				_validationService.ValidateUserCreatedEvent(updatedEvent, token);
 				await _userCreatedEventsRepo.UpdateUserCreatedEventAsync(updatedEvent, token);
 				return Ok();

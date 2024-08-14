@@ -22,4 +22,8 @@ export const updateScienceEventPath = "http://localhost:8443/api/scienceevents/u
 export const addScienceEventPath = "http://localhost:8443/api/scienceevents/add";
 export const deleteScienceEventPath = "http://localhost:8443/api/scienceevents/delete";
 
-//
+//userCreatedEvents
+export const getAllUserCreatedEventsPath = "http://localhost:8443/api/usercreatedevents/get";
+export const getUserCreatedEventsByChatIdPath = "http://localhost:8443/api/usercreatedevents/id";
+export const updateUserCreatedEventsPath = "http://localhost:8443/api/usercreatedevents/update";
+export const deleteUserCreatedEventPath = "http://localhost:8443/api/usercreatedevents/delete";

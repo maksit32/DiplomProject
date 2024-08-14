@@ -154,6 +154,7 @@ function ScienceEventsBlock() {
                                         Изменить
                                     </button>
                                     <button
+                                        id="delete-btn"
                                         className="btn btn-danger"
                                         onClick={() => handleDelete(sEvent.id)}
                                     >

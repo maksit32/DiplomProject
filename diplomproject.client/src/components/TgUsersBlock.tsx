@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getAdmTgUsersPath, getAllTgUsersPath, getSubTgUsersPath, deleteTgUserPath, updateTgUserPath } from "../data/APIPaths";
 import "../styles/tgUsersBlock.css";
 import TgUserModal from "./TgUserModal";
@@ -167,6 +167,7 @@ function TgUsersBlock() {
                                         Изменить
                                     </button>
                                     <button
+                                        id="delete-btn"
                                         className="btn btn-danger"
                                         onClick={() => handleDelete(user.id)}
                                     >

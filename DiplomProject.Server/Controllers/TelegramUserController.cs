@@ -121,7 +121,7 @@ namespace DiplomProject.Server.Controllers
 		{
 			try
 			{
-				var user = await _dtoConverterService.ConvertToTelegramUser(userDto, token);
+				var user = await _dtoConverterService.ConvertToTgUserFromUpdatedDto(userDto, token);
 				_validationService.ValidateTgUser(user, token);
 				await _tgusersRepo.UpdateTgUserAsync(user, token);
 				return Ok();
