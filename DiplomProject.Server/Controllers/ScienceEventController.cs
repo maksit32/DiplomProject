@@ -101,10 +101,11 @@ namespace DiplomProject.Server.Controllers
 			}
 		}
 		[HttpDelete("delete")]
-		public async Task<ActionResult> DeleteScienceEvent([FromQuery] ScienceEvent scEvent, CancellationToken token)
+		public async Task<ActionResult> DeleteScienceEvent([FromQuery] Guid id, CancellationToken token)
 		{
 			try
 			{
+				var scEvent = await _scEventsRepo.GetScienceEventByIdAsync(id, token);
 				await _scEventsRepo.DeleteEventAsync(scEvent, token);
 				await _notificationService.NotifyEventChangingUsersAsync(scEvent, DeleteEventNotification, token);
 				return Ok();

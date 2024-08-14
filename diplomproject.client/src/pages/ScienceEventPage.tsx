@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/NavBar"
-
+import ScienceEventsBlock from "../components/ScienceEventsBlock";
 
 
 export function ScienceEventPage() {
@@ -11,7 +11,7 @@ export function ScienceEventPage() {
     return (
         <>
             <Navbar />
-            <p>ScienceEvent</p>
+            <ScienceEventsBlock />
         </>
     )
 }

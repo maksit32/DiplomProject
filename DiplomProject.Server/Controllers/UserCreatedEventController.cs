@@ -65,10 +65,11 @@ namespace DiplomProject.Server.Controllers
 			}
 		}
 		[HttpDelete("delete")]
-		public async Task<ActionResult> DeleteUserCreatedEvent([FromQuery] UserCreatedEvent deleteEvent, CancellationToken token)
+		public async Task<ActionResult> DeleteUserCreatedEvent([FromQuery] Guid id, CancellationToken token)
 		{
 			try
 			{
+				var deleteEvent = await _userCreatedEventsRepo.GetUserCreatedEventByIdAsync(id, token);
 				await _userCreatedEventsRepo.DeleteUserCreatedEvent(deleteEvent, token);
 				return Ok();
 			}
