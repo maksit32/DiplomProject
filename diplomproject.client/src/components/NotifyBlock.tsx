@@ -52,7 +52,7 @@ export function NotifyBlock() {
                 <button
                     type="button"
                     onClick={() => submitText(notifyChoice, messageToSend, navigate)}
-                    className="btn btn-outline-success"
+                    className="btn btn-outline-primary"
                 >
                     Отправить пользователям
                 </button>

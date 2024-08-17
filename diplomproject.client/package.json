@@ -10,11 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.4.0",
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@mui/material": "^5.16.7",
     "@reduxjs/toolkit": "^2.2.7",
+    "antd": "^5.20.1",
     "axios": "^1.7.3",
     "bootstrap": "^5.3.3",
     "framer-motion": "^11.3.24",

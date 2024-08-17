@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { getAdmTgUsersPath, getAllTgUsersPath, getSubTgUsersPath, deleteTgUserPath, updateTgUserPath } from "../data/APIPaths";
 import "../styles/tgUsersBlock.css";
 import TgUserModal from "./TgUserModal";
+import axios from "axios";
+import { Tag } from "antd";
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 function TgUsersBlock() {
     const [choice, setChoice] = useState(1);
     const [users, setUsers] = useState([]);
     const [editingUser, setEditingUser] = useState(null);
-
 
     const fetchUsers = () => {
         let url;
@@ -25,27 +27,28 @@ function TgUsersBlock() {
                 return;
         }
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => setUsers(data))
-            .catch(error => console.error("Ошибка при получении данных:", error));
+        axios.get(url)
+            .then(response => {
+                setUsers(response.data);
+            })
+            .catch(error => {
+                console.error("Ошибка при получении данных:", error);
+            });
     };
 
     useEffect(() => {
         fetchUsers();
     }, [choice]);
 
-    const handleChange = (event) => {
-        setChoice(parseInt(event.target.value));
+    const handleTagChange = (value) => {
+        setChoice(value);
     };
 
     const handleDelete = (id) => {
         if (window.confirm("Вы уверены, что хотите удалить этого пользователя?")) {
-            fetch(`${deleteTgUserPath}?id=${id}`, {
-                method: "DELETE",
-            })
+            axios.delete(`${deleteTgUserPath}?id=${id}`)
                 .then(response => {
-                    if (response.ok) {
+                    if (response.status === 200) {
                         setUsers(users.filter(user => user.id !== id));
                     } else {
                         console.error("Ошибка при удалении пользователя.");
@@ -68,15 +71,13 @@ function TgUsersBlock() {
     const handleSave = () => {
         console.log(JSON.stringify(editingUser));
 
-        fetch(updateTgUserPath, {
-            method: "PUT",
+        axios.put(updateTgUserPath, editingUser, {
             headers: {
                 "Content-Type": "application/json",
-            },
-            body: JSON.stringify(editingUser),
+            }
         })
             .then(response => {
-                if (response.ok) {
+                if (response.status === 200) {
                     console.log("ok");
                     fetchUsers();
                 }
@@ -85,53 +86,28 @@ function TgUsersBlock() {
             .catch(error => console.error("Ошибка при обновлении пользователя:", error));
     };
 
-
     return (
         <>
             <div><h2>Выберите действие: </h2></div>
-            <div className="options-container">
-                <div className="form-check">
-                    <input
-                        className="form-check-input"
-                        type="radio"
-                        id="option1"
-                        name="options"
-                        value="1"
-                        checked={choice === 1}
-                        onChange={handleChange}
-                    />
-                    <label className="form-check-label" htmlFor="option1">
-                        Список всех пользователей
-                    </label>
-                </div>
-                <div className="form-check">
-                    <input
-                        className="form-check-input"
-                        type="radio"
-                        id="option2"
-                        name="options"
-                        value="2"
-                        checked={choice === 2}
-                        onChange={handleChange}
-                    />
-                    <label className="form-check-label" htmlFor="option2">
-                        Список администраторов
-                    </label>
-                </div>
-                <div className="form-check">
-                    <input
-                        className="form-check-input"
-                        type="radio"
-                        id="option3"
-                        name="options"
-                        value="3"
-                        checked={choice === 3}
-                        onChange={handleChange}
-                    />
-                    <label className="form-check-label" htmlFor="option3">
-                        Список подписчиков
-                    </label>
-                </div>
+            <div>
+                <Tag.CheckableTag
+                    checked={choice === 1}
+                    onChange={() => handleTagChange(1)}
+                >
+                    Список всех пользователей
+                </Tag.CheckableTag>
+                <Tag.CheckableTag
+                    checked={choice === 2}
+                    onChange={() => handleTagChange(2)}
+                >
+                    Список администраторов
+                </Tag.CheckableTag>
+                <Tag.CheckableTag
+                    checked={choice === 3}
+                    onChange={() => handleTagChange(3)}
+                >
+                    Список подписчиков
+                </Tag.CheckableTag>
             </div>
             <div className="table-responsive">
                 <table className="table table-striped table-bordered">
@@ -164,14 +140,14 @@ function TgUsersBlock() {
                                         className="btn btn-primary"
                                         onClick={() => handleEditClick(user)}
                                     >
-                                        Изменить
+                                        <EditOutlined />
                                     </button>
                                     <button
                                         id="delete-btn"
                                         className="btn btn-danger"
                                         onClick={() => handleDelete(user.id)}
                                     >
-                                        Удалить
+                                        <DeleteOutlined />
                                     </button>
                                 </td>
                             </tr>

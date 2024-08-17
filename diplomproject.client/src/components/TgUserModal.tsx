@@ -1,4 +1,5 @@
 import React from "react";
+import "../styles/tgUserModal.css" // Подключаем стили
 
 function TgUserModal({ editingUser, handleInputChange, handleSave, setEditingUser }) {
     return (
@@ -9,7 +10,12 @@ function TgUserModal({ editingUser, handleInputChange, handleSave, setEditingUse
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Редактировать пользователя</h5>
-                                <button type="button" className="close" aria-label="Close" onClick={() => setEditingUser(null)}>
+                                <button
+                                    type="button"
+                                    className="btn-close-custom"
+                                    aria-label="Close"
+                                    onClick={() => setEditingUser(null)}
+                                >
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
@@ -88,10 +94,10 @@ function TgUserModal({ editingUser, handleInputChange, handleSave, setEditingUse
                                 </form>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-success" onClick={handleSave}>
+                                <button type="button" className="btn btn-outline-primary" onClick={handleSave}>
                                     Сохранить
                                 </button>
-                                <button type="button" className="btn btn-secondary" onClick={() => setEditingUser(null)}>
+                                <button type="button" className="btn btn-outline-dark" onClick={() => setEditingUser(null)}>
                                     Отмена
                                 </button>
                             </div>
