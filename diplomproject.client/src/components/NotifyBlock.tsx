@@ -2,16 +2,19 @@ import { useState } from "react";
 import { Form } from 'react-bootstrap';
 import { submitText } from "../data/Functions";
 import { useNavigate } from "react-router-dom";
-import "../styles/notifyBlock.css"
-
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import "../styles/notifyBlock.css";
 
 export function NotifyBlock() {
-    const [notifyChoice, SetChoice] = useState(-1);
-    const [messageToSend, SetSendMessage] = useState('');
+    const [notifyChoice, setChoice] = useState(-1);
+    const [messageToSend, setSendMessage] = useState('');
     const navigate = useNavigate();
 
     const handleChange = (event: any) => {
-        SetChoice(parseInt(event.target.value));
+        setChoice(event.target.value);
         console.log(event.target.value);
     };
 
@@ -19,48 +22,20 @@ export function NotifyBlock() {
         <div>
             <div><h2>Введите сообщение в поле ниже и выберите, кого вы хотите оповестить</h2></div>
             <div className="options-container">
-                <div className="form-check">
-                    <input
-                        className="form-check-input"
-                        type="radio"
-                        id="option1"
-                        name="options"
-                        value="1"
-                        checked={notifyChoice === 1}
+                <FormControl fullWidth>
+                    <InputLabel id="notify-select-label">Оповестить</InputLabel>
+                    <Select
+                        labelId="notify-select-label"
+                        id="notify-select"
+                        value={notifyChoice}
+                        label="Оповестить"
                         onChange={handleChange}
-                    />
-                    <label className="form-check-label" htmlFor="option1">
-                        Оповестить администраторов телеграм бота
-                    </label>
-                </div>
-                <div className="form-check">
-                    <input
-                        className="form-check-input"
-                        type="radio"
-                        id="option2"
-                        name="options"
-                        value="2"
-                        checked={notifyChoice === 2}
-                        onChange={handleChange}
-                    />
-                    <label className="form-check-label" htmlFor="option2">
-                        Оповестить подписчиков телеграм бота
-                    </label>
-                </div>
-                <div className="form-check">
-                    <input
-                        className="form-check-input"
-                        type="radio"
-                        id="option3"
-                        name="options"
-                        value="3"
-                        checked={notifyChoice === 3}
-                        onChange={handleChange}
-                    />
-                    <label className="form-check-label" htmlFor="option3">
-                        Оповестить всех пользователей телеграм бота
-                    </label>
-                </div>
+                    >
+                        <MenuItem value={1}>Администраторов телеграм бота</MenuItem>
+                        <MenuItem value={2}>Подписчиков телеграм бота</MenuItem>
+                        <MenuItem value={3}>Всех пользователей телеграм бота</MenuItem>
+                    </Select>
+                </FormControl>
             </div>
             <div className="text-container">
                 <Form.Group controlId="formText">
@@ -69,7 +44,7 @@ export function NotifyBlock() {
                         rows={13}
                         placeholder="Ваш текст..."
                         className="custom-textarea"
-                        onChange={e => SetSendMessage(e.target.value)}
+                        onChange={e => setSendMessage(e.target.value)}
                     />
                 </Form.Group>
             </div>

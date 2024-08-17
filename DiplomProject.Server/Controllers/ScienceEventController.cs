@@ -12,6 +12,7 @@ namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
 	//[Authorize("Jwt")]
+	[AllowAnonymous]
 	[Route("api/scienceevents")]
 	public class ScienceEventController : ControllerBase
 	{

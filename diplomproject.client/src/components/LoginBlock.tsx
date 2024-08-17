@@ -14,7 +14,6 @@ export function LoginBlock() {
     const [errorMessage, setError] = useState("");
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const phoneNumber = useSelector((state) => state.user.phoneNumber);
 
     // //проверка на jwt
     // CheckJwt(navigate);

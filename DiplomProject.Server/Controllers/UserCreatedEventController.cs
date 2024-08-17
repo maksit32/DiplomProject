@@ -10,6 +10,7 @@ namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
 	//[Authorize("Jwt")]
+	[AllowAnonymous]
 	[Route("api/usercreatedevents")]
 	public class UserCreatedEventController : ControllerBase
 	{

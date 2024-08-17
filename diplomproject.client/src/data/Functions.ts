@@ -1,3 +1,4 @@
+import axios from "axios";
 import { notifyAdminUsersPath, notifyAllUsersPath, notifySubUsersPath } from "./APIPaths";
 
 export function CheckJwt(navigate: any) {
@@ -31,45 +32,27 @@ export function redirectAndRemoveToken(navigate: any) {
 export async function submitText(notifyChoice: number, message: string, navigate: any) {
     const token = localStorage.getItem("jwtToken");
 
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+    };
+
     try {
         let response;
         if (notifyChoice === 1) {
-            response = await fetch(notifyAdminUsersPath, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(message)
-            });
+            response = await axios.post(notifyAdminUsersPath, JSON.stringify(message), { headers });
         } else if (notifyChoice === 2) {
-            response = await fetch(notifySubUsersPath, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(message)
-            });
+            response = await axios.post(notifySubUsersPath, JSON.stringify(message), { headers });
         } else if (notifyChoice === 3) {
-            response = await fetch(notifyAllUsersPath, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(message)
-            });
+            response = await axios.post(notifyAllUsersPath, JSON.stringify(message), { headers });
         }
 
-        if (response.ok) {
+        if (response.status === 200) {
             console.log("Notification sent successfully!");
-        }
-        else if (response.status === 401) {
+        } else if (response.status === 401) {
             // redirectAndRemoveToken(navigate);
-        }
-        else {
-            console.error("Failed to send notification:", response.status, errorMessage);
+        } else {
+            console.error("Failed to send notification:", response.status, response.data);
         }
     } catch (error) {
         console.error("Error sending notification:", error);

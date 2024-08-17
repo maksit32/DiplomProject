@@ -9,6 +9,7 @@ namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
 	//[Authorize("Jwt")]
+	[AllowAnonymous]
 	[Route("api/tgusers")]
 	public class TelegramUserController : ControllerBase
 	{

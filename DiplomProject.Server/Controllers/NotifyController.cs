@@ -6,6 +6,7 @@ namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
 	//[Authorize("Jwt")]
+	[AllowAnonymous]
 	[Route("api/[controller]")]
 	public class NotifyController : ControllerBase
 	{
