@@ -11,7 +11,7 @@ function UserCreatedEventModal({ editingUserCreatedEvent, handleInputChange, han
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Редактировать мероприятие</h5>
-                                <button type="button" className="close" aria-label="Close" onClick={() => setEditingUserCreatedEvent(null)}>
+                                <button type="button" className="btn-close-custom" aria-label="Close" onClick={() => setEditingUserCreatedEvent(null)}>
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
@@ -40,12 +40,12 @@ function UserCreatedEventModal({ editingUserCreatedEvent, handleInputChange, han
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label htmlFor="dateEvent">Место проведения:</label>
+                                        <label htmlFor="placeEvent">Место проведения:</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            id="dateEvent"
-                                            name="dateEvent"
+                                            id="placeEvent"
+                                            name="placeEvent"
                                             value={editingUserCreatedEvent.placeEvent}
                                             onChange={handleInputChange}
                                         />
@@ -66,10 +66,10 @@ function UserCreatedEventModal({ editingUserCreatedEvent, handleInputChange, han
                                 </form>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-success" onClick={handleSave}>
+                                <button type="button" className="btn btn-outline-primary" onClick={handleSave}>
                                     Сохранить
                                 </button>
-                                <button type="button" className="btn btn-secondary" onClick={() => setEditingUserCreatedEvent(null)}>
+                                <button type="button" className="btn btn-outline-danger" onClick={() => setEditingUserCreatedEvent(null)}>
                                     Отмена
                                 </button>
                             </div>

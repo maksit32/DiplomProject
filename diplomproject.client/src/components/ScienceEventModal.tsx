@@ -1,5 +1,6 @@
 import React from "react";
 
+
 function ScEventModal({ editingSEvent, handleInputChange, handleSave, setEditingSEvent }) {
     return (
         <>
@@ -9,7 +10,7 @@ function ScEventModal({ editingSEvent, handleInputChange, handleSave, setEditing
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Редактировать мероприятие</h5>
-                                <button type="button" className="close" aria-label="Close" onClick={() => setEditingSEvent(null)}>
+                                <button type="button" className="btn-close-custom" aria-label="Close" onClick={() => setEditingSEvent(null)}>
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
@@ -73,10 +74,10 @@ function ScEventModal({ editingSEvent, handleInputChange, handleSave, setEditing
                                 </form>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-success" onClick={handleSave}>
+                                <button type="button" className="btn btn-outline-primary" onClick={handleSave}>
                                     Сохранить
                                 </button>
-                                <button type="button" className="btn btn-secondary" onClick={() => setEditingSEvent(null)}>
+                                <button type="button" className="btn btn-outline-danger" onClick={() => setEditingSEvent(null)}>
                                     Отмена
                                 </button>
                             </div>

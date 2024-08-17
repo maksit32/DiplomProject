@@ -2,12 +2,21 @@ import { useEffect, useState } from "react";
 import { getAllScienceEventsPath, getActualScienceEventsPath, deleteScienceEventPath, updateScienceEventPath } from "../data/APIPaths";
 import "../styles/scienceEventsBlock.css";
 import ScEventModal from "./ScienceEventModal";
+import axios from "axios";
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import IconButton from '@mui/material/IconButton';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { blue, red } from '@mui/material/colors';
+
 
 function ScienceEventsBlock() {
     const [choice, setChoice] = useState(1);
     const [scienceEvents, setScienceEvents] = useState([]);
     const [editingSEvent, setEditingSEvent] = useState(null);
-
 
     const fetchScEvents = () => {
         let url;
@@ -22,10 +31,13 @@ function ScienceEventsBlock() {
                 return;
         }
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => setScienceEvents(data))
-            .catch(error => console.error("Ошибка при получении данных:", error));
+        axios.get(url)
+            .then(response => {
+                setScienceEvents(response.data);
+            })
+            .catch(error => {
+                console.error("Ошибка при получении данных:", error);
+            });
     };
 
     useEffect(() => {
@@ -33,27 +45,24 @@ function ScienceEventsBlock() {
     }, [choice]);
 
     const handleChange = (event) => {
-        setChoice(parseInt(event.target.value));
+        setChoice(event.target.value);
     };
 
     const handleDelete = (id) => {
         if (window.confirm("Вы уверены, что хотите удалить это событие?")) {
-            fetch(`${deleteScienceEventPath}?id=${id}`, {
-                method: "DELETE",
-            })
+            axios.delete(`${deleteScienceEventPath}?id=${id}`)
                 .then(response => {
-                    if (response.ok) {
+                    if (response.status === 200) {
                         setScienceEvents(scienceEvents.filter(scienceEvent => scienceEvent.id !== id));
                     } else {
                         console.error("Ошибка при удалении мероприятия.");
                     }
                 })
-                .catch(error => console.error("Ошибка при мероприятия:", error));
+                .catch(error => console.error("Ошибка при удалении мероприятия:", error));
         }
     };
 
     const handleEditClick = (sEvent) => {
-        console.log(sEvent);
         setEditingSEvent(sEvent);
     };
 
@@ -63,18 +72,13 @@ function ScienceEventsBlock() {
     };
 
     const handleSave = () => {
-        console.log(JSON.stringify(editingSEvent));
-
-        fetch(updateScienceEventPath, {
-            method: "PUT",
+        axios.put(updateScienceEventPath, editingSEvent, {
             headers: {
                 "Content-Type": "application/json",
-            },
-            body: JSON.stringify(editingSEvent),
+            }
         })
             .then(response => {
-                if (response.ok) {
-                    console.log("ok");
+                if (response.status === 200) {
                     fetchScEvents();
                 }
                 setEditingSEvent(null); // Закрытие модального окна после сохранения
@@ -87,34 +91,19 @@ function ScienceEventsBlock() {
         <>
             <div><h2>Выберите действие: </h2></div>
             <div className="options-container">
-                <div className="form-check">
-                    <input
-                        className="form-check-input"
-                        type="radio"
-                        id="option1"
-                        name="options"
-                        value="1"
-                        checked={choice === 1}
+                <FormControl fullWidth>
+                    <InputLabel id="science-select-label">Список</InputLabel>
+                    <Select
+                        labelId="science-select-label"
+                        id="science-select"
+                        value={choice}
+                        label="Действие"
                         onChange={handleChange}
-                    />
-                    <label className="form-check-label" htmlFor="option1">
-                        Список активных мероприятий
-                    </label>
-                </div>
-                <div className="form-check">
-                    <input
-                        className="form-check-input"
-                        type="radio"
-                        id="option2"
-                        name="options"
-                        value="2"
-                        checked={choice === 2}
-                        onChange={handleChange}
-                    />
-                    <label className="form-check-label" htmlFor="option2">
-                        Список всех мероприятий
-                    </label>
-                </div>
+                    >
+                        <MenuItem value={1}>Активные мероприятия</MenuItem>
+                        <MenuItem value={2}>Все мероприятия</MenuItem>
+                    </Select>
+                </FormControl>
             </div>
             <div>
                 <button
@@ -147,19 +136,18 @@ function ScienceEventsBlock() {
                                 <td>{new Date(sEvent.dateEventCreated).toLocaleString()}</td>
                                 <td>{sEvent.addByAdminChatId}</td>
                                 <td>
-                                    <button
-                                        className="btn btn-primary"
+                                    <IconButton
+                                        sx={{ color: blue[500] }}
                                         onClick={() => handleEditClick(sEvent)}
                                     >
-                                        Изменить
-                                    </button>
-                                    <button
-                                        id="delete-btn"
-                                        className="btn btn-danger"
+                                        <EditIcon />
+                                    </IconButton>
+                                    <IconButton
+                                        sx={{ color: red[500] }}
                                         onClick={() => handleDelete(sEvent.id)}
                                     >
-                                        Удалить
-                                    </button>
+                                        <DeleteIcon />
+                                    </IconButton>
                                 </td>
                             </tr>
                         ))}

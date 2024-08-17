@@ -4,7 +4,10 @@ import "../styles/tgUsersBlock.css";
 import TgUserModal from "./TgUserModal";
 import axios from "axios";
 import { Tag } from "antd";
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import IconButton from '@mui/material/IconButton';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { blue, red } from '@mui/material/colors';
 
 function TgUsersBlock() {
     const [choice, setChoice] = useState(1);
@@ -59,7 +62,6 @@ function TgUsersBlock() {
     };
 
     const handleEditClick = (user) => {
-        console.log(user);
         setEditingUser(user);
     };
 
@@ -69,8 +71,6 @@ function TgUsersBlock() {
     };
 
     const handleSave = () => {
-        console.log(JSON.stringify(editingUser));
-
         axios.put(updateTgUserPath, editingUser, {
             headers: {
                 "Content-Type": "application/json",
@@ -78,7 +78,6 @@ function TgUsersBlock() {
         })
             .then(response => {
                 if (response.status === 200) {
-                    console.log("ok");
                     fetchUsers();
                 }
                 setEditingUser(null); // Закрытие модального окна после сохранения
@@ -136,19 +135,18 @@ function TgUsersBlock() {
                                 <td>{user.isAdmin ? "Да" : "Нет"}</td>
                                 <td>{new Date(user.lastMessageTime).toLocaleString()}</td>
                                 <td>
-                                    <button
-                                        className="btn btn-primary"
+                                    <IconButton
+                                        sx={{ color: blue[500] }}
                                         onClick={() => handleEditClick(user)}
                                     >
-                                        <EditOutlined />
-                                    </button>
-                                    <button
-                                        id="delete-btn"
-                                        className="btn btn-danger"
+                                        <EditIcon />
+                                    </IconButton>
+                                    <IconButton
+                                        sx={{ color: red[500] }}
                                         onClick={() => handleDelete(user.id)}
                                     >
-                                        <DeleteOutlined />
-                                    </button>
+                                        <DeleteIcon />
+                                    </IconButton>
                                 </td>
                             </tr>
                         ))}

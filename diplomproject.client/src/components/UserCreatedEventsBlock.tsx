@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { deleteUserCreatedEventPath, getAllUserCreatedEventsPath, updateUserCreatedEventsPath } from "../data/APIPaths";
 import "../styles/userCreatedEventBlock.css";
 import UserCreatedEventModal from "./UserCreatedEventModal";
+import axios from "axios";
+import IconButton from '@mui/material/IconButton';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { blue, red } from '@mui/material/colors';
 
 
 function UserCreatedEventBlock() {
@@ -10,11 +15,15 @@ function UserCreatedEventBlock() {
 
 
     const fetchUsers = () => {
-        fetch(getAllUserCreatedEventsPath)
-            .then(response => response.json())
-            .then(data => setUserCreatedEvents(data))
-            .catch(error => console.error("Ошибка при получении данных:", error));
+        axios.get(getAllUserCreatedEventsPath)
+            .then(response => {
+                setUserCreatedEvents(response.data);
+            })
+            .catch(error => {
+                console.error("Ошибка при получении данных:", error);
+            });
     };
+
 
     useEffect(() => {
         fetchUsers();
@@ -23,11 +32,9 @@ function UserCreatedEventBlock() {
 
     const handleDelete = (id) => {
         if (window.confirm("Вы уверены, что хотите удалить это мероприятие?")) {
-            fetch(`${deleteUserCreatedEventPath}?id=${id}`, {
-                method: "DELETE",
-            })
+            axios.delete(`${deleteUserCreatedEventPath}?id=${id}`)
                 .then(response => {
-                    if (response.ok) {
+                    if (response.status === 200) {
                         setUserCreatedEvents(userCreatedEvents.filter(uCreatedEvent => uCreatedEvent.id !== id));
                     } else {
                         console.error("Ошибка при удалении мероприятия.");
@@ -36,6 +43,7 @@ function UserCreatedEventBlock() {
                 .catch(error => console.error("Ошибка при удалении мероприятия:", error));
         }
     };
+
 
     const handleEditClick = (uCreatedEvent) => {
         console.log(uCreatedEvent);
@@ -50,15 +58,13 @@ function UserCreatedEventBlock() {
     const handleSave = () => {
         console.log(JSON.stringify(editingUserCreatedEvent));
 
-        fetch(updateUserCreatedEventsPath, {
-            method: "PUT",
+        axios.put(updateUserCreatedEventsPath, editingUserCreatedEvent, {
             headers: {
                 "Content-Type": "application/json",
-            },
-            body: JSON.stringify(editingUserCreatedEvent),
+            }
         })
             .then(response => {
-                if (response.ok) {
+                if (response.status === 200) {
                     console.log("ok");
                     fetchUsers();
                 }
@@ -91,19 +97,18 @@ function UserCreatedEventBlock() {
                                 <td>{uCreatedEvent.isWinner ? "Да" : "Нет"}</td>
                                 <td>{uCreatedEvent.chatId}</td>
                                 <td>
-                                    <button
-                                        className="btn btn-primary"
+                                    <IconButton
+                                        sx={{ color: blue[500] }}
                                         onClick={() => handleEditClick(uCreatedEvent)}
                                     >
-                                        Изменить
-                                    </button>
-                                    <button
-                                        id="deleteSEv-btn"
-                                        className="btn btn-danger"
+                                        <EditIcon />
+                                    </IconButton>
+                                    <IconButton
+                                        sx={{ color: red[500] }}
                                         onClick={() => handleDelete(uCreatedEvent.id)}
                                     >
-                                        Удалить
-                                    </button>
+                                        <DeleteIcon />
+                                    </IconButton>
                                 </td>
                             </tr>
                         ))}

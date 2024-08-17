@@ -97,7 +97,7 @@ function TgUserModal({ editingUser, handleInputChange, handleSave, setEditingUse
                                 <button type="button" className="btn btn-outline-primary" onClick={handleSave}>
                                     Сохранить
                                 </button>
-                                <button type="button" className="btn btn-outline-dark" onClick={() => setEditingUser(null)}>
+                                <button type="button" className="btn btn-outline-danger" onClick={() => setEditingUser(null)}>
                                     Отмена
                                 </button>
                             </div>
