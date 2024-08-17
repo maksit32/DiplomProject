@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllScienceEventsPath, getActualScienceEventsPath, deleteScienceEventPath, updateScienceEventPath } from "../data/APIPaths";
+import { getAllScienceEventsPath, getActualScienceEventsPath, deleteScienceEventPath, updateScienceEventPath, addScienceEventPath } from "../data/APIPaths";
 import "../styles/scienceEventsBlock.css";
 import ScEventModal from "./ScienceEventModal";
 import axios from "axios";
@@ -11,12 +11,15 @@ import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { blue, red } from '@mui/material/colors';
-
+import { useAppSelector } from "../store/store";
 
 function ScienceEventsBlock() {
     const [choice, setChoice] = useState(1);
     const [scienceEvents, setScienceEvents] = useState([]);
     const [editingSEvent, setEditingSEvent] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const phoneNumber = useAppSelector(state => state.user.phoneNumber)
 
     const fetchScEvents = () => {
         let url;
@@ -64,28 +67,53 @@ function ScienceEventsBlock() {
 
     const handleEditClick = (sEvent) => {
         setEditingSEvent(sEvent);
+        setIsModalOpen(true); // Открываем модальное окно
     };
 
-    const handleInputChange = (sEvent) => {
-        const { name, value } = sEvent.target;
+    const handleAddSEvent = () => {
+        const now = new Date();
+        setEditingSEvent({
+            nameEvent: '',
+            dateEvent: new Date(Date.UTC(
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate(),
+                12, 0, 0, 0 // Установить время на 12:00:00.000 (полдень)
+            )).toISOString(),
+            placeEvent: '',
+            requirementsEvent: '',
+            informationEvent: '',
+            adminPhoneNumber: phoneNumber
+        });
+        setIsModalOpen(true); // Открываем модальное окно
+    };
+
+    const handleInputChange = (event) => {
+        const { name, value } = event.target;
         setEditingSEvent({ ...editingSEvent, [name]: value });
     };
 
     const handleSave = () => {
-        axios.put(updateScienceEventPath, editingSEvent, {
+        const url = editingSEvent.id ? updateScienceEventPath : addScienceEventPath;
+        const requestMethod = editingSEvent.id ? 'put' : 'post';
+
+        axios({
+            method: requestMethod,
+            url: url,
+            data: editingSEvent,
             headers: {
                 "Content-Type": "application/json",
             }
         })
             .then(response => {
-                if (response.status === 200) {
+                if (response.status === 200 || response.status === 201 || response.status === 204) {
                     fetchScEvents();
+                    console.log("fetched!");
                 }
-                setEditingSEvent(null); // Закрытие модального окна после сохранения
+                setIsModalOpen(false); // Закрытие модального окна после сохранения
             })
-            .catch(error => console.error("Ошибка при обновлении мероприятия:", error));
+            .catch(error => console.error("Возникла ошибка при отправке данных:", error));
     };
-
 
     return (
         <>
@@ -109,7 +137,7 @@ function ScienceEventsBlock() {
                 <button
                     id="addSEventBtn"
                     className="btn btn-success"
-                    onClick={() => handleAddSEvent()}>Добавить мероприятие</button>
+                    onClick={handleAddSEvent}>Добавить мероприятие</button>
             </div>
             <div className="table-responsive">
                 <table className="table table-striped table-bordered">
@@ -158,7 +186,9 @@ function ScienceEventsBlock() {
                 editingSEvent={editingSEvent}
                 handleInputChange={handleInputChange}
                 handleSave={handleSave}
-                setEditingSEvent={setEditingSEvent} />
+                isOpen={isModalOpen}
+                setIsModalOpen={setIsModalOpen}
+            />
         </>
     );
 }

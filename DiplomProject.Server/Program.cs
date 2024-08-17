@@ -144,15 +144,15 @@ namespace API
 									};
 								});
 				//authorise по jwt
-				builder.Services.AddAuthorization(options => {
-					options.FallbackPolicy = new AuthorizationPolicyBuilder()
-												.RequireAuthenticatedUser()
-												.Build();
-					options.AddPolicy("Jwt", new AuthorizationPolicyBuilder()
-								.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-								.RequireAuthenticatedUser()
-								.Build());
-				});
+				//builder.Services.AddAuthorization(options => {
+				//	options.FallbackPolicy = new AuthorizationPolicyBuilder()
+				//								.RequireAuthenticatedUser()
+				//								.Build();
+				//	options.AddPolicy("Jwt", new AuthorizationPolicyBuilder()
+				//				.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+				//				.RequireAuthenticatedUser()
+				//				.Build());
+				//});
 
 
 				var app = builder.Build();

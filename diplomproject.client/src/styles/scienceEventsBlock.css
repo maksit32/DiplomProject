@@ -3,8 +3,21 @@
 }
 
 #addSEventBtn {
-    margin-top: 20px;
-    width: 100%;
+    background-color: #3a99fd;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+    width: fit-content;
+    margin: 20px auto;
+    display: block;
+}
+
+#addSEventBtn:hover {
+    background-color: #0056b3;
 }
 
 #delete-btn {

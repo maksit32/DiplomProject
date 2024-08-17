@@ -1,16 +1,19 @@
 import React from "react";
 
+function ScEventModal({ editingSEvent, handleInputChange, handleSave, setIsModalOpen, isOpen }) {
+    const handleClose = () => {
+        setIsModalOpen(false);
+    };
 
-function ScEventModal({ editingSEvent, handleInputChange, handleSave, setEditingSEvent }) {
     return (
         <>
-            {editingSEvent && (
+            {isOpen && (
                 <div className="modal show d-block" tabIndex="-1" role="dialog">
                     <div className="modal-dialog" role="document">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Редактировать мероприятие</h5>
-                                <button type="button" className="btn-close-custom" aria-label="Close" onClick={() => setEditingSEvent(null)}>
+                                <button type="button" className="btn-close-custom" aria-label="Close" onClick={handleClose}>
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
@@ -77,7 +80,7 @@ function ScEventModal({ editingSEvent, handleInputChange, handleSave, setEditing
                                 <button type="button" className="btn btn-outline-primary" onClick={handleSave}>
                                     Сохранить
                                 </button>
-                                <button type="button" className="btn btn-outline-danger" onClick={() => setEditingSEvent(null)}>
+                                <button type="button" className="btn btn-outline-danger" onClick={handleClose}>
                                     Отмена
                                 </button>
                             </div>
