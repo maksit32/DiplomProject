@@ -4,16 +4,16 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const userSlice = createSlice({
     name: 'userSlice',
-    initialState: { isLogged: false },
+    initialState: { phoneNumber: "" },
     reducers: {
-        setLogged(state, action) {
-            state.isLogged = action.payload
+        setPhoneNumber(state, action) {
+            state.phoneNumber = action.payload
         },
     },
 });
 
 export const {
-    setLogged
+    setPhoneNumber
 } = userSlice.actions;
 
 export default userSlice.reducer;

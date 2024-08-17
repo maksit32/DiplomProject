@@ -1,19 +1,24 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserLogin } from "../context/LoginData";
 import { loginPath } from "../data/APIPaths";
 import { loginImagePath } from "../data/ImagesPath";
 import { useNavigate } from "react-router-dom";
 import { CheckJwt } from "../data/Functions";
 import "../styles/loginBlock.css"
+import { useDispatch, useSelector } from "react-redux";
+import { setPhoneNumber } from "../store/userReducer";
 
 export function LoginBlock() {
     const [loginData, setLoginData] = useState(new UserLogin({ phoneNumber: "", password: "" }));
     const [errorMessage, setError] = useState("");
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const phoneNumber = useSelector((state) => state.user.phoneNumber);
 
     // //проверка на jwt
     // CheckJwt(navigate);
+
 
     const handleInputChange = (e: any) => {
         const { name, value } = e.target;
@@ -33,6 +38,7 @@ export function LoginBlock() {
             if (token) {
                 localStorage.setItem("jwtToken", token);
                 console.log("Токен сохранен:", token);
+                dispatch(setPhoneNumber(loginData.phoneNumber));
                 navigate("/documents");
             }
         } catch (error) {
