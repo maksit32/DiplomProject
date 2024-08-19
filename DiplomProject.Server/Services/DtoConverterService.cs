@@ -2,6 +2,7 @@
 using Domain.Entities;
 using Domain.Repositories.Interfaces;
 using Domain.Services.Interfaces;
+using System.Collections.Generic;
 
 
 namespace DiplomProject.Server.Services
@@ -99,6 +100,19 @@ namespace DiplomProject.Server.Services
 		{
 			var tgUser = await _tgUserRepo.GetTgUserByPhoneAsync(addDto.PhoneNumber, token);
 			return new UserCreatedEvent(addDto.NameEvent, addDto.PlaceEvent, addDto.DateEvent, addDto.IsWinner, tgUser);
+		}
+	
+		public List<FileDto> ConvertToFileDtoList(List<string> lstFileNames, CancellationToken token)
+		{
+			if (lstFileNames is null) throw new ArgumentNullException(nameof(lstFileNames));
+
+			List<FileDto> lstDto = new List<FileDto>();
+			foreach (var fileName in lstFileNames)
+			{
+				FileDto newDto = new FileDto(fileName);
+				lstDto.Add(newDto);
+			}
+			return lstDto;
 		}
 	}
 }

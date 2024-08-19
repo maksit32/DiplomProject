@@ -7,7 +7,7 @@ namespace DiplomProject.Server.Services
 {
 	public class WordDocumentService : IDocumentService
 	{
-		public List<string?> GetWordList(string folderPath)
+		public List<string?> GetFilesList(string folderPath)
 		{
 			if (string.IsNullOrWhiteSpace(folderPath)) throw new ArgumentNullException(nameof(folderPath));
 			if (!Directory.Exists(folderPath))
@@ -17,7 +17,7 @@ namespace DiplomProject.Server.Services
 			var wordFileNames = wordFiles.Select(Path.GetFileName).ToList();
 			return wordFileNames;
 		}
-		public async Task<byte[]> GetWordFile(string folderPath, string fileName)
+		public async Task<byte[]> GetFile(string folderPath, string fileName)
 		{
 			if (string.IsNullOrWhiteSpace(folderPath)) throw new ArgumentNullException(nameof(folderPath));
 			if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentNullException(nameof(fileName));
@@ -33,7 +33,7 @@ namespace DiplomProject.Server.Services
 
 			return memory.ToArray();
 		}
-		public async Task<bool> UploadWordFile(IFormFile file, string folderPath)
+		public async Task<bool> UploadFile(IFormFile file, string folderPath)
 		{
 			if (string.IsNullOrWhiteSpace(folderPath)) throw new ArgumentNullException(nameof(folderPath));
 			if (file == null || file.Length == 0)
@@ -48,7 +48,7 @@ namespace DiplomProject.Server.Services
 			await file.CopyToAsync(stream);
 			return true;
 		}
-		public bool DeleteWordFile(string folderPath, string fileName)
+		public bool DeleteFile(string folderPath, string fileName)
 		{
 			if (string.IsNullOrEmpty(folderPath))
 				throw new ArgumentNullException(nameof(folderPath));

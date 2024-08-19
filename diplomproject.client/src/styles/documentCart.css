@@ -1,0 +1,48 @@
+.document-cart {
+    position: relative;
+    width: 200px;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+    transition: box-shadow 0.3s;
+}
+
+.document-cart:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.document-image {
+    width: 100%;
+    height: auto;
+}
+
+.document-name {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+.document-actions {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.document-actions .btn {
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.document-actions .delete-btn {
+    background-color: #dc3545;
+}

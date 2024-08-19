@@ -27,3 +27,11 @@ export const getAllUserCreatedEventsPath = "http://localhost:8443/api/usercreate
 export const getUserCreatedEventsByChatIdPath = "http://localhost:8443/api/usercreatedevents/id";
 export const updateUserCreatedEventsPath = "http://localhost:8443/api/usercreatedevents/update";
 export const deleteUserCreatedEventPath = "http://localhost:8443/api/usercreatedevents/delete";
+
+//documents
+export const getSNOFilesPath = "http://localhost:8443/api/Documents/sno";
+export const getSMUFilesPath = "http://localhost:8443/api/Documents/smu";
+export const downloadSNOFilePath = "http://localhost:8443/api/Documents/sno/";
+export const downloadSMUFilePath = "http://localhost:8443/api/Documents/smu/";
+export const deleteSNOFilePath = "http://localhost:8443/api/Documents/sno";
+export const deleteSMUFilePath = "http://localhost:8443/api/Documents/smu";

@@ -12,24 +12,27 @@ namespace DiplomProject.Server.Controllers
 	public class DocumentsController : ControllerBase
 	{
 		private readonly IDocumentService _documentService;
+		private readonly IDtoConverterService _dtoConverterService;
 		private readonly IConfiguration _configuration;
-		private readonly string _wordSNOFolderPath;
-		private readonly string _wordSMUFolderPath;
+		private readonly string _SNOFolderPath;
+		private readonly string _SMUFolderPath;
 
-		public DocumentsController(IConfiguration configuration, IDocumentService documentService)
+		public DocumentsController(IConfiguration configuration, IDocumentService documentService, IDtoConverterService dtoConverterService)
 		{
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			_dtoConverterService = dtoConverterService ?? throw new ArgumentNullException(nameof(dtoConverterService));
 			_documentService = documentService ?? throw new ArgumentNullException(nameof(documentService));
-			_wordSNOFolderPath = _configuration["SNOFolderPath"] ?? throw new ArgumentNullException(nameof(_wordSNOFolderPath));
-			_wordSMUFolderPath = _configuration["SMUFolderPath"] ?? throw new ArgumentNullException(nameof(_wordSMUFolderPath));
+			_SNOFolderPath = _configuration["SNOFolderPath"] ?? throw new ArgumentNullException(nameof(_SNOFolderPath));
+			_SMUFolderPath = _configuration["SMUFolderPath"] ?? throw new ArgumentNullException(nameof(_SMUFolderPath));
 		}
 		[HttpGet("sno")]
-		public IActionResult GetSNOWordFiles()
+		public IActionResult GetSNOWordFiles(CancellationToken ct)
 		{
 			try
 			{
-				var wordFileNames = _documentService.GetWordList(_wordSNOFolderPath);
-				return Ok(wordFileNames);
+				var wordFileNames = _documentService.GetFilesList(_SNOFolderPath);
+				var dtoList = _dtoConverterService.ConvertToFileDtoList(wordFileNames, ct);
+				return Ok(dtoList);
 			}
 			catch (Exception)
 			{
@@ -37,12 +40,13 @@ namespace DiplomProject.Server.Controllers
 			}
 		}
 		[HttpGet("smu")]
-		public IActionResult GetSMUWordFiles()
+		public IActionResult GetSMUWordFiles(CancellationToken ct)
 		{
 			try
 			{
-				var wordFileNames = _documentService.GetWordList(_wordSMUFolderPath);
-				return Ok(wordFileNames);
+				var wordFileNames = _documentService.GetFilesList(_SMUFolderPath);
+				var dtoList = _dtoConverterService.ConvertToFileDtoList(wordFileNames, ct);
+				return Ok(dtoList);
 			}
 			catch (Exception)
 			{
@@ -54,7 +58,7 @@ namespace DiplomProject.Server.Controllers
 		{
 			try
 			{
-				var snoFile = await _documentService.GetWordFile(_wordSNOFolderPath, fileName);
+				var snoFile = await _documentService.GetFile(_SNOFolderPath, fileName);
 				return File(snoFile, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
 			}
 			catch (Exception)
@@ -67,7 +71,7 @@ namespace DiplomProject.Server.Controllers
 		{
 			try
 			{
-				var smuFile = await _documentService.GetWordFile(_wordSMUFolderPath, fileName);
+				var smuFile = await _documentService.GetFile(_SMUFolderPath, fileName);
 				return File(smuFile, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
 			}
 			catch (Exception)
@@ -76,11 +80,11 @@ namespace DiplomProject.Server.Controllers
 			}
 		}
 		[HttpDelete("sno")]
-		public IActionResult DeleteSNODocument([FromQuery]string fileName)
+		public IActionResult DeleteSNODocument([FromQuery] string fileName)
 		{
 			try
 			{
-				_documentService.DeleteWordFile(_wordSNOFolderPath, fileName);
+				_documentService.DeleteFile(_SNOFolderPath, fileName);
 				return Ok();
 			}
 			catch (Exception)
@@ -89,11 +93,11 @@ namespace DiplomProject.Server.Controllers
 			}
 		}
 		[HttpDelete("smu")]
-		public IActionResult DeleteSMUDocument([FromQuery]string fileName)
+		public IActionResult DeleteSMUDocument([FromQuery] string fileName)
 		{
 			try
 			{
-				_documentService.DeleteWordFile(_wordSMUFolderPath, fileName);
+				_documentService.DeleteFile(_SMUFolderPath, fileName);
 				return Ok();
 			}
 			catch (Exception)

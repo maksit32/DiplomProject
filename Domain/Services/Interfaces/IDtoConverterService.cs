@@ -17,5 +17,6 @@ namespace Domain.Services.Interfaces
 		Task<UserCreatedEventDto> ConvertToUserCreatedEventDto(UserCreatedEvent uCreatedEvent, CancellationToken token);
 		Task<UserCreatedEvent> ConvertToUsCrEventFromUpdatedDto(UserCreatedEventDto uCreatedEvDto, CancellationToken token);
 		Task<UserCreatedEvent> ConvertToUserCreatedEvent(UserCreatedEventAddDto addDto, CancellationToken token);
+		List<FileDto> ConvertToFileDtoList(List<string> lstFileNames, CancellationToken ct);
 	}
 }

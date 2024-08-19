@@ -10,9 +10,9 @@ namespace Domain.Services.Interfaces
 {
 	public interface IDocumentService
 	{
-		List<string?> GetWordList(string wordFolderPath);
-		Task<byte[]> GetWordFile(string folderPath, string fileName);
-		Task<bool> UploadWordFile(IFormFile file, string folderPath);
-		bool DeleteWordFile(string folderPath, string fileName);
+		List<string?> GetFilesList(string filesFolderPath);
+		Task<byte[]> GetFile(string folderPath, string fileName);
+		Task<bool> UploadFile(IFormFile file, string folderPath);
+		bool DeleteFile(string folderPath, string fileName);
 	}
 }
