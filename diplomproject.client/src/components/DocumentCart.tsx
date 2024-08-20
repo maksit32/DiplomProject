@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "../styles/documentCart.css";
 
 export function DocumentCart({ document, onDelete }) {
