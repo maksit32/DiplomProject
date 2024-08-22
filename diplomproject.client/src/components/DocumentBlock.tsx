@@ -19,7 +19,12 @@ export function DocumentBlock() {
 
     const fetchDocuments = async (path) => {
         try {
-            const response = await axios.get(path);
+            const token = localStorage.getItem("jwtToken");
+            const response = await axios.get(path, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             const data = response.data;
             console.log(data);
 

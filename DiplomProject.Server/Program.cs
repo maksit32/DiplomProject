@@ -1,6 +1,5 @@
 using DiplomProject.Server.Configurations;
 using DiplomProject.Server.DbContexts;
-using DiplomProject.Server.Middlewares;
 using DiplomProject.Server.Repositories;
 using DiplomProject.Server.Services;
 using Domain.Entities;
@@ -45,7 +44,7 @@ namespace API
 				//добавляем внешний json файл (путь из секретов)
 				builder.Configuration.AddJsonFile(builder.Configuration["TelegramTextConstantsPath"], optional: true, reloadOnChange: true);
 
-				//регистрируем конфиг jwt
+				//регистрируем конфиг jwt (IOptions)
 				var jwtConfig = builder.Configuration
 				.GetRequiredSection("Jwt")
 				.Get<JwtConfig>();
@@ -54,7 +53,6 @@ namespace API
 					config.SigningKey = jwtConfig.SigningKey;
 					config.Audience = jwtConfig.Audience;
 					config.Issuer = jwtConfig.Issuer;
-					config.LifeTime = jwtConfig.LifeTime;
 				});
 
 				var botConfigSection = builder.Configuration.GetSection("BotConfiguration");
@@ -144,20 +142,19 @@ namespace API
 									};
 								});
 				//authorise по jwt
-				//builder.Services.AddAuthorization(options => {
-				//	options.FallbackPolicy = new AuthorizationPolicyBuilder()
-				//								.RequireAuthenticatedUser()
-				//								.Build();
-				//	options.AddPolicy("Jwt", new AuthorizationPolicyBuilder()
-				//				.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-				//				.RequireAuthenticatedUser()
-				//				.Build());
-				//});
+				builder.Services.AddAuthorization(options =>
+				{
+					options.FallbackPolicy = new AuthorizationPolicyBuilder()
+												.RequireAuthenticatedUser()
+												.Build();
+					options.AddPolicy("Jwt", new AuthorizationPolicyBuilder()
+								.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+								.RequireAuthenticatedUser()
+								.Build());
+				});
 
 
 				var app = builder.Build();
-				//must be deleted!
-				app.UseMiddleware<AuthenticationMiddleware>();
 				app.UseHttpsRedirection();
 				app.UseHttpLogging();
 				app.UseRouting();

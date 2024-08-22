@@ -10,11 +10,13 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types.ReplyMarkups;
 using Domain.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
+	[AllowAnonymous]
 	[Route("api/[controller]")]
 	public class BotController : ControllerBase
 	{

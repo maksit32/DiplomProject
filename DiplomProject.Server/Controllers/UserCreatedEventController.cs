@@ -9,8 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
-	//[Authorize("Jwt")]
-	[AllowAnonymous]
+	[Authorize("Jwt")]
 	[Route("api/usercreatedevents")]
 	public class UserCreatedEventController : ControllerBase
 	{

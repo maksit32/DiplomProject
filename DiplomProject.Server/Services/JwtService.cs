@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 
 
 
@@ -21,29 +22,28 @@ namespace DiplomProject.Server.Services
 		}
 		public string GenerateJwtToken(TelegramUser user)
 		{
+			var issuer = _jwtConfig.Issuer;
+			var audience = _jwtConfig.Audience;
+			var key = Encoding.ASCII.GetBytes(_jwtConfig.SigningKey);
+
 			var tokenDescriptor = new SecurityTokenDescriptor
 			{
-				Subject = CreateClaimsIdentity(user),
-				Expires = DateTime.UtcNow.Add(_jwtConfig.LifeTime),
-				Audience = _jwtConfig.Audience,
-				Issuer = _jwtConfig.Issuer,
-				SigningCredentials = new SigningCredentials(
-					new SymmetricSecurityKey(_jwtConfig.SigningKeyBytes),
-					SecurityAlgorithms.HmacSha256Signature
-				)
+				Subject = new ClaimsIdentity(new[]
+				{
+					new Claim("Id", Guid.NewGuid().ToString()),
+					new Claim(JwtRegisteredClaimNames.Sub, "Data sync request"),
+					new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+				}),
+				Expires = DateTime.UtcNow.AddMinutes(15),
+				Issuer = issuer,
+				Audience = audience,
+				SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512Signature)
 			};
-			var tokenHandler = new JwtSecurityTokenHandler();
-			var securityToken = tokenHandler.CreateToken(tokenDescriptor);
-			return tokenHandler.WriteToken(securityToken);
-		}
-		private ClaimsIdentity CreateClaimsIdentity(TelegramUser user)
-		{
-			var claimsIdentity = new ClaimsIdentity(new[]
-			{
-			new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-			});
 
-			return claimsIdentity;
+			var tokenHandler = new JwtSecurityTokenHandler();
+			var token = tokenHandler.CreateToken(tokenDescriptor);
+			var stringToken = tokenHandler.WriteToken(token);
+			return stringToken;
 		}
 	}
 }

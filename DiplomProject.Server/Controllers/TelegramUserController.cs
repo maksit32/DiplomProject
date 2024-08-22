@@ -8,8 +8,7 @@ using System.Runtime.InteropServices;
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
-	//[Authorize("Jwt")]
-	[AllowAnonymous]
+	[Authorize("Jwt")]
 	[Route("api/tgusers")]
 	public class TelegramUserController : ControllerBase
 	{

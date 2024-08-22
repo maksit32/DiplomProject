@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DiplomProject.Server.Controllers
 {
 	[ApiController]
-	//[Authorize("Jwt")]
-	[AllowAnonymous]
+	[Authorize("Jwt")]
 	[Route("api/[controller]")]
 	public class DocumentsController : ControllerBase
 	{
