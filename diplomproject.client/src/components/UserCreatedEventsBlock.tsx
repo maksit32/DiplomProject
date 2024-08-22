@@ -7,15 +7,27 @@ import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { blue, red } from '@mui/material/colors';
-
+import { useNavigate } from "react-router-dom";
+import { checkAndRemoveToken, isTokenExpired } from "../data/Functions";
 
 function UserCreatedEventBlock() {
     const [userCreatedEvents, setUserCreatedEvents] = useState([]);
     const [editingUserCreatedEvent, setEditingUserCreatedEvent] = useState(null);
-
+    const navigate = useNavigate();
 
     const fetchUsers = () => {
-        axios.get(getAllUserCreatedEventsPath)
+        const token = localStorage.getItem("jwtToken");
+        if (!token || isTokenExpired(token)) {
+            checkAndRemoveToken(navigate);
+            return;
+        }
+
+        axios.get(getAllUserCreatedEventsPath, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }
+        })
             .then(response => {
                 setUserCreatedEvents(response.data);
             })
@@ -24,15 +36,24 @@ function UserCreatedEventBlock() {
             });
     };
 
-
     useEffect(() => {
         fetchUsers();
     }, []);
 
-
     const handleDelete = (id) => {
         if (window.confirm("Вы уверены, что хотите удалить это мероприятие?")) {
-            axios.delete(`${deleteUserCreatedEventPath}?id=${id}`)
+            const token = localStorage.getItem("jwtToken");
+            if (!token || isTokenExpired(token)) {
+                checkAndRemoveToken(navigate);
+                return;
+            }
+
+            axios.delete(`${deleteUserCreatedEventPath}?id=${id}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                }
+            })
                 .then(response => {
                     if (response.status === 200) {
                         setUserCreatedEvents(userCreatedEvents.filter(uCreatedEvent => uCreatedEvent.id !== id));
@@ -44,9 +65,7 @@ function UserCreatedEventBlock() {
         }
     };
 
-
     const handleEditClick = (uCreatedEvent) => {
-        console.log(uCreatedEvent);
         setEditingUserCreatedEvent(uCreatedEvent);
     };
 
@@ -56,23 +75,26 @@ function UserCreatedEventBlock() {
     };
 
     const handleSave = () => {
-        console.log(JSON.stringify(editingUserCreatedEvent));
+        const token = localStorage.getItem("jwtToken");
+        if (!token || isTokenExpired(token)) {
+            checkAndRemoveToken(navigate);
+            return;
+        }
 
         axios.put(updateUserCreatedEventsPath, editingUserCreatedEvent, {
             headers: {
                 "Content-Type": "application/json",
+                'Authorization': `Bearer ${token}`,
             }
         })
             .then(response => {
                 if (response.status === 200) {
-                    console.log("ok");
                     fetchUsers();
                 }
                 setEditingUserCreatedEvent(null); // Закрытие модального окна после сохранения
             })
             .catch(error => console.error("Ошибка при обновлении мероприятия:", error));
     };
-
 
     return (
         <>

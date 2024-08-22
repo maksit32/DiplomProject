@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../styles/documentCart.css";
 
-export function DocumentCart({ document, onDelete }) {
+export function DocumentCart({ document, onDelete, onDownload }) {
     const [hover, setHover] = useState(false);
 
     return (
@@ -15,7 +15,7 @@ export function DocumentCart({ document, onDelete }) {
             {hover && (
                 <div className="document-actions">
                     <button
-                        onClick={() => window.location.href = document.downloadLink}
+                        onClick={() => onDownload(document)}
                         className="btn download-btn"
                     >
                         Скачать

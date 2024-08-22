@@ -1,7 +1,5 @@
 
 
-
-
 function UserCreatedEventModal({ editingUserCreatedEvent, handleInputChange, handleSave, setEditingUserCreatedEvent }) {
     return (
         <>

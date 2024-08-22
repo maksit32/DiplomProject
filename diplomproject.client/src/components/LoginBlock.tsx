@@ -4,7 +4,6 @@ import { UserLogin } from "../context/LoginData";
 import { loginPath } from "../data/APIPaths";
 import { loginImagePath } from "../data/ImagesPath";
 import { useNavigate } from "react-router-dom";
-import { CheckJwt } from "../data/Functions";
 import "../styles/loginBlock.css"
 import { useDispatch, useSelector } from "react-redux";
 import { setPhoneNumber } from "../store/userReducer";
@@ -14,10 +13,6 @@ export function LoginBlock() {
     const [errorMessage, setError] = useState("");
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
-    // //проверка на jwt
-    // CheckJwt(navigate);
-
 
     const handleInputChange = (e: any) => {
         const { name, value } = e.target;

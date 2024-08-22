@@ -10,23 +10,30 @@ import {
     deleteSNOFilePath,
     deleteSMUFilePath
 } from "../data/APIPaths";
+import { useNavigate } from "react-router-dom";
+import { checkAndRemoveToken, isTokenExpired } from "../data/Functions";
 
 const { Option } = Select;
 
 export function DocumentBlock() {
     const [documents, setDocuments] = useState([]);
     const [selectedType, setSelectedType] = useState("sno");
+    const navigate = useNavigate();
 
     const fetchDocuments = async (path) => {
         try {
             const token = localStorage.getItem("jwtToken");
+            if (!token || isTokenExpired(token)) {
+                checkAndRemoveToken(navigate);
+                return;
+            }
+
             const response = await axios.get(path, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
             const data = response.data;
-            console.log(data);
 
             const imagePath = path === getSNOFilesPath ? SNOImagePath : SMUImagePath;
 
@@ -36,7 +43,6 @@ export function DocumentBlock() {
                 image: imagePath,
                 downloadLink: `${path}/${fileDto.fileName}`,
             }));
-            console.log(formattedDocuments);
             setDocuments(formattedDocuments);
         } catch (error) {
             console.error("Ошибка при получении документов:", error);
@@ -51,8 +57,44 @@ export function DocumentBlock() {
         }
     }, [selectedType]);
 
+    const handleDownload = async (doc) => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token || isTokenExpired(token)) {
+            checkAndRemoveToken(navigate);
+            return;
+        }
+
+        try {
+            const response = await axios({
+                url: doc.downloadLink,
+                method: 'GET',
+                responseType: 'blob',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = window.document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', doc.name);
+            window.document.body.appendChild(link);
+            link.click();
+            window.document.body.removeChild(link);
+        } catch (error) {
+            console.error("Ошибка при скачивании документа:", error);
+        }
+    };
+
+
     const handleDelete = async (id) => {
         try {
+            const token = localStorage.getItem("jwtToken");
+            if (!token || isTokenExpired(token)) {
+                checkAndRemoveToken(navigate);
+                return;
+            }
+
             const documentToDelete = documents.find(doc => doc.id === id);
             if (!documentToDelete) {
                 console.error(`Документ с id ${id} не найден`);
@@ -67,6 +109,9 @@ export function DocumentBlock() {
             const deletePath = selectedType === "sno" ? deleteSNOFilePath : deleteSMUFilePath;
 
             const response = await axios.delete(`${deletePath}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
                 params: {
                     fileName: documentToDelete.name,
                 },
@@ -81,7 +126,6 @@ export function DocumentBlock() {
             console.error("Ошибка при удалении документа:", error);
         }
     };
-
 
     const handleTypeChange = (value) => {
         setSelectedType(value);
@@ -101,7 +145,7 @@ export function DocumentBlock() {
             </div>
             <div className="document-block">
                 {documents.map(document => (
-                    <DocumentCart key={document.id} document={document} onDelete={handleDelete} />
+                    <DocumentCart key={document.id} document={document} onDelete={handleDelete} onDownload={handleDownload} />
                 ))}
             </div>
         </>

@@ -12,16 +12,24 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { blue, red } from '@mui/material/colors';
 import { useAppSelector } from "../store/store";
+import { checkAndRemoveToken, isTokenExpired } from "../data/Functions";
+import { useNavigate } from "react-router-dom";
 
 function ScienceEventsBlock() {
     const [choice, setChoice] = useState(1);
     const [scienceEvents, setScienceEvents] = useState([]);
     const [editingSEvent, setEditingSEvent] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const phoneNumber = useAppSelector(state => state.user.phoneNumber)
+    const navigate = useNavigate();
+    const phoneNumber = useAppSelector(state => state.user.phoneNumber);
 
     const fetchScEvents = () => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token || isTokenExpired(token)) {
+            checkAndRemoveToken(navigate);
+            return;
+        }
+
         let url;
         switch (choice) {
             case 1:
@@ -34,7 +42,12 @@ function ScienceEventsBlock() {
                 return;
         }
 
-        axios.get(url)
+        axios.get(url, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }
+        })
             .then(response => {
                 setScienceEvents(response.data);
             })
@@ -53,7 +66,18 @@ function ScienceEventsBlock() {
 
     const handleDelete = (id) => {
         if (window.confirm("Вы уверены, что хотите удалить это событие?")) {
-            axios.delete(`${deleteScienceEventPath}?id=${id}`)
+            const token = localStorage.getItem("jwtToken");
+            if (!token || isTokenExpired(token)) {
+                checkAndRemoveToken(navigate);
+                return;
+            }
+
+            axios.delete(`${deleteScienceEventPath}?id=${id}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                }
+            })
                 .then(response => {
                     if (response.status === 200) {
                         setScienceEvents(scienceEvents.filter(scienceEvent => scienceEvent.id !== id));
@@ -78,7 +102,7 @@ function ScienceEventsBlock() {
                 now.getUTCFullYear(),
                 now.getUTCMonth(),
                 now.getUTCDate(),
-                12, 0, 0, 0 // Установить время на 12:00:00.000 (полдень)
+                12, 0, 0, 0 //время на 12:00:00
             )).toISOString(),
             placeEvent: '',
             requirementsEvent: '',
@@ -94,6 +118,12 @@ function ScienceEventsBlock() {
     };
 
     const handleSave = () => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token || isTokenExpired(token)) {
+            checkAndRemoveToken(navigate);
+            return;
+        }
+
         const url = editingSEvent.id ? updateScienceEventPath : addScienceEventPath;
         const requestMethod = editingSEvent.id ? 'put' : 'post';
 
@@ -102,7 +132,8 @@ function ScienceEventsBlock() {
             url: url,
             data: editingSEvent,
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
             }
         })
             .then(response => {

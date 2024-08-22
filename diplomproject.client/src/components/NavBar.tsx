@@ -22,9 +22,6 @@ export function Navbar() {
                     <Nav.Link to="/usercreatedevents" as={NavLink}>
                         Пользовательские мероприятия
                     </Nav.Link>
-                    {/* <Nav.Link to="/admin" as={NavLink}>
-                        {isLogged === true ? "Sign out" : "Sign in"}
-                    </Nav.Link> */}
                 </Nav>
             </Container>
         </NavbarBs>

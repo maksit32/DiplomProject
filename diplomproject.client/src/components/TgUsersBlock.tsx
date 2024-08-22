@@ -8,13 +8,23 @@ import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { blue, red } from '@mui/material/colors';
+import { useNavigate } from "react-router-dom";
+import { checkAndRemoveToken, isTokenExpired } from "../data/Functions";
+
 
 function TgUsersBlock() {
     const [choice, setChoice] = useState(1);
     const [users, setUsers] = useState([]);
     const [editingUser, setEditingUser] = useState(null);
+    const navigate = useNavigate();
 
     const fetchUsers = () => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token || isTokenExpired(token)) {
+            checkAndRemoveToken(navigate);
+            return;
+        }
+
         let url;
         switch (choice) {
             case 1:
@@ -30,7 +40,12 @@ function TgUsersBlock() {
                 return;
         }
 
-        axios.get(url)
+        axios.get(url, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }
+        })
             .then(response => {
                 setUsers(response.data);
             })
@@ -49,7 +64,18 @@ function TgUsersBlock() {
 
     const handleDelete = (id) => {
         if (window.confirm("Вы уверены, что хотите удалить этого пользователя?")) {
-            axios.delete(`${deleteTgUserPath}?id=${id}`)
+            const token = localStorage.getItem("jwtToken");
+            if (!token || isTokenExpired(token)) {
+                checkAndRemoveToken(navigate);
+                return;
+            }
+
+            axios.delete(`${deleteTgUserPath}?id=${id}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                }
+            })
                 .then(response => {
                     if (response.status === 200) {
                         setUsers(users.filter(user => user.id !== id));
@@ -71,9 +97,16 @@ function TgUsersBlock() {
     };
 
     const handleSave = () => {
+        const token = localStorage.getItem("jwtToken");
+        if (!token || isTokenExpired(token)) {
+            checkAndRemoveToken(navigate);
+            return;
+        }
+
         axios.put(updateTgUserPath, editingUser, {
             headers: {
                 "Content-Type": "application/json",
+                'Authorization': `Bearer ${token}`,
             }
         })
             .then(response => {
