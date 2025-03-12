@@ -14,11 +14,11 @@ const Header: React.FC = () => {
     };
 
     return (
-        <header className="bg-success text-white py-4 fixed-top">
+        <header className="bg-primary text-white py-4 fixed-top">
             <div className="container d-flex justify-content-between align-items-center">
-                <h4 className="mb-0 font-weight-bold">Добро пожаловать в СНО и СМУ!</h4>
+                <h4 className="mb-0 font-weight-bold text-white">Добро пожаловать в СНО и СМУ!</h4>
                 <button
-                    className="btn btn-primary custom-btn"
+                    className="btn btn-warning custom-btn"
                     onClick={handleLogout}
                 >
                     Выйти из аккаунта

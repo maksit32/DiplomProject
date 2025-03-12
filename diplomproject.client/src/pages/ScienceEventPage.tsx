@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/NavBar"
 import ScienceEventsBlock from "../components/ScienceEventsBlock";
 import { useEffect } from "react";
+import Header from "../components/Header";
 
 
 export function ScienceEventPage() {
@@ -14,6 +15,7 @@ export function ScienceEventPage() {
 
     return (
         <>
+            <Header />
             <Navbar />
             <ScienceEventsBlock />
         </>

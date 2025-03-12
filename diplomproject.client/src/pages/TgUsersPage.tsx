@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/NavBar"
 import TgUsersBlock from "../components/TgUsersBlock";
 import { useEffect } from "react";
+import Header from "../components/Header";
 
 
 
@@ -17,6 +18,7 @@ export function TgUsersPage() {
 
     return (
         <>
+            <Header />
             <Navbar />
             <TgUsersBlock />
         </>

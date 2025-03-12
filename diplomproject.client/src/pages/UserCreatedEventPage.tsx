@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/NavBar"
 import UserCreatedEventBlock from "../components/UserCreatedEventsBlock";
 import { useEffect } from "react";
+import Header from "../components/Header";
 
 
 
@@ -16,6 +17,7 @@ export function UserCreatedEventPage() {
 
     return (
         <>
+            <Header />
             <Navbar />
             <UserCreatedEventBlock />
         </>
