@@ -11,7 +11,7 @@ import {
     deleteSMUFilePath
 } from "../data/APIPaths";
 import { useNavigate } from "react-router-dom";
-import { checkAndRemoveToken, isTokenExpired } from "../data/Functions";
+import { checkAndRemoveToken, isTokenExpired, redirectAndRemoveToken } from "../data/Functions";
 
 const { Option } = Select;
 
@@ -22,9 +22,9 @@ export function DocumentBlock() {
 
     const fetchDocuments = async (path) => {
         try {
-            const token = localStorage.getItem("jwtToken");
+            const token = sessionStorage.getItem("jwtToken");
             if (!token || isTokenExpired(token)) {
-                checkAndRemoveToken(navigate);
+                redirectAndRemoveToken(navigate);
                 return;
             }
 
@@ -58,9 +58,9 @@ export function DocumentBlock() {
     }, [selectedType]);
 
     const handleDownload = async (doc) => {
-        const token = localStorage.getItem("jwtToken");
+        const token = sessionStorage.getItem("jwtToken");
         if (!token || isTokenExpired(token)) {
-            checkAndRemoveToken(navigate);
+            redirectAndRemoveToken(navigate);
             return;
         }
 
@@ -89,9 +89,9 @@ export function DocumentBlock() {
 
     const handleDelete = async (id) => {
         try {
-            const token = localStorage.getItem("jwtToken");
+            const token = sessionStorage.getItem("jwtToken");
             if (!token || isTokenExpired(token)) {
-                checkAndRemoveToken(navigate);
+                redirectAndRemoveToken(navigate);
                 return;
             }
 

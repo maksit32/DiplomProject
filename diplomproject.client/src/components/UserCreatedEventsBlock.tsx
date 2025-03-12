@@ -8,7 +8,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { blue, red } from '@mui/material/colors';
 import { useNavigate } from "react-router-dom";
-import { checkAndRemoveToken, isTokenExpired } from "../data/Functions";
+import { checkAndRemoveToken, isTokenExpired, redirectAndRemoveToken } from "../data/Functions";
 
 function UserCreatedEventBlock() {
     const [userCreatedEvents, setUserCreatedEvents] = useState([]);
@@ -16,9 +16,9 @@ function UserCreatedEventBlock() {
     const navigate = useNavigate();
 
     const fetchUsers = () => {
-        const token = localStorage.getItem("jwtToken");
+        const token = sessionStorage.getItem("jwtToken");
         if (!token || isTokenExpired(token)) {
-            checkAndRemoveToken(navigate);
+            redirectAndRemoveToken(navigate);
             return;
         }
 
@@ -42,9 +42,9 @@ function UserCreatedEventBlock() {
 
     const handleDelete = (id) => {
         if (window.confirm("Вы уверены, что хотите удалить это мероприятие?")) {
-            const token = localStorage.getItem("jwtToken");
+            const token = sessionStorage.getItem("jwtToken");
             if (!token || isTokenExpired(token)) {
-                checkAndRemoveToken(navigate);
+                redirectAndRemoveToken(navigate);
                 return;
             }
 
@@ -75,9 +75,9 @@ function UserCreatedEventBlock() {
     };
 
     const handleSave = () => {
-        const token = localStorage.getItem("jwtToken");
+        const token = sessionStorage.getItem("jwtToken");
         if (!token || isTokenExpired(token)) {
-            checkAndRemoveToken(navigate);
+            redirectAndRemoveToken(navigate);
             return;
         }
 

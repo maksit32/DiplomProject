@@ -30,7 +30,7 @@ export function LoginBlock() {
             const token = response.data.token;
 
             if (token) {
-                localStorage.setItem("jwtToken", token);
+                sessionStorage.setItem("jwtToken", token);
                 console.log("Токен сохранен:", token);
                 dispatch(setPhoneNumber(loginData.phoneNumber));
                 navigate("/documents");

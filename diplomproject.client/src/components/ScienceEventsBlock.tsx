@@ -12,7 +12,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { blue, red } from '@mui/material/colors';
 import { useAppSelector } from "../store/store";
-import { checkAndRemoveToken, isTokenExpired } from "../data/Functions";
+import { checkAndRemoveToken, isTokenExpired, redirectAndRemoveToken } from "../data/Functions";
 import { useNavigate } from "react-router-dom";
 
 function ScienceEventsBlock() {
@@ -24,9 +24,9 @@ function ScienceEventsBlock() {
     const phoneNumber = useAppSelector(state => state.user.phoneNumber);
 
     const fetchScEvents = () => {
-        const token = localStorage.getItem("jwtToken");
+        const token = sessionStorage.getItem("jwtToken");
         if (!token || isTokenExpired(token)) {
-            checkAndRemoveToken(navigate);
+            redirectAndRemoveToken(navigate);
             return;
         }
 
@@ -66,9 +66,9 @@ function ScienceEventsBlock() {
 
     const handleDelete = (id) => {
         if (window.confirm("Вы уверены, что хотите удалить это событие?")) {
-            const token = localStorage.getItem("jwtToken");
+            const token = sessionStorage.getItem("jwtToken");
             if (!token || isTokenExpired(token)) {
-                checkAndRemoveToken(navigate);
+                redirectAndRemoveToken(navigate);
                 return;
             }
 
@@ -118,9 +118,9 @@ function ScienceEventsBlock() {
     };
 
     const handleSave = () => {
-        const token = localStorage.getItem("jwtToken");
+        const token = sessionStorage.getItem("jwtToken");
         if (!token || isTokenExpired(token)) {
-            checkAndRemoveToken(navigate);
+            redirectAndRemoveToken(navigate);
             return;
         }
 

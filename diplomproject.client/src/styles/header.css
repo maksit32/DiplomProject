@@ -1,0 +1,8 @@
+.custom-btn {
+    transition: background-color 0.3s ease;
+}
+
+.custom-btn:hover {
+    background-color: #dc3545;
+    border-color: #000000;
+}

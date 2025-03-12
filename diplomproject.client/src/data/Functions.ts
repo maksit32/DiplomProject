@@ -3,33 +3,43 @@ import { notifyAdminUsersPath, notifyAllUsersPath, notifySubUsersPath } from "./
 
 export function CheckJwt(navigate: any) {
     //проверка на jwt
-    const token = localStorage.getItem("jwtToken");
+    const token = sessionStorage.getItem("jwtToken");
     if (token) {
         navigate("/documents");
     }
 }
 
-export function isTokenExpired(token: any) {
-    const decodedToken = JSON.parse(atob(token.split('.')[1]));
-    //время получает от сервера
-    const expirationTime = decodedToken.exp * 1000;
-    return expirationTime < Date.now();
+export function isTokenExpired(token: string | null): boolean {
+    if (!token) return true;
+
+    try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const expirationTime = decodedToken.exp * 1000; // Преобразуем время в миллисекунды
+        return expirationTime < Date.now(); // Проверяем, истек ли токен
+    } catch (error) {
+        console.error('Ошибка при декодировании токена:', error);
+        return true;
+    }
 }
 
 export function checkAndRemoveToken(navigate: any) {
-    localStorage.removeItem('jwtToken');
-    navigate("/");
+    const token = sessionStorage.getItem('jwtToken');
+
+    if (isTokenExpired(token)) {
+        sessionStorage.removeItem('jwtToken');
+        navigate("/");
+    }
 }
 
 export function redirectAndRemoveToken(navigate: any) {
-    localStorage.removeItem('jwtToken');
+    sessionStorage.removeItem('jwtToken');
     navigate("/");
 }
 
 export async function submitText(notifyChoice: number, message: string, navigate: any) {
-    const token = localStorage.getItem("jwtToken");
+    const token = sessionStorage.getItem("jwtToken");
     if (!token || isTokenExpired(token)) {
-        checkAndRemoveToken(navigate);
+        redirectAndRemoveToken(navigate);
         return;
     }
 
