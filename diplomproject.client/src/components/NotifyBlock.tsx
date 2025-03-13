@@ -18,6 +18,12 @@ export function NotifyBlock() {
         console.log(event.target.value);
     };
 
+    const handleSubmit = async () => {
+        await submitText(notifyChoice, messageToSend, navigate);
+        // Очистка текста после отправки
+        setSendMessage('');
+    };
+
     return (
         <div>
             <div><h2>Введите сообщение в поле ниже и выберите, кого вы хотите оповестить</h2></div>
@@ -44,6 +50,7 @@ export function NotifyBlock() {
                         rows={13}
                         placeholder="Ваш текст..."
                         className="custom-textarea"
+                        value={messageToSend}
                         onChange={e => setSendMessage(e.target.value)}
                     />
                 </Form.Group>
@@ -51,7 +58,7 @@ export function NotifyBlock() {
             <div>
                 <button
                     type="button"
-                    onClick={() => submitText(notifyChoice, messageToSend, navigate)}
+                    onClick={handleSubmit}
                     className="btn btn-outline-primary"
                 >
                     Отправить пользователям
