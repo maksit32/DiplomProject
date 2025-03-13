@@ -13,6 +13,9 @@ import { checkAndRemoveToken, isTokenExpired, redirectAndRemoveToken } from "../
 function UserCreatedEventBlock() {
     const [userCreatedEvents, setUserCreatedEvents] = useState([]);
     const [editingUserCreatedEvent, setEditingUserCreatedEvent] = useState(null);
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [sortCriterion, setSortCriterion] = useState('name');
+
     const navigate = useNavigate();
 
     const fetchUsers = () => {
@@ -96,22 +99,72 @@ function UserCreatedEventBlock() {
             .catch(error => console.error("Ошибка при обновлении мероприятия:", error));
     };
 
+    const sortedEvents = [...userCreatedEvents].sort((a, b) => {
+        let comparison = 0;
+
+        if (sortCriterion === 'name') {
+            comparison = a.nameEvent.localeCompare(b.nameEvent);
+        } else if (sortCriterion === 'city') {
+            comparison = a.placeEvent.localeCompare(b.placeEvent);
+        } else if (sortCriterion === 'date') {
+            comparison = new Date(a.dateEvent) - new Date(b.dateEvent);
+        }
+
+        return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    const toggleSortOrder = () => {
+        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    };
+
+    const handleSortCriterionChange = (event) => {
+        setSortCriterion(event.target.value);
+    };
+
     return (
         <>
+            <div className="sort-controls mb-4 d-flex align-items-center">
+                <label className="me-3" htmlFor="sortCriterion">
+                    Сортировать по:
+                </label>
+                <select
+                    id="sortCriterion"
+                    className="form-select me-3"
+                    value={sortCriterion}
+                    onChange={handleSortCriterionChange}
+                >
+                    <option value="name">Название</option>
+                    <option value="city">Город</option>
+                    <option value="date">Дата</option>
+                </select>
+                <button
+                    className={`btn ${sortOrder === 'asc' ? 'btn-success' : 'btn-primary'}`}
+                    onClick={toggleSortOrder}
+                >
+                    Порядок: {sortOrder === 'asc' ? 'Возрастающий' : 'Убывающий'}
+                </button>
+            </div>
+
             <div className="table-responsive">
                 <table className="table table-striped table-bordered">
                     <thead>
                         <tr className="table-primary">
-                            <th>Название мероприятия</th>
-                            <th>Место проведения</th>
-                            <th>Дата проведения</th>
+                            <th>
+                                Название мероприятия
+                            </th>
+                            <th>
+                                Место проведения
+                            </th>
+                            <th>
+                                Дата проведения
+                            </th>
                             <th>Статус победителя</th>
                             <th>Id чата телеграм</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {userCreatedEvents.map((uCreatedEvent) => (
+                        {sortedEvents.map((uCreatedEvent) => (
                             <tr key={uCreatedEvent.id}>
                                 <td>{uCreatedEvent.nameEvent}</td>
                                 <td>{uCreatedEvent.placeEvent}</td>
