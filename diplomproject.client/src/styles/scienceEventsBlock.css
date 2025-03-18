@@ -2,6 +2,10 @@
     padding-top: 15px;
 }
 
+.sort-div {
+    padding-top: 10px;
+}
+
 #addSEventBtn {
     background-color: #3a99fd;
     color: white;

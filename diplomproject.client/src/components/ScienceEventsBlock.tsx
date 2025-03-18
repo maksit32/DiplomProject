@@ -20,6 +20,8 @@ function ScienceEventsBlock() {
     const [scienceEvents, setScienceEvents] = useState([]);
     const [editingSEvent, setEditingSEvent] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [sortCriterion, setSortCriterion] = useState('nameEvent');
+    const [sortOrder, setSortOrder] = useState('asc');
     const navigate = useNavigate();
     const phoneNumber = useAppSelector(state => state.user.phoneNumber);
 
@@ -59,6 +61,19 @@ function ScienceEventsBlock() {
     useEffect(() => {
         fetchScEvents();
     }, [choice]);
+
+    const sortedEvents = [...scienceEvents].sort((a, b) => {
+        let comparison = 0;
+
+        if (sortCriterion === 'dateEvent' || sortCriterion === 'dateEventCreated') {
+            comparison = new Date(a[sortCriterion]) - new Date(b[sortCriterion]);
+        } else {
+            comparison = a[sortCriterion].localeCompare(b[sortCriterion]);
+        }
+
+        return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
 
     const handleChange = (event) => {
         setChoice(event.target.value);
@@ -117,6 +132,14 @@ function ScienceEventsBlock() {
         setEditingSEvent({ ...editingSEvent, [name]: value });
     };
 
+    const handleSortChange = (event) => {
+        setSortCriterion(event.target.value);
+    };
+
+    const toggleSortOrder = () => {
+        setSortOrder(prevOrder => (prevOrder === 'asc' ? 'desc' : 'asc'));
+    };
+
     const handleSave = () => {
         const token = sessionStorage.getItem("jwtToken");
         if (!token || isTokenExpired(token)) {
@@ -164,6 +187,27 @@ function ScienceEventsBlock() {
                     </Select>
                 </FormControl>
             </div>
+            <div className="sort-div sort-controls mb-4 d-flex align-items-center">
+                <label className="me-3" htmlFor="sortCriterion">
+                    Сортировать по:
+                </label>
+                <select
+                    id="sortCriterion"
+                    className="form-select me-3"
+                    value={sortCriterion}
+                    onChange={handleSortChange}
+                >
+                    <option value="nameEvent">Название</option>
+                    <option value="placeEvent">Место</option>
+                    <option value="dateEvent">Дата</option>
+                </select>
+                <button
+                    className={`btn ${sortOrder === 'asc' ? 'btn-success' : 'btn-primary'}`}
+                    onClick={toggleSortOrder}
+                >
+                    Порядок: {sortOrder === 'asc' ? 'Возрастающий' : 'Убывающий'}
+                </button>
+            </div>
             <div>
                 <button
                     id="addSEventBtn"
@@ -185,7 +229,7 @@ function ScienceEventsBlock() {
                         </tr>
                     </thead>
                     <tbody>
-                        {scienceEvents.map((sEvent) => (
+                        {sortedEvents.map((sEvent) => (
                             <tr key={sEvent.id}>
                                 <td>{sEvent.nameEvent}</td>
                                 <td>{new Date(sEvent.dateEvent).toLocaleString()}</td>
